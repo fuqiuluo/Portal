@@ -26,6 +26,7 @@ abstract class BaseLocationHook: BaseDivineService() {
                     originLocation.provider == LocationManager.GPS_PROVIDER
                 }
             ) {
+                FakeLoc.accuracy = originLocation.accuracy
                 FakeLoc.lastLocation = originLocation
             }
         } else {

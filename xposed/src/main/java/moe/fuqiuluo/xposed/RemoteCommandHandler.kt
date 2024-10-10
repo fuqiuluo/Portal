@@ -129,6 +129,18 @@ object RemoteCommandHandler {
                 }
                 return true
             }
+            "sync_config" -> {
+                rely.putBoolean("enable", FakeLoc.enable)
+                rely.putDouble("latitude", FakeLoc.latitude)
+                rely.putDouble("longitude", FakeLoc.longitude)
+                rely.putDouble("altitude", FakeLoc.altitude)
+                rely.putDouble("speed", FakeLoc.speed)
+                rely.putDouble("speed_amplitude", FakeLoc.speedAmplitude)
+                rely.putBoolean("has_bearings", FakeLoc.hasBearings)
+                rely.putDouble("bearing", FakeLoc.bearing)
+                rely.putParcelable("last_location", FakeLoc.lastLocation)
+                return true
+            }
             "broadcast_location" -> {
 //                for (listener in locationListeners) {
 //                    if (!listener.asBinder().pingBinder()) continue

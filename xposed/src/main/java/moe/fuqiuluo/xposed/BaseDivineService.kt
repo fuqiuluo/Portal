@@ -1,8 +1,10 @@
 package moe.fuqiuluo.xposed
 
 import android.content.Context
+import android.location.Location
 import android.location.LocationManager
 import android.os.Binder
+import android.os.Build
 import android.os.Bundle
 import android.os.Parcel
 import moe.fuqiuluo.xposed.utils.BinderUtils
@@ -56,6 +58,8 @@ abstract class BaseDivineService {
             return false
         }
 
+        syncConfig(locationManager, randomKey)
+
         rely.putBinder("proxy", object: Binder() {
             override fun getInterfaceDescriptor(): String {
                 return "moe.fuqiuluo.portal.service.${from}Helper"
@@ -81,5 +85,30 @@ abstract class BaseDivineService {
             return false
         }
         return true
+    }
+
+    /**
+     * Synchronize configurations in different processes
+     */
+    private fun syncConfig(locationManager: LocationManager, randomKey: String) {
+        val rely = Bundle()
+        rely.putString("command_id", "sync_config")
+        if(locationManager.sendExtraCommand("portal", randomKey, rely)) {
+            FakeLoc.enable = rely.getBoolean("enable", FakeLoc.enable)
+            FakeLoc.latitude = rely.getDouble("latitude", FakeLoc.latitude)
+            FakeLoc.longitude = rely.getDouble("longitude", FakeLoc.longitude)
+            FakeLoc.altitude = rely.getDouble("altitude", FakeLoc.altitude)
+            FakeLoc.speed = rely.getDouble("speed", FakeLoc.speed)
+            FakeLoc.speedAmplitude = rely.getDouble("speed_amplitude", FakeLoc.speedAmplitude)
+            FakeLoc.hasBearings = rely.getBoolean("has_bearings", FakeLoc.hasBearings)
+            FakeLoc.bearing = rely.getDouble("bearing", FakeLoc.bearing)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                FakeLoc.lastLocation = rely.getParcelable("last_location", Location::class.java)
+            } else {
+                FakeLoc.lastLocation = rely.getParcelable("last_location")
+            }
+        } else {
+            Logger.error("Failed to sync config for DivineService")
+        }
     }
 }
