@@ -6,7 +6,7 @@ import kotlin.random.Random
 
 object FakeLoc {
     var enableLog = true
-    var enableDebugLog = true
+    var enableDebugLog = false
 
     var enable = false
 
@@ -53,7 +53,7 @@ object FakeLoc {
     var latitude = 0.0
         get() = field + ((if(Random.nextBoolean()) -1 else 1) * (Random.nextInt(1, max(2, (accuracy * 10000).toInt())).toDouble() / 10000.0) * 6.99E-6)
     var longitude = 0.0
-        get() = field + ((if(Random.nextBoolean()) 1 else -1) * (Random.nextInt(1, max(2, (accuracy * 10000).toInt())).toDouble() / 10000.0) * 1.141E-5)
+        get() = field + ((if(Random.nextBoolean()) 1 else -1) * (Random.nextInt(1, max(2, (accuracy * 10000).toInt())).toDouble() / 10000.0) * 1.121E-5)
     var altitude = 80.0
     var speed = 0.0
     var speedAmplitude = 1.0
