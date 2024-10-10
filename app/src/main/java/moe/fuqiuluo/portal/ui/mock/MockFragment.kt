@@ -178,13 +178,6 @@ class MockFragment : Fragment() {
                 } else {
                     Toast.makeText(requireContext(), "更新位置失败", Toast.LENGTH_SHORT).show()
                 }
-
-                thread {
-                    while (true) {
-                        MockServiceHelper.broadcastLocation(mockServiceViewModel.locationManager!!)
-                        Thread.sleep(100)
-                    }
-                }
             } finally {
                 button.isClickable = true
             }

@@ -22,6 +22,9 @@ object MockServiceHelper {
     }
 
     fun isMockStart(locationManager: LocationManager): Boolean {
+        if (!::randomKey.isInitialized) {
+            return false
+        }
         val rely = Bundle()
         rely.putString("command_id", "is_start")
         if(locationManager.sendExtraCommand(PROVIDER_NAME, randomKey, rely)) {
@@ -31,6 +34,9 @@ object MockServiceHelper {
     }
 
     fun tryOpenMock(locationManager: LocationManager): Boolean {
+        if (!::randomKey.isInitialized) {
+            return false
+        }
         val rely = Bundle()
         rely.putString("command_id", "start")
         return if(locationManager.sendExtraCommand(PROVIDER_NAME, randomKey, rely)) {
@@ -41,6 +47,9 @@ object MockServiceHelper {
     }
 
     fun tryCloseMock(locationManager: LocationManager): Boolean {
+        if (!::randomKey.isInitialized) {
+            return false
+        }
         val rely = Bundle()
         rely.putString("command_id", "stop")
         if (locationManager.sendExtraCommand(PROVIDER_NAME, randomKey, rely)) {
@@ -50,6 +59,9 @@ object MockServiceHelper {
     }
 
     fun getLocation(locationManager: LocationManager): Pair<Double, Double>? {
+        if (!::randomKey.isInitialized) {
+            return null
+        }
         val rely = Bundle()
         rely.putString("command_id", "get_location")
         if(locationManager.sendExtraCommand(PROVIDER_NAME, randomKey, rely)) {
@@ -59,6 +71,9 @@ object MockServiceHelper {
     }
 
     fun broadcastLocation(locationManager: LocationManager): Boolean {
+        if (!::randomKey.isInitialized) {
+            return false
+        }
         val rely = Bundle()
         rely.putString("command_id", "broadcast_location")
         return locationManager.sendExtraCommand(PROVIDER_NAME, randomKey, rely)
@@ -69,6 +84,9 @@ object MockServiceHelper {
     }
 
     fun updateLocation(locationManager: LocationManager, lat: Double, lon: Double, mode: String): Boolean {
+        if (!::randomKey.isInitialized) {
+            return false
+        }
         val rely = Bundle()
         rely.putString("command_id", "update_location")
         rely.putDouble("lat", lat)
