@@ -2,7 +2,7 @@ package moe.fuqiuluo.portal.ui.mock
 
 import java.math.BigDecimal
 
-data class HistoryLocation(
+data class HistoricalLocation(
     val name: String,
     val address: String,
     val lat: Double,
@@ -10,12 +10,12 @@ data class HistoryLocation(
 ) {
     companion object {
         // $name,$address,${newLat},${newLon}
-        fun fromString(str: String): HistoryLocation {
+        fun fromString(str: String): HistoricalLocation {
             val parts = str.split(",")
             if (parts.size != 4) {
                 throw IllegalArgumentException("Invalid string: $str")
             }
-            return HistoryLocation(
+            return HistoricalLocation(
                 parts[0],
                 parts[1],
                 parts[2].toDouble(),

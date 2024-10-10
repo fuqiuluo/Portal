@@ -4,16 +4,15 @@ import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.textview.MaterialTextView
 import moe.fuqiuluo.portal.R
 import java.math.BigDecimal
 
-class HistoryLocationAdapter(
-    private val dataSet: List<HistoryLocation>,
-    private val onItemClicked: (HistoryLocation, isLongClicked: Boolean) -> Unit
-): RecyclerView.Adapter<HistoryLocationAdapter.ViewHolder>() {
+class HistoricalLocationAdapter(
+    private val dataSet: List<HistoricalLocation>,
+    private val onItemClicked: (HistoricalLocation, isLongClicked: Boolean) -> Unit
+): RecyclerView.Adapter<HistoricalLocationAdapter.ViewHolder>() {
     class ViewHolder(
         val root: View
     ) : RecyclerView.ViewHolder(root) {

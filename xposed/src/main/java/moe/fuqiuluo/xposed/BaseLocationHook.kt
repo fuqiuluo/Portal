@@ -4,13 +4,11 @@ import android.location.Location
 import android.location.LocationManager
 import android.os.Build
 import android.os.Bundle
-import de.robv.android.xposed.XposedBridge
 import de.robv.android.xposed.XposedHelpers
 import moe.fuqiuluo.xposed.utils.FakeLoc
 import moe.fuqiuluo.xposed.utils.Logger
 import moe.microbios.nmea.NMEA
 import moe.microbios.nmea.NmeaValue
-import kotlin.math.max
 import kotlin.random.Random
 
 abstract class BaseLocationHook: BaseDivineService() {

@@ -1,18 +1,13 @@
 package moe.fuqiuluo.portal.ui.mock
 
-import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context.MODE_PRIVATE
-import android.content.pm.PackageManager
-import android.location.OnNmeaMessageListener
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.CheckedTextView
 import android.widget.Toast
-import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -20,8 +15,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.button.MaterialButton
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import moe.fuqiuluo.portal.R
 import moe.fuqiuluo.portal.android.window.OverlayUtils
@@ -29,11 +22,8 @@ import moe.fuqiuluo.portal.databinding.FragmentMockBinding
 import moe.fuqiuluo.portal.service.MockServiceHelper
 import moe.fuqiuluo.portal.ui.viewmodel.MockServiceViewModel
 import moe.fuqiuluo.portal.ui.viewmodel.MockViewModel
-import kotlin.concurrent.thread
-
 
 class MockFragment : Fragment() {
-
     private var _binding: FragmentMockBinding? = null
 
     // This property is only valid between onCreateView and
@@ -94,7 +84,7 @@ class MockFragment : Fragment() {
 
         val pref = requireContext().getSharedPreferences("portal", MODE_PRIVATE)
         pref.getString("selectedLocation", null)?.let {
-            val loc = HistoryLocation.fromString(it)
+            val loc = HistoricalLocation.fromString(it)
             binding.mockLocationName.text = loc.name
             binding.mockLocationAddress.text = loc.address
             binding.mockLocationLatlon.text = loc.lat.toString().take(8) + ", " + loc.lon.toString().take(8)
@@ -102,15 +92,14 @@ class MockFragment : Fragment() {
         }
 
         val locations = pref.getStringSet("locations", mutableSetOf())!!
-            .map { HistoryLocation.fromString(it) }
-
-        Log.d("MockFragment", "locations: $locations")
+            .map { HistoricalLocation.fromString(it) }
 
         binding.mockLocationCard.setOnClickListener {
-            Toast.makeText(requireContext(), "当前虚拟位置 => ${MockServiceHelper.getLocation(mockServiceViewModel.locationManager!!)}", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), "Location${MockServiceHelper.getLocation(mockServiceViewModel.locationManager!!)}", Toast.LENGTH_SHORT).show()
         }
 
-        val historyLocationAdapter = HistoryLocationAdapter(locations) { loc, isLongClick ->
+        // 2024.10.10: sort historical locations
+        val historicalLocationAdapter = HistoricalLocationAdapter(locations.sortedBy { it.name }) { loc, isLongClick ->
             if (isLongClick) {
                 Toast.makeText(requireContext(), "长按", Toast.LENGTH_SHORT).show()
             } else {
@@ -123,7 +112,7 @@ class MockFragment : Fragment() {
 
                 if (MockServiceHelper.isMockStart(mockServiceViewModel.locationManager!!)) {
                     if (MockServiceHelper.setLocation(mockServiceViewModel.locationManager!!, loc.lat, loc.lon)) {
-                        Toast.makeText(requireContext(), "更新位置成功 => ${MockServiceHelper.getLocation(mockServiceViewModel.locationManager!!)}", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(requireContext(), "位置更新成功", Toast.LENGTH_SHORT).show()
                     } else {
                         Toast.makeText(requireContext(), "更新位置失败", Toast.LENGTH_SHORT).show()
                     }
@@ -132,7 +121,7 @@ class MockFragment : Fragment() {
         }
         val recyclerView = binding.historyLocationList
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
-        recyclerView.adapter = historyLocationAdapter
+        recyclerView.adapter = historicalLocationAdapter
 
         return root
     }
