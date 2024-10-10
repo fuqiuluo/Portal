@@ -504,13 +504,12 @@ class HomeFragment : Fragment() {
     override fun onDestroy() {
         super.onDestroy()
 
-
         baiduMapViewModel.isExists = false
         if (mLocationClient.isStarted)
             mLocationClient.stop()
         if (_binding != null) {
             binding.bmapView.map.isMyLocationEnabled = false
-            binding.bmapView.onDestroy()
+            //binding.bmapView.onDestroy()
         }
     }
 

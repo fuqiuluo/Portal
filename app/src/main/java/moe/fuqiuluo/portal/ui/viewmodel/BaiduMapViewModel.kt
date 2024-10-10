@@ -35,7 +35,10 @@ class BaiduMapViewModel: ViewModel() {
     /* Notification */
     var mNotification: Notification? = null
 
-    var locationViewMode = MyLocationConfiguration.LocationMode.FOLLOWING
+    /**
+     * 2024.10.10: Cancels the default follow perspective
+     */
+    var locationViewMode = MyLocationConfiguration.LocationMode.NORMAL
 
     val mMapIndicator by lazy {
         BitmapDescriptorFactory.fromResource(R.drawable.icon_selected_location_16)
