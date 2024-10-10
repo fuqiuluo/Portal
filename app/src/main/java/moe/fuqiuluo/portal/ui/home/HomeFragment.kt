@@ -69,6 +69,9 @@ class HomeFragment : Fragment() {
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
+        // Fixed the issue that the Fab was opening incorrectly after switching back to Home for Fragments
+        homeViewModel.mFabOpened = false
+
         baiduMapViewModel.isExists = true
         baiduMapViewModel.baiduMap = binding.bmapView.map
 

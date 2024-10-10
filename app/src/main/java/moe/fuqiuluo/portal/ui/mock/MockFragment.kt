@@ -15,7 +15,9 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.button.MaterialButton
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import moe.fuqiuluo.portal.R
 import moe.fuqiuluo.portal.android.window.OverlayUtils
 import moe.fuqiuluo.portal.databinding.FragmentMockBinding
@@ -25,9 +27,6 @@ import moe.fuqiuluo.portal.ui.viewmodel.MockViewModel
 
 class MockFragment : Fragment() {
     private var _binding: FragmentMockBinding? = null
-
-    // This property is only valid between onCreateView and
-    // onDestroyView.
     private val binding get() = _binding!!
 
     private val mockViewModel by lazy { ViewModelProvider(this)[MockViewModel::class.java] }
@@ -40,7 +39,6 @@ class MockFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentMockBinding.inflate(inflater, container, false)
-        val root: View = binding.root
 
         binding.fabMockLocation.setOnClickListener {
             if (!OverlayUtils.hasOverlayPermissions(requireContext())) {
@@ -123,7 +121,7 @@ class MockFragment : Fragment() {
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
         recyclerView.adapter = historicalLocationAdapter
 
-        return root
+        return binding.root
     }
 
     private fun tryOpenService(button: MaterialButton) {
@@ -132,40 +130,37 @@ class MockFragment : Fragment() {
             return
         }
 
-        lifecycleScope.launch {
-            val selectedLocation = if (mockServiceViewModel.selectedLocation == null) {
-                Toast.makeText(requireContext(), "请选择一个位置", Toast.LENGTH_SHORT).show()
-                return@launch
-            } else {
-                mockServiceViewModel.selectedLocation!!
-            }
+        val selectedLocation = mockServiceViewModel.selectedLocation ?: run {
+            Toast.makeText(requireContext(), "请选择一个位置", Toast.LENGTH_SHORT).show()
+            return
+        }
 
+        lifecycleScope.launch {
             button.isClickable = false
             try {
-                if (mockServiceViewModel.locationManager == null) {
-                    Toast.makeText(requireContext(), "定位服务加载异常", Toast.LENGTH_SHORT).show()
-                    return@launch
-                }
-
-                if (!MockServiceHelper.isServiceInit()) {
-                    Toast.makeText(requireContext(), "系统服务注入失败", Toast.LENGTH_SHORT).show()
-                    return@launch
-                }
-
-                if (MockServiceHelper.tryOpenMock(mockServiceViewModel.locationManager!!)) {
-                    button.text = "停止模拟"
-                    ContextCompat.getDrawable(requireContext(), R.drawable.rounded_play_disabled_24)?.let {
-                        button.icon = it
+                withContext(Dispatchers.IO) {
+                    if (mockServiceViewModel.locationManager == null) {
+                        showToast("定位服务加载异常")
+                        return@withContext
                     }
-                } else {
-                    Toast.makeText(requireContext(), "模拟服务启动失败", Toast.LENGTH_SHORT).show()
-                    return@launch
-                }
 
-                if (MockServiceHelper.setLocation(mockServiceViewModel.locationManager!!, selectedLocation.lat, selectedLocation.lon)) {
-                    Toast.makeText(requireContext(), "更新位置成功 => ${MockServiceHelper.getLocation(mockServiceViewModel.locationManager!!)}", Toast.LENGTH_SHORT).show()
-                } else {
-                    Toast.makeText(requireContext(), "更新位置失败", Toast.LENGTH_SHORT).show()
+                    if (!MockServiceHelper.isServiceInit()) {
+                        showToast("系统服务注入失败")
+                        return@withContext
+                    }
+
+                    if (MockServiceHelper.tryOpenMock(mockServiceViewModel.locationManager!!)) {
+                        updateButtonState(button, "停止模拟", R.drawable.rounded_play_disabled_24)
+                    } else {
+                        showToast("模拟服务启动失败")
+                        return@withContext
+                    }
+
+                    if (MockServiceHelper.setLocation(mockServiceViewModel.locationManager!!, selectedLocation.lat, selectedLocation.lon)) {
+                        showToast("更新位置成功")
+                    } else {
+                        showToast("更新位置失败")
+                    }
                 }
             } finally {
                 button.isClickable = true
@@ -177,20 +172,26 @@ class MockFragment : Fragment() {
         lifecycleScope.launch {
             button.isClickable = false
             try {
-                if (mockServiceViewModel.locationManager == null) {
-                    Toast.makeText(requireContext(), "定位服务加载异常", Toast.LENGTH_SHORT).show()
-                    return@launch
-                }
+                withContext(Dispatchers.IO) {
+                    if (mockServiceViewModel.locationManager == null) {
+                        showToast("定位服务加载异常")
+                        return@withContext
+                    }
 
-                if (!MockServiceHelper.isServiceInit()) {
-                    Toast.makeText(requireContext(), "系统服务注入失败", Toast.LENGTH_SHORT).show()
-                    return@launch
-                }
+                    if (!MockServiceHelper.isServiceInit()) {
+                        showToast("系统服务注入失败")
+                        return@withContext
+                    }
 
-                if (MockServiceHelper.tryCloseMock(mockServiceViewModel.locationManager!!)) {
-                    button.text = "开始模拟"
-                    ContextCompat.getDrawable(requireContext(), R.drawable.rounded_play_arrow_24)?.let {
-                        button.icon = it
+                    if (!MockServiceHelper.isMockStart(mockServiceViewModel.locationManager!!)) {
+                        showToast("模拟服务未启动")
+                        return@withContext
+                    }
+
+                    if (MockServiceHelper.tryCloseMock(mockServiceViewModel.locationManager!!)) {
+                        updateButtonState(button, "开始模拟", R.drawable.rounded_play_arrow_24)
+                    } else {
+                        showToast("模拟服务停止失败")
                     }
                 }
             } finally {
@@ -204,5 +205,18 @@ class MockFragment : Fragment() {
         _binding = null
     }
 
-    companion object
+    private fun showToast(message: String) {
+        lifecycleScope.launch(Dispatchers.Main) {
+            Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun updateButtonState(button: MaterialButton, text: String, iconRes: Int) {
+        lifecycleScope.launch(Dispatchers.Main) {
+            button.text = text
+            ContextCompat.getDrawable(requireContext(), iconRes)?.let {
+                button.icon = it
+            }
+        }
+    }
 }

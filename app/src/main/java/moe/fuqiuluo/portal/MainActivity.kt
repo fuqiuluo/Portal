@@ -86,13 +86,64 @@ class MainActivity : AppCompatActivity() {
     private val baiduMapViewModel by viewModels<BaiduMapViewModel>()
     private val mockServiceViewModel by viewModels<MockServiceViewModel>()
 
+    private fun getRequiredPermissions(): MutableSet<String> {
+        val permissions = mutableSetOf(
+            ACCESS_FINE_LOCATION,
+            ACCESS_COARSE_LOCATION,
+            ACCESS_LOCATION_EXTRA_COMMANDS,
+            ACCESS_WIFI_STATE,
+            CHANGE_WIFI_STATE,
+            READ_PHONE_STATE,
+            INTERNET,
+            ACCESS_NETWORK_STATE,
+            VIBRATE
+        )
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            permissions.add(FOREGROUND_SERVICE)
+        }
+        return permissions
+    }
+
+    private fun handleDeniedPermissions(denied: Set<String>) {
+        denied.forEach { permission ->
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, permission)) {
+                showPermissionDeniedToast(permission)
+            } else {
+                ActivityCompat.requestPermissions(this, arrayOf(permission), REQUEST_PERMISSIONS_CODE)
+            }
+        }
+
+        if (denied.isEmpty()) {
+            requireFloatWindows()
+        }
+    }
+
+    private fun showPermissionDeniedToast(permission: String) {
+        val message = when (permission) {
+            ACCESS_FINE_LOCATION, ACCESS_COARSE_LOCATION -> "Portal需要完整位置权限"
+            ACCESS_LOCATION_EXTRA_COMMANDS -> "Portal需要额外位置命令权限和系统交互"
+            CHANGE_WIFI_STATE, ACCESS_WIFI_STATE -> "Portal需要访问Wi-Fi状态"
+            READ_PHONE_STATE -> "Portal需要读取设备信息"
+            ACCESS_NETWORK_STATE, INTERNET -> "Portal需要访问网络"
+            VIBRATE -> "Portal需要访问传感器"
+            else -> "需要 $permission 才能运行"
+        }
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+    }
+
+    private suspend fun checkPermission(): Boolean {
+        val permissions = getRequiredPermissions()
+        val (_, denied) = requestMultiplePermissions.request(permissions)
+        handleDeniedPermissions(denied)
+        return denied.isEmpty()
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         StatusBarUtil.transparentStatusBar(this, false)
 
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.N) {
-            // resizeable
             window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
         }
 
@@ -100,11 +151,6 @@ class MainActivity : AppCompatActivity() {
         if (pref.getBoolean("full_screen", false)) {
             StatusBarUtil.fullScreen(this)
         }
-
-//        Log.d("MainActivity", pref.javaClass.getDeclaredField("mFile").apply {
-//            isAccessible = true
-//            Log.d("MainActivity", "mFilename: ${get(pref)}")
-//        }.toString())
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.CREATED) {
@@ -195,46 +241,6 @@ class MainActivity : AppCompatActivity() {
             baiduMapViewModel.mNotification = builder.build()
         }
         baiduMapViewModel.mNotification!!.defaults = Notification.DEFAULT_SOUND
-    }
-
-    private suspend fun checkPermission(): Boolean {
-        val permissions = mutableSetOf(
-            ACCESS_FINE_LOCATION,
-            ACCESS_COARSE_LOCATION,
-            ACCESS_LOCATION_EXTRA_COMMANDS,
-            ACCESS_WIFI_STATE,
-            CHANGE_WIFI_STATE,
-            READ_PHONE_STATE,
-            INTERNET,
-            ACCESS_NETWORK_STATE,
-            VIBRATE
-        )
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            permissions.add(FOREGROUND_SERVICE)
-        }
-        val (_, denied) = requestMultiplePermissions.request(permissions)
-        denied.forEach { permission ->
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this, permission)) {
-                Log.e("MainActivity", "Permission denied: $permission")
-                Toast.makeText(this, when(permission) {
-                    ACCESS_FINE_LOCATION, ACCESS_COARSE_LOCATION -> "Portal需要完整位置权限"
-                    ACCESS_LOCATION_EXTRA_COMMANDS -> "Portal需要额外位置命令权限和系统交互"
-                    CHANGE_WIFI_STATE, ACCESS_WIFI_STATE -> "Portal需要访问Wi-Fi状态"
-                    READ_PHONE_STATE -> "Portal需要读取设备信息"
-                    ACCESS_NETWORK_STATE, INTERNET -> "Portal需要访问网络"
-                    VIBRATE -> "Portal需要访问传感器"
-                    else -> "需要 $permission 才能运行"
-                }, Toast.LENGTH_SHORT).show()
-            } else {
-                ActivityCompat.requestPermissions(this, arrayOf(permission), REQUEST_PERMISSIONS_CODE)
-            }
-        }
-
-        if (denied.isEmpty()) {
-            requireFloatWindows()
-        }
-
-        return denied.isEmpty()
     }
 
     private fun requireFloatWindows(): Boolean {
@@ -434,23 +440,14 @@ class MainActivity : AppCompatActivity() {
         return navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
     }
 
-    override fun onResume() {
-        super.onResume()
-    }
-
     override fun onDestroy() {
         super.onDestroy()
 
         mSuggestionSearch?.destroy()
     }
 
-    override fun onPause() {
-        super.onPause()
-    }
-
     companion object {
         const val REQUEST_PERMISSIONS_CODE = 111
-        const val REQUEST_OVERLAY_CODE = 101
 
         internal var mCityString: String? = null
             set(value) {
