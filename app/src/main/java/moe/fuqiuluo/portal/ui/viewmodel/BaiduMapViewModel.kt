@@ -1,0 +1,45 @@
+package moe.fuqiuluo.portal.ui.viewmodel
+
+import android.app.Notification
+import androidx.lifecycle.ViewModel
+import com.baidu.location.LocationClient
+import com.baidu.mapapi.map.BaiduMap
+import com.baidu.mapapi.map.BitmapDescriptorFactory
+import com.baidu.mapapi.map.MyLocationConfiguration
+import com.baidu.mapapi.model.LatLng
+import moe.fuqiuluo.portal.R
+import com.baidu.mapapi.search.geocode.GeoCoder
+
+class BaiduMapViewModel: ViewModel() {
+    var isExists = false
+    lateinit var baiduMap: BaiduMap
+    lateinit var mLocationClient: LocationClient
+
+    /**
+     * Current location
+     * WGS84
+     */
+    var currentLocation: Pair<Double, Double>? = null
+
+    var markName: String? = null
+
+    /**
+     * Marked location
+     * WGS84
+     * first => latitude
+     * second => longitude
+     */
+    var markedLocation: Pair<Double, Double>? = null
+    var showDetailView = false
+
+    /* Notification */
+    var mNotification: Notification? = null
+
+    var locationViewMode = MyLocationConfiguration.LocationMode.FOLLOWING
+
+    val mMapIndicator by lazy {
+        BitmapDescriptorFactory.fromResource(R.drawable.icon_selected_location_16)
+    }
+
+    var mGeoCoder: GeoCoder? = null
+}

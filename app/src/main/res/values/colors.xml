@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorAccent">#D81B60</color>
+
+    <color name="primary">#FFFFFFFF</color>
+    <color name="primary_dark">#FFFFFFFF</color>
+    <color name="accent">#696969</color>
+    <color name="accentFallback">#757575</color>
+    <color name="icon_grey">#757575</color>
+
+    <color name="red500">#F44336</color>
+    <color name="green500">#4CAF50</color>
+    <color name="grey500">#9E9E9E</color>
+    <color name="blue500">#2196f3</color>
+    <color name="yellow500">#FFC107</color>
+
+    <color name="dark_secondary_text">#dedede</color>
+
+    <!-- Flashing colors -->
+    <color name="flashing_background_color">@android:color/black</color>
+    <color name="ic_launcher_background">#00B0FF</color>
+
+    <color name="portal_appbar_color">#5F5F5F</color>
+    <color name="portal_appbar_color_center">#494949</color>
+    <color name="portal_appbar_color_dark">#373737</color>
+    <color name="portal_mini_title_color">#5F5F5F</color>
+    <color name="portal_hint_color">#5F5F5F</color>
+    <color name="portal_text_color">#373737</color>
+    <color name="portal_nav_icon">#373737</color>
+    <color name="portal_mock_off">#373737</color>
+    <color name="portal_mock_on">#040404</color>
+
+    <color name="portal_location_detail_background">#bb5F5F5F</color>
+    <color name="portal_location_detail_block">#aaFFFFFF</color>
+
+    <color name="selected_color">#BCBCBC</color>
+
+    <color name="purple_200">#FFBB86FC</color>
+    <color name="purple_500">#FF6200EE</color>
+    <color name="purple_700">#FF3700B3</color>
+    <color name="teal_200">#FF03DAC5</color>
+    <color name="teal_700">#FF018786</color>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="colorPrimary">#F44336</color>
+    <color name="colorPrimaryDark">#8E24AA</color>
+</resources>

@@ -1,0 +1,109 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <item name="colorPrimaryVariant">@color/purple_700</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorSecondary">@color/portal_appbar_color</item>
+        <item name="colorSecondaryVariant">@color/portal_appbar_color_center</item>
+        <item name="colorOnSecondary">@color/white</item>
+
+        <item name="colorPrimary">@color/portal_appbar_color</item>
+        <item name="colorPrimaryDark">@color/portal_appbar_color</item>
+
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="windowActionModeOverlay">true</item>
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        <item name="android:windowTranslucentStatus">true</item>
+
+        <item name="colorControlNormal">@color/white</item>
+        <item name="colorControlActivated">@color/portal_appbar_color_dark</item>
+        <item name="colorControlHighlight">@color/white</item>
+
+        <item name="android:textColorHint">@android:color/white</item>
+        <item name="android:editTextColor">@android:color/white</item>
+
+        <item name="searchViewStyle">@style/Portal.SearchViewStyle</item>
+
+        <item name="selectableItemBackgroundBorderless">@drawable/ripple_effect</item>
+    </style>
+
+    <style name="Portal.SearchViewStyle" parent="Widget.AppCompat.SearchView">
+    </style>
+
+    <style name="AppTheme.Portal.ToolBarOverlay" parent="ThemeOverlay.AppCompat.DayNight.ActionBar">
+
+    </style>
+
+    <style name="AppTheme.Portal.PopupTheme" parent="ThemeOverlay.AppCompat.Light">
+
+    </style>
+
+    <style name="AppTheme.Dark" parent="Theme.AppCompat.NoActionBar">
+        <item name="colorAccent">@color/accent</item>
+        <!--<item name="colorAccentFallback">@color/accentFallback</item>-->
+        <item name="windowActionModeOverlay">true</item>
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        <!--<item name="cardStyle">@style/CardViewStyle.Dark</item>-->
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:textColorSecondary">@color/dark_secondary_text</item>
+        <!--<item name="imageColorTint">@color/dark_secondary_text</item>-->
+    </style>
+
+    <style name="AppTheme.Translucent" parent="Theme.AppCompat.NoActionBar">
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:colorBackgroundCacheHint">@null</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowAnimationStyle">@android:style/Animation</item>
+    </style>
+
+    <style name="AppTheme.Dialog" parent="ThemeOverlay.AppCompat.Dialog">
+        <item name="android:windowFrame">@null</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:background">@android:color/transparent</item>
+
+        <!--<item name="dialog_positive_color">@color/tx_appbar_color</item>
+        <item name="dialog_negative_color">@color/red500</item>
+        <item name="dialog_neutral_color">@color/tx_appbar_color</item>-->
+    </style>
+
+    <style name="AppTheme.MaterialButton" parent="Widget.MaterialComponents.Button">
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="android:gravity">center</item>
+        <item name="backgroundTintMode">src_atop</item>
+        <item name="elevation">10dp</item>
+        <item name="rippleColor">@color/white</item>
+        <item name="iconTintMode">src_atop</item>
+        <item name="iconTint">@color/white</item>
+        <item name="iconGravity">textStart</item>
+        <item name="iconPadding">0dp</item>
+        <item name="iconSize">20dp</item>
+    </style>
+
+    <style name="CardViewStyle.Dark" parent="CardView">
+        <item name="cardBackgroundColor">@android:color/background_dark</item>
+    </style>
+
+    <style name="CardViewStyle.Light" parent="CardView">
+        <item name="cardBackgroundColor">@android:color/background_light</item>
+    </style>
+
+    <style name="AppTheme.StatusBar" parent="AppTheme">
+        <item name="android:statusBarColor">?attr/colorPrimaryDark</item>
+    </style>
+
+    <style name="AppTheme.StatusBar.Dark" parent="AppTheme.Dark">
+        <item name="android:statusBarColor">?attr/colorPrimaryDark</item>
+    </style>
+</resources>

@@ -1,0 +1,51 @@
+[versions]
+agp = "8.6.1"
+circularProgressButtonVersion = "1.4"
+systemRefine = "4.4.0"
+xposed = "82"
+hiddenapibypass = "4.3"
+kotlin = "1.9.0"
+coreKtx = "1.13.1"
+junit = "4.13.2"
+junitVersion = "1.2.1"
+espressoCore = "3.6.1"
+appcompat = "1.7.0"
+material = "1.12.0"
+constraintlayout = "2.1.4"
+lifecycleLivedataKtx = "2.6.1"
+lifecycleViewmodelKtx = "2.6.1"
+navigationFragmentKtx = "2.6.0"
+navigationUiKtx = "2.6.0"
+playServicesLocation = "21.3.0"
+lifecycleProcess = "2.8.6"
+androidbrowserhelper = "2.5.0"
+jetbrainsKotlinJvm = "1.9.0"
+
+[libraries]
+androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+dmytrodanylyk-circular-progress-button = { module = "com.github.dmytrodanylyk:circular-progress-button", version.ref = "circularProgressButtonVersion" }
+refine-annotation-core = { group = "dev.rikka.tools.refine", name = "annotation", version.ref = "systemRefine" }
+refine-annotation-processor = { group = "dev.rikka.tools.refine", name = "annotation-processor", version.ref = "systemRefine" }
+refine-runtime = { group = "dev.rikka.tools.refine", name = "runtime", version.ref = "systemRefine" }
+xposed-api = { group = "de.robv.android.xposed", name = "api", version.ref = "xposed" }
+junit = { group = "junit", name = "junit", version.ref = "junit" }
+androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
+androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
+androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+material = { group = "com.google.android.material", name = "material", version.ref = "material" }
+androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
+androidx-lifecycle-livedata-ktx = { group = "androidx.lifecycle", name = "lifecycle-livedata-ktx", version.ref = "lifecycleLivedataKtx" }
+androidx-lifecycle-viewmodel-ktx = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-ktx", version.ref = "lifecycleViewmodelKtx" }
+androidx-navigation-fragment-ktx = { group = "androidx.navigation", name = "navigation-fragment-ktx", version.ref = "navigationFragmentKtx" }
+androidx-navigation-ui-ktx = { group = "androidx.navigation", name = "navigation-ui-ktx", version.ref = "navigationUiKtx" }
+play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
+androidx-lifecycle-process = { group = "androidx.lifecycle", name = "lifecycle-process", version.ref = "lifecycleProcess" }
+androidbrowserhelper = { group = "com.google.androidbrowserhelper", name = "androidbrowserhelper", version.ref = "androidbrowserhelper" }
+okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version = "4.12.0" }
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "agp" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+android-library = { id = "com.android.library", version.ref = "agp" }
+jetbrains-kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "jetbrainsKotlinJvm" }
+
