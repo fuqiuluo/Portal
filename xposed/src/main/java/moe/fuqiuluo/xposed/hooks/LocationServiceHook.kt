@@ -705,6 +705,8 @@ internal object LocationServiceHook: BaseLocationHook() {
                         Thread.sleep(FakeLoc.updateInterval)
                     }
 
+                    if (!FakeLoc.enable) return@runCatching // Prevent the last loop from being executed
+
                     if (FakeLoc.enableDebugLog)
                         Logger.debug("LocationUpdater: callOnLocationChanged: ${locationListeners.size}")
                     locationListeners.removeIf { (provider, listener) ->
