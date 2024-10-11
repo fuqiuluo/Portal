@@ -5,7 +5,7 @@ import android.os.Bundle
 import android.util.Log
 
 object MockServiceHelper {
-    private const val PROVIDER_NAME = "portal"
+    const val PROVIDER_NAME = "portal"
     private lateinit var randomKey: String
 
     fun tryInitService(locationManager: LocationManager) {

@@ -155,7 +155,7 @@
             app:contentPadding="8dp">
 
             <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/history_location_list"
+                android:id="@+id/historical_location_list"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"/>
 

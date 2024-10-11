@@ -4,11 +4,12 @@ import android.app.Notification
 import androidx.lifecycle.ViewModel
 import com.baidu.location.LocationClient
 import com.baidu.mapapi.map.BaiduMap
+import com.baidu.mapapi.map.BitmapDescriptor
 import com.baidu.mapapi.map.BitmapDescriptorFactory
 import com.baidu.mapapi.map.MyLocationConfiguration
-import com.baidu.mapapi.model.LatLng
 import moe.fuqiuluo.portal.R
 import com.baidu.mapapi.search.geocode.GeoCoder
+import moe.fuqiuluo.portal.bdmap.setMapConfig
 
 class BaiduMapViewModel: ViewModel() {
     var isExists = false
@@ -29,7 +30,7 @@ class BaiduMapViewModel: ViewModel() {
      * first => latitude
      * second => longitude
      */
-    var markedLocation: Pair<Double, Double>? = null
+    var markedLoc: Pair<Double, Double>? = null
     var showDetailView = false
 
     /* Notification */
@@ -38,9 +39,13 @@ class BaiduMapViewModel: ViewModel() {
     /**
      * 2024.10.10: Cancels the default follow perspective
      */
-    var locationViewMode = MyLocationConfiguration.LocationMode.NORMAL
+    var perspectiveState = MyLocationConfiguration.LocationMode.NORMAL
+        set(value) {
+            field = value
+            baiduMap.setMapConfig(value, null)
+        }
 
-    val mMapIndicator by lazy {
+    val mMapIndicator: BitmapDescriptor? by lazy {
         BitmapDescriptorFactory.fromResource(R.drawable.icon_selected_location_16)
     }
 

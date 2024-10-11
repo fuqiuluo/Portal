@@ -1,14 +1,17 @@
-package moe.fuqiuluo.portal.utils
+package moe.fuqiuluo.portal.bdmap
 
-import com.baidu.location.Jni
+import com.baidu.mapapi.map.BaiduMap
+import com.baidu.mapapi.map.BitmapDescriptorFactory
+import com.baidu.mapapi.map.MyLocationConfiguration
 import com.baidu.mapapi.search.sug.SuggestionResult
+import moe.fuqiuluo.portal.ext.Loc4j
 
 fun SuggestionResult.toPoi(
     currentLocation: Pair<Double, Double>? = null
 ) = this.allSuggestions.map {
     val gcj02Lat = it.pt.latitude
     val gcj02Lon = it.pt.longitude
-    val (lon, lat) = Jni.coorEncrypt(gcj02Lon, gcj02Lat, "gcj2wgs")
+    val (lon, lat) = Loc4j.gcj2wgs(gcj02Lat, gcj02Lon)
     if (currentLocation != null) {
         Poi(
             name = it.key,
@@ -35,3 +38,11 @@ fun SuggestionResult.toPoi(
     }
 }
 
+fun BaiduMap.setMapConfig(mode: MyLocationConfiguration.LocationMode, resourceId: Int?) {
+    setMyLocationConfiguration(MyLocationConfiguration(mode, true,  resourceId?.let { BitmapDescriptorFactory.fromResource(it) }))
+}
+
+fun BaiduMap.locateMe() {
+    setMyLocationConfiguration(MyLocationConfiguration(MyLocationConfiguration.LocationMode.FOLLOWING, true, null))
+    setMyLocationConfiguration(MyLocationConfiguration(MyLocationConfiguration.LocationMode.NORMAL, true, null))
+}

@@ -15,21 +15,21 @@
         android:focusable="true" />
 
     <RadioGroup
-        android:id="@+id/location_view_mode"
+        android:id="@+id/map_type_group"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="top|end"
         android:layout_margin="8dp">
 
         <RadioButton
-            android:id="@+id/normal_loc_view"
+            android:id="@+id/map_type_normal"
             android:text="@string/normal_view"
             android:checked="true"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
 
         <RadioButton
-            android:id="@+id/satellite_loc_view"
+            android:id="@+id/map_type_satellite"
             android:text="@string/satellite_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />

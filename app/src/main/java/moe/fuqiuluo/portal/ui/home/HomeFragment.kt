@@ -5,7 +5,6 @@ import android.animation.AnimatorListenerAdapter
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
-import android.content.Context.MODE_PRIVATE
 import android.graphics.Point
 import android.os.Bundle
 import android.util.Log
@@ -13,9 +12,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.DecelerateInterpolator
-import android.widget.EditText
 import android.widget.Toast
-import androidx.core.content.edit
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -23,11 +20,9 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import com.baidu.location.BDAbstractLocationListener
 import com.baidu.location.BDLocation
-import com.baidu.location.Jni
 import com.baidu.location.LocationClient
 import com.baidu.location.LocationClientOption
 import com.baidu.mapapi.map.BaiduMap
-import com.baidu.mapapi.map.BitmapDescriptorFactory
 import com.baidu.mapapi.map.LogoPosition
 import com.baidu.mapapi.map.MapPoi
 import com.baidu.mapapi.map.MapStatusUpdateFactory
@@ -39,15 +34,21 @@ import com.baidu.mapapi.search.geocode.ReverseGeoCodeOption
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import moe.fuqiuluo.portal.MainActivity
 import moe.fuqiuluo.portal.Portal
 import moe.fuqiuluo.portal.R
 import moe.fuqiuluo.portal.databinding.FragmentHomeBinding
 import moe.fuqiuluo.portal.ui.viewmodel.BaiduMapViewModel
 import moe.fuqiuluo.portal.ui.viewmodel.HomeViewModel
+import moe.fuqiuluo.portal.bdmap.locateMe
+import moe.fuqiuluo.portal.bdmap.setMapConfig
+import moe.fuqiuluo.portal.ext.gcj02
+import moe.fuqiuluo.portal.ext.mapType
+import moe.fuqiuluo.portal.ext.rawHistoricalLocations
+import moe.fuqiuluo.portal.ext.wgs84
 import java.math.BigDecimal
 import kotlin.random.Random
-
 
 class HomeFragment : Fragment() {
     private var _binding: FragmentHomeBinding? = null
@@ -72,78 +73,33 @@ class HomeFragment : Fragment() {
         // Fixed the issue that the Fab was opening incorrectly after switching back to Home for Fragments
         homeViewModel.mFabOpened = false
 
-        baiduMapViewModel.isExists = true
-        baiduMapViewModel.baiduMap = binding.bmapView.map
-
-        binding.bmapView.let {
-            it.showZoomControls(true)
-            it.showScaleControl(true)
-            it.logoPosition = LogoPosition.logoPostionRightTop
+        with(baiduMapViewModel) {
+            isExists = true
+            baiduMap = binding.bmapView.map
         }
 
-        val mapType = context?.getSharedPreferences("portal", 0)?.getInt("mapType", BaiduMap.MAP_TYPE_NORMAL) ?: BaiduMap.MAP_TYPE_NORMAL
-        binding.bmapView.map.let {
-            it.setMapStatus(MapStatusUpdateFactory.zoomTo(19f))
+        with(binding.bmapView) {
+            showZoomControls(true)
+            showScaleControl(true)
+            logoPosition = LogoPosition.logoPostionRightTop
+        }
 
-            it.mapType = mapType
-            it.compassPosition = Point(50, 50)
-            it.setCompassEnable(true)
-            it.uiSettings.isCompassEnabled = true
-            it.uiSettings.isOverlookingGesturesEnabled = true
-            it.isMyLocationEnabled = true
+        with(binding.bmapView.map) {
+            setMapStatus(MapStatusUpdateFactory.zoomTo(19f))
 
-            mLocationClient = LocationClient(requireContext())
-            val option = LocationClientOption()
-            option.isOpenGps = true
-            option.enableSimulateGps = false
-            option.setIsNeedAddress(true) /* 关掉这个无法获取当前城市 */
-            option.setNeedDeviceDirect(true)
-            option.isLocationNotify = true
-            option.setIgnoreKillProcess(true)
-            option.setIsNeedLocationDescribe(false)
-            option.setIsNeedLocationPoiList(false)
-            option.isOpenGnss = true
-            option.setIsNeedAltitude(false)
-            option.locationMode = LocationClientOption.LocationMode.Hight_Accuracy
+            mapType = context?.mapType ?: BaiduMap.MAP_TYPE_NORMAL
+            compassPosition = Point(50, 50)
+            setCompassEnable(true)
+            uiSettings.isCompassEnabled = true
+            uiSettings.isOverlookingGesturesEnabled = true
+            isMyLocationEnabled = true
 
-            option.setCoorType(Portal.DEFAULT_COORD_STR)
-            option.setScanSpan(1000)
-            mLocationClient.locOption = option
-            mLocationClient.registerLocationListener(object: BDAbstractLocationListener() {
-                override fun onReceiveLocation(loc: BDLocation?) {
-                    if (loc == null) return
-                    val locData = MyLocationData.Builder()
-                        .accuracy(loc.radius)
-                        .direction(loc.direction)
-                        .latitude(loc.latitude)
-                        .longitude(loc.longitude)
-                        .build()
+            setMapConfig(baiduMapViewModel.perspectiveState, if (Random.nextBoolean()) R.drawable.icon_my_location else null)
 
-                    baiduMapViewModel.currentLocation = Jni.coorEncrypt(loc.longitude, loc.latitude, "gcj2wgs")
-                        .let { it[1] to it[0] }
-
-                    if (loc.city != null)
-                        MainActivity.mCityString = loc.city
-
-                    it.setMyLocationData(locData)
-                }
-            })
-
-            if (Random.nextBoolean()) {
-                it.setMyLocationConfiguration(MyLocationConfiguration(
-                    baiduMapViewModel.locationViewMode, true,  BitmapDescriptorFactory.fromResource(R.drawable.icon_my_location)
-                ))
-            } else {
-                it.setMyLocationConfiguration(MyLocationConfiguration(
-                    baiduMapViewModel.locationViewMode, true, null
-                ))
-            }
-
-            it.setOnMapClickListener(object: BaiduMap.OnMapClickListener {
+            setOnMapClickListener(object: BaiduMap.OnMapClickListener {
                 override fun onMapClick(loc: LatLng) {
                     // 默认获取的gcj02坐标，需要转换一下
-                    baiduMapViewModel.markedLocation = Jni.coorEncrypt(loc.longitude, loc.latitude, "gcj2wgs")
-                        .let { it[1] to it[0] }
+                    baiduMapViewModel.markedLoc = loc.wgs84
 
                     lifecycleScope.launch {
                         baiduMapViewModel.showDetailView = false
@@ -159,54 +115,83 @@ class HomeFragment : Fragment() {
                 override fun onMapPoiClick(poi: MapPoi) {}
             })
 
-            it.setOnMapLongClickListener {
-                if (it == null) return@setOnMapLongClickListener
+            setOnMapLongClickListener { loc ->
+                if (loc == null) return@setOnMapLongClickListener
 
                 // 默认获取的gcj02坐标，需要转换一下
-                baiduMapViewModel.markedLocation = Jni.coorEncrypt(it.longitude, it.latitude, "gcj2wgs")
-                    .let { it[1] to it[0] }
+                baiduMapViewModel.markedLoc = loc.wgs84
                 lifecycleScope.launch {
                     baiduMapViewModel.showDetailView = true
-                    baiduMapViewModel.mGeoCoder?.reverseGeoCode(ReverseGeoCodeOption().location(it))
+                    baiduMapViewModel.mGeoCoder?.reverseGeoCode(ReverseGeoCodeOption().location(loc))
                 }
                 lifecycleScope.launch {
                     markMap()
                 }
             }
 
-            baiduMapViewModel.mLocationClient = mLocationClient
-
-            mLocationClient.enableLocInForeground(1, baiduMapViewModel.mNotification)
-
-            mLocationClient.start()
+            binding.mapTypeGroup.check(
+                when (mapType) {
+                    BaiduMap.MAP_TYPE_NORMAL -> R.id.map_type_normal
+                    BaiduMap.MAP_TYPE_SATELLITE -> R.id.map_type_satellite
+                    else -> R.id.map_type_normal
+                }
+            )
         }
 
-        binding.locationViewMode.check(
-            when (mapType) {
-                BaiduMap.MAP_TYPE_NORMAL -> R.id.normal_loc_view
-                BaiduMap.MAP_TYPE_SATELLITE -> R.id.satellite_loc_view
-                else -> R.id.normal_loc_view
+        mLocationClient = LocationClient(requireContext())
+        val option = LocationClientOption()
+        option.isOpenGps = true
+        option.enableSimulateGps = false
+        option.setIsNeedAddress(true) /* 关掉这个无法获取当前城市 */
+        option.setNeedDeviceDirect(true)
+        option.isLocationNotify = true
+        option.setIgnoreKillProcess(true)
+        option.setIsNeedLocationDescribe(false)
+        option.setIsNeedLocationPoiList(false)
+        option.isOpenGnss = true
+        option.setIsNeedAltitude(false)
+        option.locationMode = LocationClientOption.LocationMode.Hight_Accuracy
+
+        option.setCoorType(Portal.DEFAULT_COORD_STR)
+        option.setScanSpan(1000)
+        mLocationClient.locOption = option
+        mLocationClient.registerLocationListener(object: BDAbstractLocationListener() {
+            override fun onReceiveLocation(loc: BDLocation?) {
+                if (loc == null) return
+                val locData = MyLocationData.Builder()
+                    .accuracy(loc.radius)
+                    .direction(loc.direction)
+                    .latitude(loc.latitude)
+                    .longitude(loc.longitude)
+                    .build()
+
+                if (loc.city != null)
+                    MainActivity.mCityString = loc.city
+
+                with(baiduMapViewModel) {
+                    currentLocation = loc.wgs84
+                    baiduMap.setMyLocationData(locData)
+                }
             }
-        )
-        binding.locationViewMode.setOnCheckedChangeListener { _, checkedId ->
-            val pref = requireContext().getSharedPreferences("portal", 0)
+        })
+        baiduMapViewModel.mLocationClient = mLocationClient
+        mLocationClient.enableLocInForeground(1, baiduMapViewModel.mNotification)
+        mLocationClient.start()
+
+
+        binding.mapTypeGroup.setOnCheckedChangeListener { _, checkedId ->
             when (checkedId) {
-                R.id.normal_loc_view -> {
-                    pref.edit {
-                        putInt("mapType", BaiduMap.MAP_TYPE_NORMAL)
-                    }
+                R.id.map_type_normal -> {
                     binding.bmapView.map.mapType = BaiduMap.MAP_TYPE_NORMAL
                 }
-                R.id.satellite_loc_view -> {
-                    pref.edit {
-                        putInt("mapType", BaiduMap.MAP_TYPE_SATELLITE)
-                    }
+                R.id.map_type_satellite -> {
                     binding.bmapView.map.mapType = BaiduMap.MAP_TYPE_SATELLITE
                 }
                 else -> {
                     Log.e("HomeFragment", "Unknown location view mode: $checkedId")
                 }
             }
+            context?.mapType = binding.bmapView.map.mapType
         }
 
         binding.fab.setOnClickListener { view ->
@@ -282,12 +267,7 @@ class HomeFragment : Fragment() {
         }
 
         binding.fabMyLocation.setOnClickListener {
-            baiduMapViewModel.baiduMap.setMyLocationConfiguration(MyLocationConfiguration(
-                MyLocationConfiguration.LocationMode.FOLLOWING, true, null
-            ))
-            baiduMapViewModel.baiduMap.setMyLocationConfiguration(MyLocationConfiguration(
-                MyLocationConfiguration.LocationMode.NORMAL, true, null
-            ))
+            baiduMapViewModel.baiduMap.locateMe()
         }
 
         binding.fabGoto.setOnClickListener {
@@ -300,7 +280,6 @@ class HomeFragment : Fragment() {
             }
         }
 
-
         return root
     }
 
@@ -309,7 +288,6 @@ class HomeFragment : Fragment() {
 
         binding.bmapView.onCreate(requireContext(), savedInstanceState)
     }
-
 
     @SuppressLint("SetTextI18n", "MissingInflatedId", "MutatingSharedPrefs")
     private fun showAddLocationDialog(): Boolean {
@@ -349,61 +327,59 @@ class HomeFragment : Fragment() {
             }
         }
 
-        if (baiduMapViewModel.markedLocation == null) {
-            baiduMapViewModel.currentLocation?.let {
-                val loc = it.let {
-                    Jni.coorEncrypt(it.second, it.first, "gps2gcj")
-                }.let { LatLng(it[1], it[0]) }
-                baiduMapViewModel.showDetailView = false
-                baiduMapViewModel.mGeoCoder?.reverseGeoCode(ReverseGeoCodeOption().location(loc))
-                baiduMapViewModel.markedLocation = it
+        with(baiduMapViewModel) {
+            if (markedLoc == null) {
+                currentLocation?.let {
+                    showDetailView = false
+                    mGeoCoder?.reverseGeoCode(ReverseGeoCodeOption().location(it.gcj02))
+                    markedLoc = it
+                }
+                editName.setText("当前位置-" + System.currentTimeMillis())
+            } else {
+                editName.setText("标点位置-" + System.currentTimeMillis())
             }
-            editName.setText("当前位置-" + System.currentTimeMillis())
-        } else {
-            editName.setText("标点位置-" + System.currentTimeMillis())
+
+            val lat = BigDecimal.valueOf(markedLoc?.first ?: return false)
+            val lon = BigDecimal.valueOf(markedLoc?.second ?: return false)
+
+            editAddress.setText(markName ?: "位置地址")
+            editLatLon.setText("${lat.toPlainString()}, ${lon.toPlainString()}")
+
+            val builder = MaterialAlertDialogBuilder(requireContext())
+            builder.setTitle(null)
+            builder
+                .setCancelable(false)
+                .setView(dialogView)
+                .setPositiveButton("保存") { _, _ ->
+                    val latLonArray = editLatLon.text.toString().split(",")
+                    val newLat = latLonArray[0].trim().toDoubleOrNull()
+                    val newLon = latLonArray[1].trim().toDoubleOrNull()
+                    val name = editName.text?.toString()
+                    val address = editAddress.text?.toString()
+                    if (name.isNullOrBlank()) {
+                        Toast.makeText(requireContext(), "名称不能为空", Toast.LENGTH_SHORT).show()
+                        return@setPositiveButton
+                    }
+                    if (address.isNullOrBlank()) {
+                        Toast.makeText(requireContext(), "地址不能为空", Toast.LENGTH_SHORT).show()
+                        return@setPositiveButton
+                    }
+                    if(!checkLatLon(newLat, newLon)) {
+                        Toast.makeText(requireContext(), "经纬度格式错误", Toast.LENGTH_SHORT).show()
+                        return@setPositiveButton
+                    }
+
+                    with(requireContext()) {
+                        val locations = rawHistoricalLocations.toMutableSet()
+                        locations.add("$name,$address,${newLat},${newLon}")
+                        rawHistoricalLocations = locations
+                    }
+
+                    Toast.makeText(requireContext(), "位置已保存", Toast.LENGTH_SHORT).show()
+                }
+                .setNegativeButton("取消", null)
+                .show()
         }
-
-        val lat = BigDecimal.valueOf(baiduMapViewModel.markedLocation?.first ?: return false)
-        val lon = BigDecimal.valueOf(baiduMapViewModel.markedLocation?.second ?: return false)
-
-        editAddress.setText(baiduMapViewModel.markName ?: "位置地址")
-        editLatLon.setText("${lat.toPlainString()}, ${lon.toPlainString()}")
-
-        val builder = MaterialAlertDialogBuilder(requireContext())
-        builder.setTitle(null)
-        builder
-            .setCancelable(false)
-            .setView(dialogView)
-            .setPositiveButton("保存") { _, _ ->
-                val latLonArray = editLatLon.text.toString().split(",")
-                val newLat = latLonArray[0].trim().toDoubleOrNull()
-                val newLon = latLonArray[1].trim().toDoubleOrNull()
-                val name = editName.text?.toString()
-                val address = editAddress.text?.toString()
-                if (name.isNullOrBlank()) {
-                    Toast.makeText(requireContext(), "名称不能为空", Toast.LENGTH_SHORT).show()
-                    return@setPositiveButton
-                }
-                if (address.isNullOrBlank()) {
-                    Toast.makeText(requireContext(), "地址不能为空", Toast.LENGTH_SHORT).show()
-                    return@setPositiveButton
-                }
-                if(!checkLatLon(newLat, newLon)) {
-                    Toast.makeText(requireContext(), "经纬度格式错误", Toast.LENGTH_SHORT).show()
-                    return@setPositiveButton
-                }
-
-                val pref = requireContext().getSharedPreferences("portal", MODE_PRIVATE)
-                val locations = pref.getStringSet("locations", hashSetOf())!!.toMutableSet()
-                locations.add("$name,$address,${newLat},${newLon}")
-                pref.edit {
-                    putStringSet("locations", locations)
-                }
-
-                Toast.makeText(requireContext(), "位置已保存", Toast.LENGTH_SHORT).show()
-            }
-            .setNegativeButton("取消", null)
-            .show()
 
         return true
     }
@@ -451,25 +427,22 @@ class HomeFragment : Fragment() {
                     val latitude = latitudeEditText.text.toString()
                     val longitude = longitudeEditText.text.toString()
 
-                    if (latitude.isNotEmpty() && longitude.isNotEmpty()) {
+                    if (latitude.isNotEmpty() && longitude.isNotEmpty()) with(baiduMapViewModel) {
                         val lat = latitude.toDoubleOrNull()
                         val lon = longitude.toDoubleOrNull()
                         if (lat == null || lon == null || lat !in -90.0..90.0 || lon !in -180.0..180.0) {
                             throw IllegalArgumentException("Invalid latitude or longitude")
                         }
 
-                        baiduMapViewModel.markedLocation = lat to lon
+                        this.markedLoc = lat to lon
 
                         markMap(true)
 
-                        if (baiduMapViewModel.locationViewMode == MyLocationConfiguration.LocationMode.FOLLOWING) {
-                            baiduMapViewModel.locationViewMode = MyLocationConfiguration.LocationMode.NORMAL
-                            baiduMapViewModel.baiduMap.setMyLocationConfiguration(MyLocationConfiguration(
-                                baiduMapViewModel.locationViewMode, true, null
-                            ))
+                        if (perspectiveState == MyLocationConfiguration.LocationMode.FOLLOWING) {
+                            perspectiveState = MyLocationConfiguration.LocationMode.NORMAL
                         }
 
-                        baiduMapViewModel.mGeoCoder?.reverseGeoCode(ReverseGeoCodeOption().location(LatLng(lat, lon)))
+                        mGeoCoder?.reverseGeoCode(ReverseGeoCodeOption().location(LatLng(lat, lon)))
                     } else {
                         Toast.makeText(requireContext(), "请输入有效的经纬度！", Toast.LENGTH_SHORT).show()
                     }
@@ -481,19 +454,16 @@ class HomeFragment : Fragment() {
             .show()
     }
 
-    private fun markMap(moveEyes: Boolean = false) {
-        val loc = baiduMapViewModel.markedLocation!!.let {
-            Jni.coorEncrypt(it.second, it.first, "gps2gcj")
-        }.let { LatLng(it[1], it[0]) }
-
+    private fun markMap(moveEyes: Boolean = false) = with(baiduMapViewModel) {
+        val loc = markedLoc!!.gcj02
         val ooA = MarkerOptions()
             .position(loc)
-            .icon(baiduMapViewModel.mMapIndicator)
-        baiduMapViewModel.baiduMap.clear()
-        baiduMapViewModel.baiduMap.addOverlay(ooA)
+            .icon(mMapIndicator)
+        baiduMap.clear()
+        baiduMap.addOverlay(ooA)
 
         if (moveEyes) {
-            baiduMapViewModel.baiduMap.setMapStatus(MapStatusUpdateFactory.newLatLng(loc))
+            baiduMap.setMapStatus(MapStatusUpdateFactory.newLatLng(loc))
         }
     }
 
@@ -512,7 +482,6 @@ class HomeFragment : Fragment() {
             mLocationClient.stop()
         if (_binding != null) {
             binding.bmapView.map.isMyLocationEnabled = false
-            //binding.bmapView.onDestroy()
         }
     }
 

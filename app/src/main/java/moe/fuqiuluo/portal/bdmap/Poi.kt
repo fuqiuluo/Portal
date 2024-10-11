@@ -1,6 +1,5 @@
-package moe.fuqiuluo.portal.utils
+package moe.fuqiuluo.portal.bdmap
 
-import com.baidu.mapapi.model.LatLng
 import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.sin

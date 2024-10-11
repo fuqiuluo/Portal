@@ -3,7 +3,6 @@
 package moe.fuqiuluo.xposed.hooks
 
 import android.location.Location
-import android.location.provider.ProviderProperties
 import android.os.Build
 import android.os.Bundle
 import android.os.DeadObjectException
@@ -24,12 +23,9 @@ import moe.fuqiuluo.xposed.utils.Logger
 import moe.fuqiuluo.xposed.utils.afterHook
 import moe.fuqiuluo.xposed.utils.beforeHook
 import moe.fuqiuluo.xposed.utils.hookAllMethods
-import moe.fuqiuluo.xposed.utils.hookMethodBefore
 import moe.fuqiuluo.xposed.utils.onceHookAllMethod
-import moe.fuqiuluo.xposed.utils.onceHookMethodBefore
 import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
-import java.util.Collections
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.concurrent.thread

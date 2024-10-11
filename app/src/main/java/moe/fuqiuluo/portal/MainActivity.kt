@@ -47,7 +47,6 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
-import com.baidu.location.Jni
 import com.baidu.mapapi.map.BitmapDescriptorFactory
 import com.baidu.mapapi.map.InfoWindow
 import com.baidu.mapapi.map.MapStatusUpdateFactory
@@ -70,9 +69,12 @@ import moe.fuqiuluo.portal.databinding.ActivityMainBinding
 import moe.fuqiuluo.portal.ui.notification.NotificationUtils
 import moe.fuqiuluo.portal.ui.viewmodel.BaiduMapViewModel
 import moe.fuqiuluo.portal.ui.viewmodel.MockServiceViewModel
-import moe.fuqiuluo.portal.utils.Poi
-import moe.fuqiuluo.portal.utils.toPoi
-
+import moe.fuqiuluo.portal.bdmap.Poi
+import moe.fuqiuluo.portal.bdmap.toPoi
+import moe.fuqiuluo.portal.ext.Loc4j
+import moe.fuqiuluo.portal.ext.gcj02
+import moe.fuqiuluo.portal.ext.isFullScreen
+import moe.fuqiuluo.portal.ext.wgs84
 
 class MainActivity : AppCompatActivity() {
     private lateinit var appBarConfiguration: AppBarConfiguration
@@ -147,8 +149,7 @@ class MainActivity : AppCompatActivity() {
             window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
         }
 
-        val pref = getSharedPreferences("portal", MODE_PRIVATE)
-        if (pref.getBoolean("full_screen", false)) {
+        if (isFullScreen) {
             StatusBarUtil.fullScreen(this)
         }
 
@@ -200,16 +201,11 @@ class MainActivity : AppCompatActivity() {
             override fun onGetReverseGeoCodeResult(reverseGeoCodeResult: ReverseGeoCodeResult) {
                 if (reverseGeoCodeResult.error != SearchResult.ERRORNO.NO_ERROR) {
                     Log.e("MainActivity", "Reverse GeoCode error: ${reverseGeoCodeResult.error}")
-                } else {
-                    baiduMapViewModel.markName = reverseGeoCodeResult.address.toString()
+                } else with(baiduMapViewModel) {
+                    markName = reverseGeoCodeResult.address.toString()
 
-                    if (baiduMapViewModel.showDetailView) {
-//                        showDetailInfo(reverseGeoCodeResult.location.let {
-//                            Jni.coorEncrypt(it.longitude, it.latitude, "gcj2wgs").let { it[1] to it[0] }
-//                        }, reverseGeoCodeResult.location)
-                        showDetailInfo(reverseGeoCodeResult.location.let {
-                            Jni.coorEncrypt(it.longitude, it.latitude, "gcj2wgs").let { it[1] to it[0] }
-                        }, reverseGeoCodeResult.location)
+                    if (showDetailView) {
+                        showDetailInfo(reverseGeoCodeResult.location.wgs84, reverseGeoCodeResult.location)
                     }
                 }
             }
@@ -217,30 +213,33 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun initNotification() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val notificationUtils = NotificationUtils(this)
-            val builder = notificationUtils.getAndroidChannelNotification(
-                "Portal后台定位服务",
-                "正在后台定位"
-            )
-            baiduMapViewModel.mNotification = builder.build()
-        } else {
-            val builder = Notification.Builder(this@MainActivity)
-            val nfIntent = Intent(
-                this@MainActivity,
-                MainActivity::class.java
-            )
-            builder.setContentIntent(PendingIntent.getActivity(
-                this@MainActivity, 0, nfIntent, PendingIntent.FLAG_IMMUTABLE
-            ))
-                .setContentTitle("Portal后台定位服务")
-                .setSmallIcon(R.mipmap.ic_launcher)
-                .setContentText("正在后台定位")
-                .setWhen(System.currentTimeMillis())
+        with(baiduMapViewModel) {
+            mNotification = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                val notificationUtils = NotificationUtils(this@MainActivity)
+                val builder = notificationUtils.getAndroidChannelNotification(
+                    "Portal后台定位服务",
+                    "正在后台定位"
+                )
+                builder.build()
+            } else {
+                val builder = Notification.Builder(this@MainActivity)
+                val nfIntent = Intent(
+                    this@MainActivity,
+                    MainActivity::class.java
+                )
+                builder.setContentIntent(PendingIntent.getActivity(
+                    this@MainActivity, 0, nfIntent, PendingIntent.FLAG_IMMUTABLE
+                ))
+                    .setContentTitle("Portal后台定位服务")
+                    .setSmallIcon(R.mipmap.ic_launcher)
+                    .setContentText("正在后台定位")
+                    .setWhen(System.currentTimeMillis())
 
-            baiduMapViewModel.mNotification = builder.build()
+                builder.build()
+            }.also {
+                it.defaults = Notification.DEFAULT_SOUND
+            }
         }
-        baiduMapViewModel.mNotification!!.defaults = Notification.DEFAULT_SOUND
     }
 
     private fun requireFloatWindows(): Boolean {
@@ -302,9 +301,6 @@ class MainActivity : AppCompatActivity() {
         val searchItem: MenuItem = menu.findItem(R.id.action_search)
         val searchView = searchItem.actionView as SearchView
         searchView.onActionViewExpanded()
-        //searchView.isSubmitButtonEnabled = true
-        //searchItem.icon?.colorFilter = BlendModeColorFilterCompat
-        //    .createBlendModeColorFilterCompat(Color.WHITE, BlendModeCompat.SRC_ATOP)
 
         val searchClose = searchView.findViewById<ImageView>(androidx.appcompat.R.id.search_close_btn)
         val searchBack = searchView.findViewById<ImageView>(androidx.appcompat.R.id.search_go_btn)
@@ -315,27 +311,26 @@ class MainActivity : AppCompatActivity() {
         ImageViewCompat.setImageTintList(voiceBack, color)
 
         val mSearchList = binding.appBarMain.searchListView
-        mSearchList.onItemClickListener = OnItemClickListener { parent, view, position, id ->
+        mSearchList.onItemClickListener = OnItemClickListener { _, view, _, _ ->
             val lngText = (view.findViewById<View>(R.id.poi_longitude) as TextView).text.toString()
             val latText = (view.findViewById<View>(R.id.poi_latitude) as TextView).text.toString()
-            baiduMapViewModel.markName = (view.findViewById<View>(R.id.poi_name) as TextView).text.toString()
-            val lng = lngText.toDouble() // gcj02
-            val lat = latText.toDouble()
-            baiduMapViewModel.markedLocation = Jni.coorEncrypt(lng, lat, "gcj2wgs").let {
-                it[1] to it[0]
-            }
-            val mapStatusUpdate = MapStatusUpdateFactory.newLatLng(LatLng(lat, lng))
-            if (baiduMapViewModel.isExists) {
-                baiduMapViewModel.baiduMap.setMapStatus(mapStatusUpdate)
-            } else {
-                Toast.makeText(this@MainActivity, "地图未加载", Toast.LENGTH_SHORT).show()
-            }
+            with(baiduMapViewModel) {
+                markName = (view.findViewById<View>(R.id.poi_name) as TextView).text.toString()
+                val lng = lngText.toDouble() // gcj02
+                val lat = latText.toDouble()
+                markedLoc = Loc4j.gcj2wgs(lat, lng)
+                val mapStatusUpdate = MapStatusUpdateFactory.newLatLng(LatLng(lat, lng))
+                if (isExists) {
+                    baiduMap.setMapStatus(mapStatusUpdate)
+                } else {
+                    Toast.makeText(this@MainActivity, "地图未加载", Toast.LENGTH_SHORT).show()
+                }
 
-            markMap()
+                markMap()
 
-            // mSearchList.setVisibility(View.GONE);
-            binding.appBarMain.searchLinear.visibility = View.INVISIBLE
-            searchItem.collapseActionView()
+                binding.appBarMain.searchLinear.visibility = View.INVISIBLE
+                searchItem.collapseActionView()
+            }
         }
 
         if (mSuggestionSearch == null) {
@@ -401,26 +396,24 @@ class MainActivity : AppCompatActivity() {
         return true
     }
 
-    private fun markMap() {
-        if (baiduMapViewModel.markedLocation == null) return
+    private fun markMap() = with(baiduMapViewModel) {
+        if (markedLoc == null) return
 
-        if (baiduMapViewModel.locationViewMode == MyLocationConfiguration.LocationMode.FOLLOWING) {
-            baiduMapViewModel.locationViewMode = MyLocationConfiguration.LocationMode.NORMAL
-            baiduMapViewModel.baiduMap.setMyLocationConfiguration(MyLocationConfiguration(
-                baiduMapViewModel.locationViewMode, true, null
-            ))
+        if (perspectiveState == MyLocationConfiguration.LocationMode.FOLLOWING) {
+            perspectiveState = MyLocationConfiguration.LocationMode.NORMAL
         }
 
-        val gcjLoc = baiduMapViewModel.markedLocation!!.let {
-            Jni.coorEncrypt(it.second, it.first, "gps2gcj").let { LatLng(it[1], it[0]) }
-        }
+        val gcjLoc = markedLoc!!.gcj02
         val ooA = MarkerOptions()
             .position(gcjLoc)
-            .icon(baiduMapViewModel.mMapIndicator)
-        baiduMapViewModel.baiduMap.clear()
-        baiduMapViewModel.baiduMap.addOverlay(ooA)
+            .apply {
+                if (mMapIndicator != null)
+                    icon(mMapIndicator)
+            }
+        baiduMap.clear()
+        baiduMap.addOverlay(ooA)
 
-        showDetailInfo(baiduMapViewModel.markedLocation!!, gcjLoc)
+        showDetailInfo(markedLoc!!, gcjLoc)
     }
 
     @SuppressLint("SetTextI18n")
@@ -447,7 +440,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     companion object {
-        const val REQUEST_PERMISSIONS_CODE = 111
+        private const val REQUEST_PERMISSIONS_CODE = 111
 
         internal var mCityString: String? = null
             set(value) {
