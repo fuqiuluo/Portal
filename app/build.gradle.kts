@@ -1,3 +1,4 @@
+import com.android.build.api.dsl.ApplicationExtension
 import java.io.ByteArrayOutputStream
 
 plugins {
@@ -14,7 +15,7 @@ android {
         minSdk = 24
         targetSdk = 34
         versionCode = getVersionCode()
-        versionName = "1.0.0" + ".r${getGitCommitCount()}." + getVersionName()
+        versionName = "1.0.1" + ".r${getGitCommitCount()}." + getVersionName()
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -32,12 +33,52 @@ android {
             )
         }
     }
+
+    android.applicationVariants.all {
+        outputs.map { it as com.android.build.gradle.internal.api.BaseVariantOutputImpl }
+            .forEach {
+                val abiName = when (val abi = it.outputFileName.split("-")[1].split(".apk")[0]) {
+                    "app" -> "all"
+                    "x64" -> "x86_64"
+                    else -> abi
+                }
+                it.outputFileName = "Portal-v${versionName}-${abiName}.apk"
+            }
+    }
+
+    flavorDimensions.add("mode")
+
+    productFlavors {
+        create("app") {
+            dimension = "mode"
+            ndk {
+                println("Full architecture and full compilation.")
+                abiFilters.add("arm64-v8a")
+                abiFilters.add("x86_64") // may crash?
+            }
+        }
+        create("arm64") {
+            dimension = "mode"
+            ndk {
+                println("Full compilation of arm64 architecture")
+                abiFilters.add("arm64-v8a")
+            }
+        }
+        create("x64") {
+            dimension = "mode"
+            ndk {
+                println("Full compilation of x64 architecture")
+                abiFilters.add("x86_64")
+            }
+        }
+    }
+
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "17"
     }
     buildFeatures {
         viewBinding = true
@@ -73,6 +114,34 @@ android {
     }
     sourceSets {
         getByName("main").jniLibs.srcDirs("libs")
+    }
+
+    configureAppSigningConfigsForRelease(project)
+}
+
+fun configureAppSigningConfigsForRelease(project: Project) {
+    val keystorePath: String? = System.getenv("KEYSTORE_PATH")
+    if (keystorePath.isNullOrBlank()) {
+        return
+    }
+    project.configure<ApplicationExtension> {
+        signingConfigs {
+            create("release") {
+                storeFile = file(System.getenv("KEYSTORE_PATH"))
+                storePassword = System.getenv("KEYSTORE_PASSWORD")
+                keyAlias = System.getenv("KEY_ALIAS")
+                keyPassword = System.getenv("KEY_PASSWORD")
+                enableV2Signing = true
+            }
+        }
+        buildTypes {
+            release {
+                signingConfig = signingConfigs.findByName("release")
+            }
+            debug {
+                signingConfig = signingConfigs.findByName("release")
+            }
+        }
     }
 }
 
