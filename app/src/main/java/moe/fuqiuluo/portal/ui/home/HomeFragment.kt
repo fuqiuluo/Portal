@@ -34,7 +34,6 @@ import com.baidu.mapapi.search.geocode.ReverseGeoCodeOption
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import moe.fuqiuluo.portal.MainActivity
 import moe.fuqiuluo.portal.Portal
 import moe.fuqiuluo.portal.R
@@ -354,7 +353,7 @@ class HomeFragment : Fragment() {
                     val latLonArray = editLatLon.text.toString().split(",")
                     val newLat = latLonArray[0].trim().toDoubleOrNull()
                     val newLon = latLonArray[1].trim().toDoubleOrNull()
-                    val name = editName.text?.toString()
+                    var name = editName.text?.toString()
                     val address = editAddress.text?.toString()
                     if (name.isNullOrBlank()) {
                         Toast.makeText(requireContext(), "名称不能为空", Toast.LENGTH_SHORT).show()
@@ -369,9 +368,20 @@ class HomeFragment : Fragment() {
                         return@setPositiveButton
                     }
 
+                    fun MutableSet<String>.addLocation(name: String, address: String, lat: Double, lon: Double): Boolean {
+                        if (any { it.split(",")[0] == name }) {
+                            return false
+                        }
+                        add("$name,$address,${BigDecimal.valueOf(lat).toPlainString()},${BigDecimal.valueOf(lon).toPlainString()}")
+                        return true
+                    }
+
                     with(requireContext()) {
                         val locations = rawHistoricalLocations.toMutableSet()
-                        locations.add("$name,$address,${newLat},${newLon}")
+                        var count = 0
+                        while (!locations.addLocation(name!!, address, newLat!!, newLon!!)) {
+                            name = "$name(${++count})"
+                        }
                         rawHistoricalLocations = locations
                     }
 

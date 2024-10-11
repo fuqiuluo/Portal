@@ -1,3 +1,5 @@
+import java.io.ByteArrayOutputStream
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -11,8 +13,8 @@ android {
         applicationId = "moe.fuqiuluo.portal"
         minSdk = 24
         targetSdk = 34
-        versionCode = 1
-        versionName = "1.0.0"
+        versionCode = getVersionCode()
+        versionName = "1.0.0" + ".r${getGitCommitCount()}." + getVersionName()
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -96,4 +98,30 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+}
+
+fun getGitCommitCount(): Int {
+    val out = ByteArrayOutputStream()
+    exec {
+        commandLine("git", "rev-list", "--count", "HEAD")
+        standardOutput = out
+    }
+    return out.toString().trim().toInt()
+}
+
+fun getGitCommitHash(): String {
+    val out = ByteArrayOutputStream()
+    exec {
+        commandLine("git", "rev-parse", "--short", "HEAD")
+        standardOutput = out
+    }
+    return out.toString().trim()
+}
+
+fun getVersionCode(): Int {
+    return (System.currentTimeMillis() / 1000L).toInt()
+}
+
+fun getVersionName(): String {
+    return getGitCommitHash()
 }

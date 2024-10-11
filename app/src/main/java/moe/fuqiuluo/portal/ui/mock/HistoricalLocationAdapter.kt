@@ -10,7 +10,7 @@ import moe.fuqiuluo.portal.R
 import java.math.BigDecimal
 
 class HistoricalLocationAdapter(
-    private val dataSet: List<HistoricalLocation>,
+    private val dataSet: MutableList<HistoricalLocation>,
     private val onItemClicked: (HistoricalLocation, isLongClicked: Boolean) -> Unit
 ): RecyclerView.Adapter<HistoricalLocationAdapter.ViewHolder>() {
     class ViewHolder(
@@ -19,6 +19,16 @@ class HistoricalLocationAdapter(
         val locationName: MaterialTextView = root.findViewById(R.id.history_location_name)
         val locationLatLon: MaterialTextView = root.findViewById(R.id.history_location_latlon)
         val locationAddress: MaterialTextView = root.findViewById(R.id.history_location_address)
+    }
+
+    operator fun get(position: Int): HistoricalLocation {
+        return dataSet[position]
+    }
+
+    fun removeItem(position: Int): HistoricalLocation {
+        val removed = dataSet.removeAt(position)
+        notifyItemRemoved(position)
+        return removed
     }
 
     /**
@@ -96,5 +106,4 @@ class HistoricalLocationAdapter(
             true
         }
     }
-
 }

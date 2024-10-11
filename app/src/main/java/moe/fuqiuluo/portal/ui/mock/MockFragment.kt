@@ -1,8 +1,8 @@
 package moe.fuqiuluo.portal.ui.mock
 
 import android.annotation.SuppressLint
-import android.content.Context.MODE_PRIVATE
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,8 +13,11 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.button.MaterialButton
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -22,6 +25,7 @@ import moe.fuqiuluo.portal.R
 import moe.fuqiuluo.portal.android.window.OverlayUtils
 import moe.fuqiuluo.portal.databinding.FragmentMockBinding
 import moe.fuqiuluo.portal.ext.historicalLocations
+import moe.fuqiuluo.portal.ext.rawHistoricalLocations
 import moe.fuqiuluo.portal.ext.selectLocation
 import moe.fuqiuluo.portal.service.MockServiceHelper
 import moe.fuqiuluo.portal.ui.viewmodel.MockServiceViewModel
@@ -82,7 +86,6 @@ class MockFragment : Fragment() {
             checkedTextView.toggle()
         }
 
-
         requireContext().selectLocation?.let {
             binding.mockLocationName.text = it.name
             binding.mockLocationAddress.text = it.address
@@ -97,7 +100,7 @@ class MockFragment : Fragment() {
         }
 
         // 2024.10.10: sort historical locations
-        val historicalLocationAdapter = HistoricalLocationAdapter(locations.sortedBy { it.name }) { loc, isLongClick ->
+        val historicalLocationAdapter = HistoricalLocationAdapter(locations.sortedBy { it.name }.toMutableList()) { loc, isLongClick ->
             if (isLongClick) {
                 Toast.makeText(requireContext(), "长按", Toast.LENGTH_SHORT).show()
             } else {
@@ -119,18 +122,55 @@ class MockFragment : Fragment() {
         val recyclerView = binding.historicalLocationList
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
         recyclerView.adapter = historicalLocationAdapter
+        ItemTouchHelper(object: ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT) {
+            override fun onMove(
+                recyclerView: RecyclerView,
+                viewHolder: RecyclerView.ViewHolder,
+                target: RecyclerView.ViewHolder
+            ): Boolean {
+                return false
+            }
+
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                val position = viewHolder.adapterPosition
+                val location = historicalLocationAdapter[position]
+                with(requireContext()) {
+                    MaterialAlertDialogBuilder(this)
+                        .setTitle("删除位置")
+                        .setMessage("确定要删除位置(${location.name})吗？")
+                        .setPositiveButton("删除") { _, _ ->
+                            rawHistoricalLocations = rawHistoricalLocations.toMutableSet().apply {
+                                removeIf { it.split(",")[0] == location.name }
+                            }
+                            showToast("已删除位置")
+                        }
+                        .setNegativeButton("取消", null)
+                        .show()
+                }
+            }
+        }).attachToRecyclerView(recyclerView)
 
         return binding.root
     }
 
     private fun tryOpenService(button: MaterialButton) {
         if (!OverlayUtils.hasOverlayPermissions(requireContext())) {
-            Toast.makeText(requireContext(), "请授权悬浮窗权限", Toast.LENGTH_SHORT).show()
+            showToast("请授权悬浮窗权限")
             return
         }
 
         val selectedLocation = mockServiceViewModel.selectedLocation ?: run {
-            Toast.makeText(requireContext(), "请选择一个位置", Toast.LENGTH_SHORT).show()
+            showToast("请选择一个位置")
+            return
+        }
+
+        if (mockServiceViewModel.locationManager == null) {
+            showToast("定位服务加载异常")
+            return
+        }
+
+        if (!MockServiceHelper.isServiceInit()) {
+            showToast("系统服务注入失败")
             return
         }
 
@@ -138,16 +178,6 @@ class MockFragment : Fragment() {
             button.isClickable = false
             try {
                 withContext(Dispatchers.IO) {
-                    if (mockServiceViewModel.locationManager == null) {
-                        showToast("定位服务加载异常")
-                        return@withContext
-                    }
-
-                    if (!MockServiceHelper.isServiceInit()) {
-                        showToast("系统服务注入失败")
-                        return@withContext
-                    }
-
                     if (MockServiceHelper.tryOpenMock(mockServiceViewModel.locationManager!!)) {
                         updateMockButtonState(button, "停止模拟", R.drawable.rounded_play_disabled_24)
                     } else {
