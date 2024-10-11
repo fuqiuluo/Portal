@@ -20,6 +20,7 @@ import moe.fuqiuluo.xposed.utils.onceHook
 import moe.fuqiuluo.xposed.utils.onceHookAllMethod
 import moe.fuqiuluo.xposed.utils.onceHookMethodBefore
 import java.util.Collections
+import kotlin.random.Random
 
 object LocationProviderManagerHook {
     private val hookOnFetchLocationResult = beforeHook {
@@ -43,8 +44,9 @@ object LocationProviderManagerHook {
             ?: Location(LocationManager.GPS_PROVIDER)
         val location = Location(originLocation.provider)
 
-        location.latitude = FakeLoc.latitude
-        location.longitude = FakeLoc.longitude
+        val jitterLat = FakeLoc.jitterLocation()
+        location.latitude = jitterLat.first
+        location.longitude = jitterLat.second
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             location.isMock = false
         }
@@ -263,8 +265,9 @@ object LocationProviderManagerHook {
                     ?: Location(LocationManager.GPS_PROVIDER)
                 val location = Location(originLocation.provider)
 
-                location.latitude = FakeLoc.latitude
-                location.longitude = FakeLoc.longitude
+                val jitterLat = FakeLoc.jitterLocation()
+                location.latitude = jitterLat.first
+                location.longitude = jitterLat.second
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                     location.isMock = false
                 }

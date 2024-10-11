@@ -11,6 +11,7 @@ import moe.fuqiuluo.xposed.utils.hookMethodBefore
 import moe.fuqiuluo.xposed.utils.onceHookMethodBefore
 import moe.fuqiuluo.xposed.utils.toClass
 import java.lang.reflect.Modifier
+import kotlin.random.Random
 
 object MiFusedLocationHook: BaseLocationHook() {
 
@@ -69,8 +70,9 @@ object MiFusedLocationHook: BaseLocationHook() {
                 if (FakeLoc.enable) {
                     val bdLocation = result ?: return@hookMethodAfter
 
-                    XposedHelpers.callMethod(bdLocation, "setLatitude", FakeLoc.latitude)
-                    XposedHelpers.callMethod(bdLocation, "setLongitude", FakeLoc.longitude)
+                    val jitterLat = FakeLoc.jitterLocation()
+                    XposedHelpers.callMethod(bdLocation, "setLatitude", jitterLat.first)
+                    XposedHelpers.callMethod(bdLocation, "setLongitude", jitterLat.second)
                     XposedHelpers.callMethod(bdLocation, "setBuildingID", "")
                     XposedHelpers.callMethod(bdLocation, "setAddrStr", "")
                 }

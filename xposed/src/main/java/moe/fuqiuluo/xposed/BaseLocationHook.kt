@@ -24,7 +24,7 @@ abstract class BaseLocationHook: BaseDivineService() {
                     originLocation.provider == LocationManager.GPS_PROVIDER
                 }
             ) {
-                FakeLoc.accuracy = originLocation.accuracy
+                //FakeLoc.accuracy = originLocation.accuracy
                 FakeLoc.lastLocation = originLocation
             }
         } else {
@@ -41,9 +41,10 @@ abstract class BaseLocationHook: BaseDivineService() {
 
         val location = Location(originLocation.provider)
         //location.provider = "gps"
-        location.accuracy = originLocation.accuracy
-        location.latitude = FakeLoc.latitude
-        location.longitude = FakeLoc.longitude
+        location.accuracy = if (FakeLoc.accuracy != 0.0f) FakeLoc.accuracy else originLocation.accuracy
+        val jitterLat = FakeLoc.jitterLocation()
+        location.latitude = jitterLat.first
+        location.longitude = jitterLat.second
         location.altitude = FakeLoc.altitude
         val speedAmp = Random.nextDouble(-FakeLoc.speedAmplitude, FakeLoc.speedAmplitude)
         location.speed = (originLocation.speed + speedAmp).toFloat()

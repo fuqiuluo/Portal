@@ -1,8 +1,14 @@
 package moe.fuqiuluo.xposed.utils
 
 import android.location.Location
+import kotlin.math.PI
+import kotlin.math.atan2
+import kotlin.math.cos
 import kotlin.math.max
+import kotlin.math.pow
 import kotlin.math.sign
+import kotlin.math.sin
+import kotlin.math.sqrt
 import kotlin.random.Random
 
 object FakeLoc {
@@ -58,9 +64,7 @@ object FakeLoc {
 
     var lastLocation: Location? = null
     var latitude = 0.0
-        get() = field + ((if(Random.nextBoolean()) -1 else 1) * (Random.nextDouble(1.0, max(2.0, (accuracy * 10000).toDouble())) / 100000.0) * 6.99E-6)
     var longitude = 0.0
-        get() = field + ((if(Random.nextBoolean()) 1 else -1) * (Random.nextDouble(1.0, max(2.0, (accuracy * 10000).toDouble())) / 100000.0) * 1.121E-5)
     var altitude = 80.0
     var speed = 0.0
     var speedAmplitude = 1.0
@@ -77,7 +81,14 @@ object FakeLoc {
                 return field
             }
         }
-    var accuracy = 20.0f
+    var accuracy = 5.0f
+        set(value) {
+            field = if (value < 0) {
+                -value
+            } else {
+                value
+            }
+        }
 
     fun randomOffset(): Pair<Double, Double> {
         val offset = 0.000045
@@ -93,4 +104,23 @@ object FakeLoc {
 //    const val TEST_SPEED = 4.0f
 //    // azimuth
 //    const val TEST_BEARING = 0.0f
+
+    fun haversine(lat1: Double, lon1: Double, lat2: Double, lon2: Double): Double {
+        val radius = 6371000.0
+        val phi1 = Math.toRadians(lat1)
+        val phi2 = Math.toRadians(lat2)
+        val deltaPhi = Math.toRadians(lat2 - lat1)
+        val deltaLambda = Math.toRadians(lon2 - lon1)
+        val a = sin(deltaPhi / 2).pow(2) + cos(phi1) * cos(phi2) * sin(deltaLambda / 2).pow(2)
+        val c = 2 * atan2(sqrt(a), sqrt(1 - a))
+        return radius * c
+    }
+
+    fun jitterLocation(lat: Double = latitude, lon: Double = longitude, n: Double = Random.nextDouble(-accuracy.toDouble(), accuracy.toDouble()), angle: Double = bearing): Pair<Double, Double> {
+        val earthRadius = 6371000.0
+        val radiusInDegrees = n / earthRadius * (180 / PI)
+        val newLat = lat + radiusInDegrees * cos(Math.toRadians(angle))
+        val newLon = lon + radiusInDegrees * sin(Math.toRadians(angle)) / cos(Math.toRadians(lat))
+        return Pair(newLat, newLon)
+    }
 }

@@ -14,6 +14,7 @@ import moe.fuqiuluo.xposed.utils.hookAllMethodsAfter
 import moe.fuqiuluo.xposed.utils.hookAllMethodsBefore
 import moe.fuqiuluo.xposed.utils.toClass
 import moe.fuqiuluo.xposed.utils.toClassOrThrow
+import kotlin.random.Random
 
 object BasicLocationHook: BaseLocationHook() {
     operator fun invoke(classLoader: ClassLoader) {
@@ -61,8 +62,9 @@ object BasicLocationHook: BaseLocationHook() {
                     ?: Location(LocationManager.GPS_PROVIDER)
                 val location = Location(originLocation.provider)
 
-                location.latitude = FakeLoc.latitude
-                location.longitude = FakeLoc.longitude
+                val jitterLat = FakeLoc.jitterLocation()
+                location.latitude = jitterLat.first
+                location.longitude = jitterLat.second
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                     location.isMock = false
                 }
