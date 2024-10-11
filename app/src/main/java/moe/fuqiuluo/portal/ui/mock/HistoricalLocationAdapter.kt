@@ -28,6 +28,7 @@ class HistoricalLocationAdapter(
     fun removeItem(position: Int): HistoricalLocation {
         val removed = dataSet.removeAt(position)
         notifyItemRemoved(position)
+        notifyItemRangeChanged(position, itemCount - position)
         return removed
     }
 

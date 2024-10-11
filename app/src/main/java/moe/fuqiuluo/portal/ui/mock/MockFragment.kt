@@ -139,6 +139,7 @@ class MockFragment : Fragment() {
                         .setTitle("删除位置")
                         .setMessage("确定要删除位置(${location.name})吗？")
                         .setPositiveButton("删除") { _, _ ->
+                            historicalLocationAdapter.removeItem(position)
                             rawHistoricalLocations = rawHistoricalLocations.toMutableSet().apply {
                                 removeIf { it.split(",")[0] == location.name }
                             }
