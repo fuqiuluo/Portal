@@ -15,7 +15,7 @@ object RemoteCommandHandler {
     private val needProxyCmd = arrayOf("start", "stop", "set_speed_amp", "set_altitude", "update_location", "set_proxy")
     internal val randomKey by lazy { "portal_" + Random.nextDouble() }
 
-    fun handleInstruction(command: String, rely: Bundle, locationListeners: List<Any>): Boolean {
+    fun handleInstruction(command: String, rely: Bundle, locationListeners: Map<String, Pair<String, Any>>): Boolean {
         // Exchange key -> returns a random key -> is used to verify that it is the PortalManager
         if (command == "exchange_key") {
             val userId = BinderUtils.getCallerUid()
@@ -58,7 +58,6 @@ object RemoteCommandHandler {
             }
             "stop" -> {
                 FakeLoc.enable = false
-                LocationServiceHook.removeIllegalLocationListener()
                 return true
             }
             "is_start" -> {

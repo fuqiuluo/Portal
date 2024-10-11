@@ -60,22 +60,15 @@ abstract class BaseLocationHook: BaseDivineService() {
 
         // final addition of zero is to remove -0 results. while these are technically within the
         // range [0, 360) according to IEEE semantics, this eliminates possible user confusion.
-        if (FakeLoc.hasBearings) {
-            var modBearing = FakeLoc.bearing % 360.0 + 0.0
-            if (modBearing < 0) {
-                modBearing += 360.0
-            }
-            if (location.hasBearing()) {
-                location.bearing = modBearing.toFloat()
-            }
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && location.hasBearingAccuracy()) {
-                location.bearingAccuracyDegrees = modBearing.toFloat()
-            }
-        } else {
-            location.bearing = originLocation.bearing
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                location.bearingAccuracyDegrees = originLocation.bearingAccuracyDegrees
-            }
+        var modBearing = FakeLoc.bearing % 360.0 + 0.0
+        if (modBearing < 0) {
+            modBearing += 360.0
+        }
+        if (location.hasBearing()) {
+            location.bearing = modBearing.toFloat()
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && location.hasBearingAccuracy()) {
+            location.bearingAccuracyDegrees = modBearing.toFloat()
         }
 
         if (location.bearing == 0.0f) {
