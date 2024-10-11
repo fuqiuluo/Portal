@@ -6,14 +6,20 @@ import kotlin.random.Random
 
 object FakeLoc {
     var enableLog = true
-    var enableDebugLog = false
+    var enableDebugLog = true
 
     var enable = false
 
     var disableGetCurrentLocation = true
     var disableRegisterLocationListener = false
 
+    /**
+     * 如果TelephonyHook失效，可能需要打开此开关
+     */
+    var disableFusedLocation = true
+
     var enableAGPS = false
+    var enableNMEA = true
     var hideMock = true
     var autoRemoveUselessLocListener = false
 

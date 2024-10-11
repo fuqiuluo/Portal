@@ -54,7 +54,7 @@ android {
             ndk {
                 println("Full architecture and full compilation.")
                 abiFilters.add("arm64-v8a")
-                abiFilters.add("x86_64") // may crash?
+                //abiFilters.add("x86_64") // todo: may crash?
             }
         }
         create("arm64") {

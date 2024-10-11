@@ -528,7 +528,7 @@ internal object LocationServiceHook: BaseLocationHook() {
                     result = true
                 } else if (args[0] == "network") {
                     result = false
-                } else if (args[0] == "fused") {
+                } else if (args[0] == "fused" && FakeLoc.disableFusedLocation) {
                     result = false
                 }
             }

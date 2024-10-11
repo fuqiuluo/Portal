@@ -139,6 +139,18 @@ object RemoteCommandHandler {
                 rely.putBoolean("has_bearings", FakeLoc.hasBearings)
                 rely.putDouble("bearing", FakeLoc.bearing)
                 rely.putParcelable("last_location", FakeLoc.lastLocation)
+                rely.putBoolean("enable_log", FakeLoc.enableLog)
+                rely.putBoolean("enable_debug_log", FakeLoc.enableDebugLog)
+                rely.putBoolean("disable_get_current_location", FakeLoc.disableGetCurrentLocation)
+                rely.putBoolean("disable_register_location_listener", FakeLoc.disableRegisterLocationListener)
+                rely.putBoolean("disable_fused_location", FakeLoc.disableFusedLocation)
+                rely.putBoolean("enable_agps", FakeLoc.enableAGPS)
+                rely.putBoolean("enable_nmea", FakeLoc.enableNMEA)
+                rely.putBoolean("hide_mock", FakeLoc.hideMock)
+                rely.putBoolean("auto_remove_useless_loc_listener", FakeLoc.autoRemoveUselessLocListener)
+                rely.putBoolean("hook_wifi", FakeLoc.hookWifi)
+                rely.putBoolean("need_downgrade_to_2g", FakeLoc.needDowngradeTo2G)
+                rely.putLong("update_interval", FakeLoc.updateInterval)
                 return true
             }
             "broadcast_location" -> {

@@ -227,12 +227,16 @@ object TelephonyHook: BaseTelephonyHook() {
             }
         }
 
-        val cTelephonyRegistry = XposedHelpers.findClassIfExists("com.android.internal.telephony.ITelephonyRegistry", classLoader)
+        val cTelephonyRegistry = XposedHelpers.findClassIfExists("com.android.server.TelephonyRegistry", classLoader)
         if (cTelephonyRegistry == null) {
-            Logger.error("ITelephonyRegistry not found")
-            return
+            Logger.error("TelephonyRegistry not found")
+        } else {
+            hookTelephonyRegistry(cTelephonyRegistry)
         }
 
+    }
+
+    fun hookTelephonyRegistry(cTelephonyRegistry: Class<*>) {
         cTelephonyRegistry.declaredMethods.filter { (it.name == "listen" || it.name == "listenWithEventList") && !Modifier.isAbstract(it.modifiers) }
             .map {
                 it to it.parameterTypes.indexOfFirst { typ -> typ.simpleName == "IPhoneStateListener" }
@@ -408,10 +412,6 @@ object TelephonyHook: BaseTelephonyHook() {
                 putInt("size", 0)
             }
         }
-
-
-
-
     }
 
     @Suppress("LocalVariableName")

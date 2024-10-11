@@ -15,6 +15,7 @@ import moe.fuqiuluo.xposed.hooks.fused.MiFusedLocationHook
 import moe.fuqiuluo.xposed.hooks.miui.MiuiTelephonyManagerHook
 import moe.fuqiuluo.xposed.hooks.telephony.TelephonyHook
 import moe.fuqiuluo.xposed.hooks.wlan.WlanHook
+import moe.fuqiuluo.xposed.utils.FakeLoc
 import moe.fuqiuluo.xposed.utils.Logger
 
 class FakeLocation: IXposedHookLoadPackage, IXposedHookZygoteInit {
@@ -73,24 +74,35 @@ class FakeLocation: IXposedHookLoadPackage, IXposedHookZygoteInit {
             System.setProperty("portal.injected_${lpparam.packageName}", "true")
         }
 
-        if (lpparam.packageName == "com.android.phone") {
-            Logger.info("Found com.android.phone")
-            TelephonyHook(lpparam.classLoader)
-            MiuiTelephonyManagerHook(lpparam.classLoader)
-        } else if (lpparam.packageName == "android") {
-            startFakeLocHook(systemClassLoader)
-            TelephonyHook.hookSubOnTransact(lpparam.classLoader)
-            WlanHook(systemClassLoader)
-        } else if (lpparam.packageName == "com.android.location.fused") {
-            AndroidFusedLocationProviderHook(lpparam.classLoader)
-        } else if (lpparam.packageName == "com.xiaomi.location.fused") {
-            MiFusedLocationHook(lpparam.classLoader)
+        when (lpparam.packageName) {
+            "com.android.phone" -> {
+                Logger.info("Found com.android.phone")
+                TelephonyHook(lpparam.classLoader)
+                MiuiTelephonyManagerHook(lpparam.classLoader)
+            }
+            "android" -> {
+                Logger.info("Debug Log Status: ${FakeLoc.enableDebugLog}")
+                startFakeLocHook(systemClassLoader)
+                TelephonyHook.hookSubOnTransact(lpparam.classLoader)
+                WlanHook(systemClassLoader)
+                AndroidFusedLocationProviderHook(lpparam.classLoader)
+            }
+            "com.android.location.fused" -> {
+                AndroidFusedLocationProviderHook(lpparam.classLoader)
+            }
+            "com.xiaomi.location.fused" -> {
+                MiFusedLocationHook(lpparam.classLoader)
+            }
         }
     }
 
     private fun startFakeLocHook(classLoader: ClassLoader) {
         cServiceManager = XposedHelpers.findClass("android.os.ServiceManager", classLoader)
         val cLocationManager = XposedHelpers.findClass("android.location.LocationManager", classLoader)
+
+        XposedHelpers.findClassIfExists("com.android.server.TelephonyRegistry", classLoader)?.let {
+            TelephonyHook.hookTelephonyRegistry(it)
+        } // for MUMU emulator
 
         LocationServiceHook(classLoader)
         LocationManagerHook(cLocationManager)  // intrusive hooks

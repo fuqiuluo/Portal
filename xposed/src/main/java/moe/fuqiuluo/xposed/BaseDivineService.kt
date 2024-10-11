@@ -107,6 +107,19 @@ abstract class BaseDivineService {
             } else {
                 FakeLoc.lastLocation = rely.getParcelable("last_location")
             }
+            FakeLoc.enableLog = rely.getBoolean("enable_log", FakeLoc.enableLog)
+            FakeLoc.enableDebugLog = rely.getBoolean("enable_debug_log", FakeLoc.enableDebugLog)
+            FakeLoc.disableGetCurrentLocation = rely.getBoolean("disable_get_current_location", FakeLoc.disableGetCurrentLocation)
+            FakeLoc.disableRegisterLocationListener = rely.getBoolean("disable_register_location_listener", FakeLoc.disableRegisterLocationListener)
+            FakeLoc.disableFusedLocation = rely.getBoolean("disable_fused_location", FakeLoc.disableFusedLocation)
+            FakeLoc.enableAGPS = rely.getBoolean("enable_agps", FakeLoc.enableAGPS)
+            FakeLoc.enableNMEA = rely.getBoolean("enable_nmea", FakeLoc.enableNMEA)
+            FakeLoc.hideMock = rely.getBoolean("hide_mock", FakeLoc.hideMock)
+            FakeLoc.autoRemoveUselessLocListener = rely.getBoolean("auto_remove_useless_loc_listener", FakeLoc.autoRemoveUselessLocListener)
+            FakeLoc.hookWifi = rely.getBoolean("hook_wifi", FakeLoc.hookWifi)
+            FakeLoc.needDowngradeTo2G = rely.getBoolean("need_downgrade_to_2g", FakeLoc.needDowngradeTo2G)
+            FakeLoc.updateInterval = rely.getLong("update_interval", FakeLoc.updateInterval)
+            Logger.debug("Synced config for DivineService")
         } else {
             Logger.error("Failed to sync config for DivineService")
         }

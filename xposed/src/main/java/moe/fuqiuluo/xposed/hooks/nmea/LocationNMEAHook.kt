@@ -19,7 +19,7 @@ object LocationNMEAHook: BaseLocationHook() {
             override fun beforeHookedMethod(param: MethodHookParam?) {
                 if (param == null || param.args.isEmpty()) return
 
-                if (FakeLoc.enable && !FakeLoc.enableAGPS) {
+                if (FakeLoc.enable && !FakeLoc.enableNMEA) {
                     if (FakeLoc.enableDebugLog) {
                         Logger.debug("${param.method.name}: disable")
                     }
