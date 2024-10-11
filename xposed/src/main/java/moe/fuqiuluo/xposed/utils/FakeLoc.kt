@@ -2,6 +2,7 @@ package moe.fuqiuluo.xposed.utils
 
 import android.location.Location
 import kotlin.math.max
+import kotlin.math.sign
 import kotlin.random.Random
 
 object FakeLoc {
@@ -57,14 +58,25 @@ object FakeLoc {
 
     var lastLocation: Location? = null
     var latitude = 0.0
-        get() = field + ((if(Random.nextBoolean()) -1 else 1) * (Random.nextInt(1, max(2, (accuracy * 10000).toInt())).toDouble() / 10000.0) * 6.99E-6)
+        get() = field + ((if(Random.nextBoolean()) -1 else 1) * (Random.nextDouble(1.0, max(2.0, (accuracy * 10000).toDouble())) / 100000.0) * 6.99E-6)
     var longitude = 0.0
-        get() = field + ((if(Random.nextBoolean()) 1 else -1) * (Random.nextInt(1, max(2, (accuracy * 10000).toInt())).toDouble() / 10000.0) * 1.121E-5)
+        get() = field + ((if(Random.nextBoolean()) 1 else -1) * (Random.nextDouble(1.0, max(2.0, (accuracy * 10000).toDouble())) / 100000.0) * 1.121E-5)
     var altitude = 80.0
     var speed = 0.0
     var speedAmplitude = 1.0
     var hasBearings = false
     var bearing = 0.0
+        get() {
+            if (hasBearings) {
+                return field
+            } else {
+                if (field >= 360.0) {
+                    field -= 360.0
+                }
+                field += 0.5
+                return field
+            }
+        }
     var accuracy = 20.0f
 
     fun randomOffset(): Pair<Double, Double> {
