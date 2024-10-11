@@ -10,6 +10,9 @@ import android.Manifest.permission.FOREGROUND_SERVICE
 import android.Manifest.permission.INTERNET
 import android.Manifest.permission.READ_PHONE_STATE
 import android.Manifest.permission.VIBRATE
+import android.animation.Animator
+import android.animation.AnimatorInflater
+import android.animation.AnimatorSet
 import android.annotation.SuppressLint
 import android.app.Notification
 import android.app.PendingIntent
@@ -190,6 +193,27 @@ class MainActivity : AppCompatActivity() {
                     val isHomeFragment = dest.id == R.id.nav_home
                     val menu = binding.appBarMain.toolbar.menu
                     menu.findItem(R.id.action_search)?.isVisible = isHomeFragment
+                }
+
+                val navLogo = binding.navView.getHeaderView(0).findViewById<ImageView>(R.id.nav_logo)
+                val rotateAnimator = AnimatorInflater.loadAnimator(this@MainActivity, R.animator.logo_rotate) as AnimatorSet
+                rotateAnimator.setTarget(navLogo)
+                rotateAnimator.addListener(object: Animator.AnimatorListener {
+                    override fun onAnimationStart(animation: Animator) {}
+
+                    override fun onAnimationEnd(animation: Animator) {
+                        navLogo.setImageDrawable(ContextCompat.getDrawable(this@MainActivity, R.mipmap.ic_yuzu_launcher))
+                    }
+
+                    override fun onAnimationCancel(animation: Animator) {}
+
+                    override fun onAnimationRepeat(animation: Animator) {}
+                })
+                var count = 0
+                navLogo.setOnClickListener {
+                    if (!rotateAnimator.isRunning && count++ > 5) {
+                        rotateAnimator.start()
+                    }
                 }
             }
         }

@@ -1,0 +1,10 @@
+<!-- res/animator/rotate.xml -->
+<set xmlns:android="http://schemas.android.com/apk/res/android">
+    <objectAnimator
+        android:propertyName="rotation"
+        android:duration="600"
+        android:valueFrom="0"
+        android:valueTo="360"
+        android:repeatCount="2"
+        android:interpolator="@android:anim/linear_interpolator"/>
+</set>
