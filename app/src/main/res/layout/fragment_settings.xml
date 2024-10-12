@@ -6,8 +6,4 @@
     android:layout_height="match_parent"
     tools:context=".ui.settings.SettingsFragment">
 
-
-
-
-
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

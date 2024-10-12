@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="RockerView">
+        <attr name="areaBackground" format="color" />
+        <attr name="rockerBackground" format="color" />
+        <attr name="pressAreaBackground" format="color" />
+        <attr name="pressRockerBackground" format="color" />
+    </declare-styleable>
+</resources>
