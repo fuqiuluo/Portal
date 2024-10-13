@@ -4,8 +4,11 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
+import android.view.WindowManager
 import android.widget.CheckedTextView
 import android.widget.Toast
 import androidx.core.content.ContextCompat
@@ -73,17 +76,30 @@ class MockFragment : Fragment() {
             }
         }
 
-        binding.rocker.setOnClickListener {
-            if (mockServiceViewModel.locationManager == null) {
-                Toast.makeText(requireContext(), "定位服务加载异常", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
+        with(mockServiceViewModel) {
+            if (rocker.isStart) {
+                binding.rocker.toggle()
             }
-            if (!mockServiceViewModel.isServiceStart()) {
-                Toast.makeText(requireContext(), "请先启动模拟", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
+            binding.rocker.setOnClickListener {
+                if (locationManager == null) {
+                    Toast.makeText(requireContext(), "定位服务加载异常", Toast.LENGTH_SHORT).show()
+                    return@setOnClickListener
+                }
+                if (!isServiceStart()) {
+                    Toast.makeText(requireContext(), "请先启动模拟", Toast.LENGTH_SHORT).show()
+                    return@setOnClickListener
+                }
+                val checkedTextView = it as CheckedTextView
+                checkedTextView.toggle()
+
+                lifecycleScope.launch(Dispatchers.Main) {
+                    if (checkedTextView.isChecked) {
+                        rocker.show()
+                    } else {
+                        rocker.hide()
+                    }
+                }
             }
-            val checkedTextView = it as CheckedTextView
-            checkedTextView.toggle()
         }
 
         requireContext().selectLocation?.let {
@@ -212,17 +228,25 @@ class MockFragment : Fragment() {
         lifecycleScope.launch {
             button.isClickable = false
             try {
-                withContext(Dispatchers.IO) {
+                val isClosed = withContext(Dispatchers.IO) {
                     if (!MockServiceHelper.isMockStart(mockServiceViewModel.locationManager!!)) {
                         showToast("模拟服务未启动")
-                        return@withContext
+                        return@withContext false
                     }
 
                     if (MockServiceHelper.tryCloseMock(mockServiceViewModel.locationManager!!)) {
                         updateMockButtonState(button, "开始模拟", R.drawable.rounded_play_arrow_24)
+                        return@withContext true
                     } else {
                         showToast("模拟服务停止失败")
+                        return@withContext false
                     }
+                }
+                if (isClosed && mockServiceViewModel.rocker.isStart) {
+                    binding.rocker.isClickable = false
+                    binding.rocker.toggle()
+                    mockServiceViewModel.rocker.hide()
+                    binding.rocker.isClickable = true
                 }
             } finally {
                 button.isClickable = true

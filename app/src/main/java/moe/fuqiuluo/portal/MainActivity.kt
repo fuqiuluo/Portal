@@ -210,6 +210,8 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         })
+
+        mockServiceViewModel.initRocker(this)
     }
 
     private fun initNotification() {

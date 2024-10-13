@@ -2,15 +2,24 @@ package moe.fuqiuluo.portal.android.widget
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Path
 import android.graphics.Point
+import android.graphics.RectF
 import android.graphics.drawable.ColorDrawable
+import android.os.Handler
+import android.os.Looper
 import android.util.AttributeSet
+import android.util.Log
 import android.view.MotionEvent
 import android.view.View
+import android.widget.Toast
+import androidx.core.content.res.ResourcesCompat
+import androidx.core.graphics.drawable.toBitmap
 import moe.fuqiuluo.portal.R
+import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.math.acos
 import kotlin.math.cos
 import kotlin.math.min
@@ -27,11 +36,16 @@ class RockerView(context: Context, attributeSet: AttributeSet): View(context, at
     private var mCenterPoint: Point
     private val trianglePaint = Paint()
     private val trianglePaint2 = Paint()
+    private val lockPaint = Paint()
+    private val lockBitmap: Bitmap
+    private var handler = Handler(Looper.getMainLooper())
+    private var lockRunnable: Runnable? = null
 
     private var mAreaRadius = 0.0f
     private var mRockerInnerCircleRadius = 0.0f
     private var mRockerColor = 0
     private var mAreaColor = 0
+    private var isLocked = AtomicBoolean(false)
     var listener: OnMoveListener? = null
 
     init {
@@ -70,9 +84,15 @@ class RockerView(context: Context, attributeSet: AttributeSet): View(context, at
 
         trianglePaint.color = resources.getColor(R.color.red500)
         trianglePaint.style = Paint.Style.FILL
+        trianglePaint.isAntiAlias = true
 
         trianglePaint2.color = white
         trianglePaint2.style = Paint.Style.FILL
+        trianglePaint2.isAntiAlias = true
+
+        lockBitmap = ResourcesCompat.getDrawable(resources, R.drawable.baseline_lock_24, null)!!.toBitmap()
+
+        lockPaint.isAntiAlias = true
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
@@ -110,6 +130,9 @@ class RockerView(context: Context, attributeSet: AttributeSet): View(context, at
             mRockerPosition.x.toFloat(),
             mRockerPosition.y.toFloat(), mRockerInnerCircleRadius, mRockerPaint
         )
+        if (isLocked.get()) {
+            drawLock(canvas)
+        }
     }
 
     private fun drawDirection(canvas: Canvas, circleRadius: Float = mAreaRadius, circleX: Float = mCenterPoint.x.toFloat(), circleY: Float = mCenterPoint.y.toFloat()) {
@@ -165,31 +188,62 @@ class RockerView(context: Context, attributeSet: AttributeSet): View(context, at
                 val moveX = event.x
                 val moveY = event.y
 
-                mRockerPosition = getRockerPositionPoint(mCenterPoint, Point(moveX.toInt(), moveY.toInt()), mAreaRadius, mRockerInnerCircleRadius)
+                val (mRockerPosition, w) = getRockerPositionPoint(mCenterPoint, Point(moveX.toInt(), moveY.toInt()), mAreaRadius, mRockerInnerCircleRadius)
+                this.mRockerPosition = mRockerPosition
                 moveRocker(mRockerPosition.x, mRockerPosition.y)
+
+                if (!w.first && isLocked.get() && lockRunnable == null) {
+                    isLocked.set(false)
+                    listener?.onLockChanged(false)
+                }
             }
 
             MotionEvent.ACTION_MOVE -> {
-                val moveX = event.x
-                val moveY = event.y
-                mRockerPosition = getRockerPositionPoint(
-                    mCenterPoint,
-                    Point(moveX.toInt(), moveY.toInt()),
-                    mAreaRadius,
-                    mRockerInnerCircleRadius
-                )
-                moveRocker(mRockerPosition.x, mRockerPosition.y)
+                if (!isLocked.get()) {
+                    val moveX = event.x
+                    val moveY = event.y
+                    val (mRockerPosition, w) = getRockerPositionPoint(
+                        mCenterPoint,
+                        Point(moveX.toInt(), moveY.toInt()),
+                        mAreaRadius,
+                        mRockerInnerCircleRadius
+                    )
+                    this.mRockerPosition = mRockerPosition
+                    moveRocker(mRockerPosition.x, mRockerPosition.y)
+
+                    if (w.first && lockRunnable == null) {
+                        lockRunnable = Runnable {
+                            isLocked.set(true)
+                            listener?.onLockChanged(true)
+                            Toast.makeText(context, "方向锁定", Toast.LENGTH_SHORT).show()
+                            lockRunnable = null
+                            invalidate()
+                        }
+                        handler.postDelayed(lockRunnable!!, 3000)
+                    }
+                }
             }
 
             MotionEvent.ACTION_UP -> {
-                listener?.onAngle(0.0)
-                listener?.onFinished()
-                moveRocker(mCenterPoint.x, mCenterPoint.y)
+                if (!isLocked.get()) {
+                    listener?.onAngle(0.0)
+                    listener?.onFinished()
+                    moveRocker(mCenterPoint.x, mCenterPoint.y)
+                    lockRunnable?.let {
+                        handler.removeCallbacks(it)
+                    }
+                }
             }
 
             MotionEvent.ACTION_CANCEL -> {
-                listener?.onFinished()
-                moveRocker(mCenterPoint.x, mCenterPoint.y)
+                if (!isLocked.get()) {
+                    listener?.onFinished()
+                    moveRocker(mCenterPoint.x, mCenterPoint.y)
+
+                    lockRunnable?.let {
+                        handler.removeCallbacks(it)
+                    }
+                }
             }
         }
         return true
@@ -198,6 +252,16 @@ class RockerView(context: Context, attributeSet: AttributeSet): View(context, at
     private fun moveRocker(x: Int, y: Int) {
         mRockerPosition[x] = y
         invalidate()
+    }
+
+    private fun drawLock(canvas: Canvas) {
+        val rockerRadius = mRockerInnerCircleRadius
+        val lockSize = rockerRadius * 0.6f
+        val rockerX = mRockerPosition.x.toFloat()
+        val rockerY = mRockerPosition.y.toFloat()
+        //val rectF = RectF(rockerX - rockerRadius, rockerY - rockerRadius, rockerX + rockerRadius, rockerY + rockerRadius)
+        val rectF = RectF(rockerX - lockSize, rockerY - lockSize, rockerX + lockSize, rockerY + lockSize)
+        canvas.drawBitmap(lockBitmap, null, rectF, lockPaint)
     }
 
     private fun getMySize(measureSpec: Int): Int {
@@ -217,7 +281,7 @@ class RockerView(context: Context, attributeSet: AttributeSet): View(context, at
         touchPoint: Point,
         regionRadius: Float,
         rockerRadius: Float
-    ): Point {
+    ): Pair<Point, Pair<Boolean, Double>> {
         val lenX = (touchPoint.x - centerPoint.x).toFloat()
         val lenY = (touchPoint.y - centerPoint.y).toFloat()
         val lenXY = sqrt((lenX * lenX + lenY * lenY).toDouble()).toFloat()
@@ -226,25 +290,27 @@ class RockerView(context: Context, attributeSet: AttributeSet): View(context, at
         val angle = if (tmp >= 0) tmp else 360 + tmp
         if (lenXY + rockerRadius <= regionRadius) {
             listener?.onAngle(angle)
-            return touchPoint
+            return touchPoint to (false to angle)
         } else {
             val showPointX = (centerPoint.x + (regionRadius - rockerRadius) * cos(radian)).toInt()
             val showPointY = (centerPoint.y + (regionRadius - rockerRadius) * sin(radian)).toInt()
             listener?.onAngle(angle)
-            return Point(showPointX, showPointY)
+            return Point(showPointX, showPointY) to (true to angle)
         }
     }
 
     companion object {
-        const val DEFAULT_SIZE: Int = 500
-        const val DEFAULT_PADDING_SIZE: Int = 200
+        const val DEFAULT_SIZE: Int = 400
+        const val DEFAULT_PADDING_SIZE: Int = 80
 
         interface OnMoveListener {
-            fun onStarted()
+            fun onStarted() {}
 
             fun onAngle(angle: Double)
 
-            fun onFinished()
+            fun onLockChanged(isLocked: Boolean)
+
+            fun onFinished() {}
         }
     }
 }

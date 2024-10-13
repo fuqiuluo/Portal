@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@android:color/transparent"
+    android:padding="4dp"
+    android:orientation="vertical">
+
+    <moe.fuqiuluo.portal.android.widget.RockerView
+        android:id="@+id/rocker"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:areaBackground="#E6494949"
+        app:rockerBackground="#FFFFFF" />
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginBottom="8dp"
+        app:contentPadding="4dp"
+        app:cardCornerRadius="12dp"
+        app:cardBackgroundColor="@color/white"
+        app:cardElevation="4dp">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/move"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:importantForAccessibility="no"
+                android:contentDescription="@string/app_name"
+                android:src="@drawable/baseline_adjust_24"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <com.google.android.material.textview.MaterialTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="10sp"
+                android:text="@string/app_name"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:visibility="gone"
+                app:layout_constraintStart_toEndOf="@id/move"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:ignore="SmallSp" />
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:importantForAccessibility="no"
+                android:contentDescription="@string/app_name"
+                android:src="@drawable/baseline_control_camera_24"
+                app:tint="#373737"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.cardview.widget.CardView>
+
+</LinearLayout>
