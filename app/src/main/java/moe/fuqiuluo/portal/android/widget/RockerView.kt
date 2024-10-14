@@ -20,6 +20,7 @@ import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.drawable.toBitmap
 import moe.fuqiuluo.portal.R
 import java.util.concurrent.atomic.AtomicBoolean
+import kotlin.math.abs
 import kotlin.math.acos
 import kotlin.math.cos
 import kotlin.math.min
@@ -221,6 +222,11 @@ class RockerView(context: Context, attributeSet: AttributeSet): View(context, at
                         }
                         handler.postDelayed(lockRunnable!!, 3000)
                     }
+
+                    if (!w.first && lockRunnable != null) {
+                        handler.removeCallbacks(lockRunnable!!)
+                        lockRunnable = null
+                    }
                 }
             }
 
@@ -287,7 +293,7 @@ class RockerView(context: Context, attributeSet: AttributeSet): View(context, at
         val lenXY = sqrt((lenX * lenX + lenY * lenY).toDouble()).toFloat()
         val radian = acos((lenX / lenXY).toDouble()) * (if (touchPoint.y < centerPoint.y) -1 else 1)
         val tmp = Math.round(radian / Math.PI * 180).toDouble()
-        val angle = if (tmp >= 0) tmp else 360 + tmp
+        val angle = ((if (tmp >= 0) tmp else 360 + tmp) + 90) % 360
         if (lenXY + rockerRadius <= regionRadius) {
             listener?.onAngle(angle)
             return touchPoint to (false to angle)
@@ -300,6 +306,7 @@ class RockerView(context: Context, attributeSet: AttributeSet): View(context, at
     }
 
     fun reset() {
+        // joystick back to center
         mRockerPosition = Point()
         isLocked.set(false)
         invalidate()
