@@ -299,6 +299,12 @@ class RockerView(context: Context, attributeSet: AttributeSet): View(context, at
         }
     }
 
+    fun reset() {
+        mRockerPosition = Point()
+        isLocked.set(false)
+        invalidate()
+    }
+
     companion object {
         const val DEFAULT_SIZE: Int = 400
         const val DEFAULT_PADDING_SIZE: Int = 80

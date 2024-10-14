@@ -12,6 +12,7 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.WindowManager
 import moe.fuqiuluo.portal.R
+import moe.fuqiuluo.portal.android.widget.RockerView
 import moe.fuqiuluo.portal.ext.rockerCoords
 
 
@@ -57,6 +58,8 @@ class Rocker(private val activity: Activity): View.OnTouchListener {
     }
 
     fun hide() {
+        val rockerView = root.findViewById<RockerView>(R.id.rocker)
+        rockerView.reset()
         windowManager.removeView(root)
         isStart = false
     }
@@ -96,17 +99,5 @@ class Rocker(private val activity: Activity): View.OnTouchListener {
             else -> {}
         }
         return false
-    }
-
-    private fun getScreenWidth(): Int {
-        val metrics = DisplayMetrics()
-        windowManager.defaultDisplay.getMetrics(metrics)
-        return metrics.widthPixels
-    }
-
-    private fun getScreenHeight(): Int {
-        val metrics = DisplayMetrics()
-        windowManager.defaultDisplay.getMetrics(metrics)
-        return metrics.heightPixels
     }
 }
