@@ -72,6 +72,11 @@ class Rocker(private val activity: Activity): View.OnTouchListener {
         windowManager.updateViewLayout(root, layoutParams)
     }
 
+    fun setRockerListener(listener: RockerView.Companion.OnMoveListener) {
+        val rockerView = root.findViewById<RockerView>(R.id.rocker)
+        rockerView.listener = listener
+    }
+
     override fun onTouch(v: View?, event: MotionEvent?): Boolean {
         if (v == null || event == null) {
             return false

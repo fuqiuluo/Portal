@@ -25,6 +25,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import moe.fuqiuluo.portal.R
+import moe.fuqiuluo.portal.android.widget.RockerView
 import moe.fuqiuluo.portal.android.window.OverlayUtils
 import moe.fuqiuluo.portal.databinding.FragmentMockBinding
 import moe.fuqiuluo.portal.ext.historicalLocations
@@ -100,6 +101,16 @@ class MockFragment : Fragment() {
                     }
                 }
             }
+
+            rocker.setRockerListener(object: RockerView.Companion.OnMoveListener {
+                override fun onAngle(angle: Double) {
+                    Log.d("Rocker", "angle: $angle")
+                }
+
+                override fun onLockChanged(isLocked: Boolean) {
+
+                }
+            })
         }
 
         requireContext().selectLocation?.let {

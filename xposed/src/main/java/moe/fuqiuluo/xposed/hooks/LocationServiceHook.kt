@@ -8,7 +8,6 @@ import android.os.Build
 import android.os.Bundle
 import android.os.DeadObjectException
 import android.os.IInterface
-import android.util.SparseArray
 import de.robv.android.xposed.XC_MethodHook
 import de.robv.android.xposed.XposedBridge
 import de.robv.android.xposed.XposedHelpers
@@ -181,6 +180,11 @@ internal object LocationServiceHook: BaseLocationHook() {
                 return@beforeHook
             }
 
+            if (FakeLoc.disableFusedLocation && provider == "fused") {
+                result = null
+                return@beforeHook
+            }
+
             // milliseconds
 //                    val updateInterval = kotlin.runCatching {
 //                        val currentInterval = XposedHelpers.getLongField(request, "mInterval")
@@ -263,6 +267,10 @@ internal object LocationServiceHook: BaseLocationHook() {
                 return@beforeHook
             }
 
+            if (FakeLoc.disableFusedLocation && provider == "fused") {
+                result = null
+                return@beforeHook
+            }
 //                    val updateInterval = kotlin.runCatching {
 //                        val currentInterval = XposedHelpers.getLongField(request, "mInterval")
 //                        if (currentInterval > FakeLocationConfig.updateInterval) {
@@ -597,11 +605,17 @@ internal object LocationServiceHook: BaseLocationHook() {
                     val command = param.args[1] as String
                     val result = param.args[2] as? Bundle
 
+                    if (FakeLoc.disableFusedLocation && provider == "fused") {
+                        param.result = false
+                        return
+                    }
+
                     // If the GPS provider is enabled, the GPS provider is disabled
                     if(provider == "gps" && FakeLoc.enable) {
                         param.result = false
                         return
                     }
+
 
                     // Not the provider of the portal, does not process
                     if (provider != "portal") {
@@ -634,6 +648,9 @@ internal object LocationServiceHook: BaseLocationHook() {
                             param.result = BinderUtils.isLocationProviderEnabled(userId)
                         } else if(provider == "network") {
                             param.result = !FakeLoc.enable
+                        } else if (FakeLoc.disableFusedLocation && provider == "fused") {
+                            param.result = false
+                            return
                         } else {
                             if (FakeLoc.enableDebugLog) {
                                  Logger.debug("isProviderEnabledForUser provider: $provider, userId: $userId")
@@ -655,6 +672,9 @@ internal object LocationServiceHook: BaseLocationHook() {
                             param.result = true
                         } else if(provider == "network") {
                             param.result = !FakeLoc.enable
+                        } else if (FakeLoc.disableFusedLocation && provider == "fused") {
+                            param.result = false
+                            return
                         }
                     }
                 })
