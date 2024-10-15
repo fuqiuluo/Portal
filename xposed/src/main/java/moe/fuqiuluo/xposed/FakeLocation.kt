@@ -1,18 +1,16 @@
 @file:Suppress("LocalVariableName", "PrivateApi", "UNCHECKED_CAST")
 package moe.fuqiuluo.xposed
 
-import android.os.IBinder
 import de.robv.android.xposed.IXposedHookLoadPackage
 import de.robv.android.xposed.IXposedHookZygoteInit
-import de.robv.android.xposed.XC_MethodHook
-import de.robv.android.xposed.XposedBridge
 import de.robv.android.xposed.XposedHelpers
 import de.robv.android.xposed.callbacks.XC_LoadPackage
 import moe.fuqiuluo.xposed.hooks.LocationManagerHook
 import moe.fuqiuluo.xposed.hooks.LocationServiceHook
 import moe.fuqiuluo.xposed.hooks.fused.AndroidFusedLocationProviderHook
-import moe.fuqiuluo.xposed.hooks.fused.MiFusedLocationHook
-import moe.fuqiuluo.xposed.hooks.miui.MiuiTelephonyManagerHook
+import moe.fuqiuluo.xposed.hooks.fused.miui.MiFusedLocationHook
+import moe.fuqiuluo.xposed.hooks.telephony.miui.MiuiTelephonyManagerHook
+import moe.fuqiuluo.xposed.hooks.sensor.SystemSensorManagerHook
 import moe.fuqiuluo.xposed.hooks.telephony.TelephonyHook
 import moe.fuqiuluo.xposed.hooks.wlan.WlanHook
 import moe.fuqiuluo.xposed.utils.FakeLoc
@@ -86,6 +84,7 @@ class FakeLocation: IXposedHookLoadPackage, IXposedHookZygoteInit {
                 TelephonyHook.hookSubOnTransact(lpparam.classLoader)
                 WlanHook(systemClassLoader)
                 AndroidFusedLocationProviderHook(lpparam.classLoader)
+                SystemSensorManagerHook(lpparam.classLoader)
             }
             "com.android.location.fused" -> {
                 AndroidFusedLocationProviderHook(lpparam.classLoader)

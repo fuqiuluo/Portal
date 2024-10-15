@@ -1,4 +1,4 @@
-package moe.fuqiuluo.xposed.hooks.miui
+package moe.fuqiuluo.xposed.hooks.telephony.miui
 
 import moe.fuqiuluo.xposed.hooks.telephony.BaseTelephonyHook
 

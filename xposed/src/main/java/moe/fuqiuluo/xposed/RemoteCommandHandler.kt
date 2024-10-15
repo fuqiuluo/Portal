@@ -3,7 +3,6 @@ package moe.fuqiuluo.xposed
 import android.os.Bundle
 import android.os.IBinder
 import android.os.Parcel
-import moe.fuqiuluo.xposed.hooks.LocationServiceHook
 import moe.fuqiuluo.xposed.utils.FakeLoc
 import moe.fuqiuluo.xposed.utils.BinderUtils
 import moe.fuqiuluo.xposed.utils.Logger
@@ -58,6 +57,7 @@ object RemoteCommandHandler {
             }
             "stop" -> {
                 FakeLoc.enable = false
+                FakeLoc.hasBearings = false
                 return true
             }
             "is_start" -> {
@@ -90,6 +90,32 @@ object RemoteCommandHandler {
                 val altitude = rely.getDouble("altitude", 0.0)
                 FakeLoc.altitude = altitude
                 return true
+            }
+            "set_speed" -> {
+                val speed = rely.getDouble("speed", 0.0)
+                FakeLoc.speed = speed
+                return true
+            }
+            "set_bearing" -> {
+                val bearing = rely.getDouble("bearing", 0.0)
+                FakeLoc.bearing = bearing
+                FakeLoc.hasBearings = true
+                return true
+            }
+            "move" -> {
+                val distance = rely.getDouble("n", 0.0)
+                if (distance == 0.0) return true
+                val bearing = rely.getDouble("bearing", 0.0)
+                val newLoc = FakeLoc.moveLocation(
+                    n = distance,
+                    angle = bearing
+                )
+                if (FakeLoc.enableDebugLog) {
+                    Logger.debug("move: distance=$distance, bearing=$bearing, newLoc=$newLoc")
+                }
+                FakeLoc.bearing = bearing
+                FakeLoc.hasBearings = true
+                return updateCoordinate(newLoc.first, newLoc.second)
             }
             "update_location" -> {
                 val mode = rely.getString("mode")
@@ -146,9 +172,8 @@ object RemoteCommandHandler {
                 rely.putBoolean("enable_agps", FakeLoc.enableAGPS)
                 rely.putBoolean("enable_nmea", FakeLoc.enableNMEA)
                 rely.putBoolean("hide_mock", FakeLoc.hideMock)
-                rely.putBoolean("auto_remove_useless_loc_listener", FakeLoc.autoRemoveUselessLocListener)
                 rely.putBoolean("hook_wifi", FakeLoc.hookWifi)
-                rely.putBoolean("need_downgrade_to_2g", FakeLoc.needDowngradeTo2G)
+                rely.putBoolean("need_downgrade_to_2g", FakeLoc.needDowngradeToCdma)
                 rely.putLong("update_interval", FakeLoc.updateInterval)
                 return true
             }

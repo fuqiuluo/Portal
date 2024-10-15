@@ -11,6 +11,7 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.WindowManager
+import android.widget.Toast
 import moe.fuqiuluo.portal.R
 import moe.fuqiuluo.portal.android.widget.RockerView
 import moe.fuqiuluo.portal.ext.rockerCoords
@@ -50,6 +51,10 @@ class Rocker(private val activity: Activity): View.OnTouchListener {
         layoutParams.y = rockerCoords.second
 
         root.setOnTouchListener(this)
+
+        root.findViewById<View>(R.id.expand_menu).setOnClickListener {
+            Toast.makeText(activity, "暂不支持", Toast.LENGTH_SHORT).show()
+        }
     }
 
     fun show() {

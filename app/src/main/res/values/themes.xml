@@ -27,6 +27,12 @@
         <item name="searchViewStyle">@style/Portal.SearchViewStyle</item>
 
         <item name="selectableItemBackgroundBorderless">@drawable/ripple_effect</item>
+
+        <item name="sliderStyle">@style/Portal.SliderTheme</item>
+    </style>
+
+    <style name="Portal.SliderTheme" parent="Widget.MaterialComponents.Slider">
+
     </style>
 
     <style name="Portal.SearchViewStyle" parent="Widget.AppCompat.SearchView">

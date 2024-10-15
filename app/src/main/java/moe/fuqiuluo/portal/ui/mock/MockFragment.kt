@@ -2,13 +2,9 @@ package moe.fuqiuluo.portal.ui.mock
 
 import android.annotation.SuppressLint
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
-import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
-import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
-import android.view.WindowManager
 import android.widget.CheckedTextView
 import android.widget.Toast
 import androidx.core.content.ContextCompat
@@ -34,6 +30,7 @@ import moe.fuqiuluo.portal.ext.selectLocation
 import moe.fuqiuluo.portal.service.MockServiceHelper
 import moe.fuqiuluo.portal.ui.viewmodel.MockServiceViewModel
 import moe.fuqiuluo.portal.ui.viewmodel.MockViewModel
+import moe.fuqiuluo.xposed.utils.FakeLoc
 
 class MockFragment : Fragment() {
     private var _binding: FragmentMockBinding? = null
@@ -98,17 +95,30 @@ class MockFragment : Fragment() {
                         rocker.show()
                     } else {
                         rocker.hide()
+                        rockerCoroutineController.pause()
                     }
                 }
             }
 
             rocker.setRockerListener(object: RockerView.Companion.OnMoveListener {
                 override fun onAngle(angle: Double) {
-                    Log.d("Rocker", "angle: $angle")
+                    MockServiceHelper.setBearing(locationManager!!, angle)
+                    FakeLoc.bearing = angle
+                    FakeLoc.hasBearings = true
                 }
 
                 override fun onLockChanged(isLocked: Boolean) {
+                    isRockerLocked = isLocked
+                }
 
+                override fun onFinished() {
+                    if (!isRockerLocked) {
+                        rockerCoroutineController.pause()
+                    }
+                }
+
+                override fun onStarted() {
+                    rockerCoroutineController.resume()
                 }
             })
         }
@@ -257,6 +267,7 @@ class MockFragment : Fragment() {
                     binding.rocker.isClickable = false
                     binding.rocker.toggle()
                     mockServiceViewModel.rocker.hide()
+                    mockServiceViewModel.rockerCoroutineController.pause()
                     binding.rocker.isClickable = true
                 }
             } finally {

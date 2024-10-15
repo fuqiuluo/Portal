@@ -115,9 +115,8 @@ abstract class BaseDivineService {
             FakeLoc.enableAGPS = rely.getBoolean("enable_agps", FakeLoc.enableAGPS)
             FakeLoc.enableNMEA = rely.getBoolean("enable_nmea", FakeLoc.enableNMEA)
             FakeLoc.hideMock = rely.getBoolean("hide_mock", FakeLoc.hideMock)
-            FakeLoc.autoRemoveUselessLocListener = rely.getBoolean("auto_remove_useless_loc_listener", FakeLoc.autoRemoveUselessLocListener)
             FakeLoc.hookWifi = rely.getBoolean("hook_wifi", FakeLoc.hookWifi)
-            FakeLoc.needDowngradeTo2G = rely.getBoolean("need_downgrade_to_2g", FakeLoc.needDowngradeTo2G)
+            FakeLoc.needDowngradeToCdma = rely.getBoolean("need_downgrade_to_2g", FakeLoc.needDowngradeToCdma)
             FakeLoc.updateInterval = rely.getLong("update_interval", FakeLoc.updateInterval)
             Logger.debug("Synced config for DivineService")
         } else {

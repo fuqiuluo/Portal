@@ -15,7 +15,7 @@ import moe.fuqiuluo.xposed.BaseLocationHook
 import moe.fuqiuluo.xposed.RemoteCommandHandler
 import moe.fuqiuluo.xposed.hooks.gnss.GnssManagerServiceHook
 import moe.fuqiuluo.xposed.hooks.miui.MiuiBlurLocationProviderHook
-import moe.fuqiuluo.xposed.hooks.miui.MiuiTelephonyManagerHook
+import moe.fuqiuluo.xposed.hooks.telephony.miui.MiuiTelephonyManagerHook
 import moe.fuqiuluo.xposed.hooks.nmea.LocationNMEAHook
 import moe.fuqiuluo.xposed.hooks.provider.LocationProviderManagerHook
 import moe.fuqiuluo.xposed.utils.FakeLoc

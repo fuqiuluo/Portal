@@ -1,8 +1,5 @@
 package moe.fuqiuluo.xposed.hooks.telephony
 
-import android.content.Context
-import android.location.LocationManager
-import android.os.Binder
 import android.os.Build
 import android.os.Bundle
 import android.os.Parcel
@@ -89,7 +86,7 @@ object TelephonyHook: BaseTelephonyHook() {
 //            XposedBridge.log("[Portal] ITelephony.Stub not found: ${it.stackTraceToString()}")
 //        }
 
-        if (!FakeLoc.needDowngradeTo2G) return
+        if (!FakeLoc.needDowngradeToCdma) return
 
         val cPhoneInterfaceManager = XposedHelpers.findClassIfExists("com.android.phone.PhoneInterfaceManager", classLoader)
             ?: return
