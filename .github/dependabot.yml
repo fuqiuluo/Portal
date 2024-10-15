@@ -1,0 +1,12 @@
+version: 2
+updates:
+  - package-ecosystem: gradle
+    directory: "/"
+    schedule:
+      interval: daily
+      time: "21:00"
+    target-branch: master
+    groups:
+      maven-dependencies:
+        patterns:
+          - "*"
