@@ -1,5 +1,5 @@
 [versions]
-agp = "8.6.1"
+agp = "8.7.1"
 circularProgressButtonVersion = "1.4"
 systemRefine = "4.4.0"
 xposed = "82"
@@ -12,14 +12,14 @@ espressoCore = "3.6.1"
 appcompat = "1.7.0"
 material = "1.12.0"
 constraintlayout = "2.1.4"
-lifecycleLivedataKtx = "2.6.1"
-lifecycleViewmodelKtx = "2.6.1"
-navigationFragmentKtx = "2.6.0"
-navigationUiKtx = "2.6.0"
+lifecycleLivedataKtx = "2.8.6"
+lifecycleViewmodelKtx = "2.8.6"
+navigationFragmentKtx = "2.8.3"
+navigationUiKtx = "2.8.3"
 playServicesLocation = "21.3.0"
 lifecycleProcess = "2.8.6"
 androidbrowserhelper = "2.5.0"
-jetbrainsKotlinJvm = "1.9.0"
+jetbrainsKotlinJvm = "2.0.21"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
