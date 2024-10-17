@@ -20,6 +20,7 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         ndk {
+            abiFilters.clear()
             abiFilters.addAll(listOf("arm64-v8a"))
         }
     }
@@ -54,7 +55,7 @@ android {
             ndk {
                 println("Full architecture and full compilation.")
                 abiFilters.add("arm64-v8a")
-                //abiFilters.add("x86_64") // todo: may crash?
+                abiFilters.add("x86_64")
             }
         }
         create("arm64") {
@@ -88,6 +89,11 @@ android {
             useLegacyPackaging = true
             excludes += "lib/armeabi/**"
             excludes += "lib/x86/**"
+            excludes += "lib/x86_64/libBaiduMapSDK**"
+            excludes += "lib/x86_64/libc++_shared.so"
+            excludes += "lib/x86_64/libc++_shared.so"
+            excludes += "lib/x86_64/liblocSDK8b.so"
+            excludes += "lib/x86_64/libtiny_magic.so"
         }
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"

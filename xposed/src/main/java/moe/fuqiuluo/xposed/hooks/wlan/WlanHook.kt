@@ -13,6 +13,7 @@ import moe.fuqiuluo.xposed.utils.FakeLoc
 import moe.fuqiuluo.xposed.utils.Logger
 import moe.fuqiuluo.xposed.utils.afterHook
 import moe.fuqiuluo.xposed.utils.hookAllMethods
+import moe.fuqiuluo.xposed.utils.hookMethodAfter
 import moe.fuqiuluo.xposed.utils.toClass
 
 object WlanHook {

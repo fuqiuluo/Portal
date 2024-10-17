@@ -1,19 +1,23 @@
 package moe.fuqiuluo.xposed
 
+import android.annotation.SuppressLint
+import android.os.Build
 import android.os.Bundle
 import android.os.IBinder
 import android.os.Parcel
 import moe.fuqiuluo.xposed.utils.FakeLoc
 import moe.fuqiuluo.xposed.utils.BinderUtils
 import moe.fuqiuluo.xposed.utils.Logger
+import java.io.File
 import java.util.Collections
 import kotlin.random.Random
 
 object RemoteCommandHandler {
     private var proxyBinders = Collections.synchronizedList(arrayListOf<IBinder>())
-    private val needProxyCmd = arrayOf("start", "stop", "set_speed_amp", "set_altitude", "update_location", "set_proxy")
+    private val needProxyCmd = arrayOf("start", "stop", "set_speed_amp", "set_altitude", "update_location")
     internal val randomKey by lazy { "portal_" + Random.nextDouble() }
 
+    @SuppressLint("UnsafeDynamicallyLoadedCode")
     fun handleInstruction(command: String, rely: Bundle, locationListeners: Map<String, Pair<String, Any>>): Boolean {
         // Exchange key -> returns a random key -> is used to verify that it is the PortalManager
         if (command == "exchange_key") {
@@ -184,8 +188,31 @@ object RemoteCommandHandler {
 //                }
                 return true
             }
+            "load_library" -> {
+                val path = rely.getString("path") ?: return false
+
+                runCatching {
+                    System.load(path)
+                }.onSuccess {
+                    rely.putString("result", "success")
+                }.onFailure {
+                    rely.putString("result", it.stackTraceToString())
+                }
+
+                return true
+            }
             else -> return false
         }
+    }
+
+    private var hasHookSensor = false
+
+    private fun tryHookSensor(classLoader: ClassLoader = FakeLoc::class.java.classLoader!!) {
+        if (hasHookSensor || proxyBinders.isNullOrEmpty()) return
+
+
+
+        hasHookSensor = true
     }
 
 //    private fun generateLocation(): Location {

@@ -63,6 +63,7 @@ import com.baidu.mapapi.search.sug.SuggestionSearchOption
 import com.google.android.material.navigation.NavigationView
 import kotlinx.coroutines.launch
 import moe.fuqiuluo.portal.android.permission.RequestPermissions
+import moe.fuqiuluo.portal.android.root.ShellUtils
 import moe.fuqiuluo.portal.android.window.OverlayUtils
 import moe.fuqiuluo.portal.android.window.StatusBarUtil
 import moe.fuqiuluo.portal.databinding.ActivityMainBinding
@@ -151,6 +152,10 @@ class MainActivity : AppCompatActivity() {
 
         if (isFullScreen) {
             StatusBarUtil.fullScreen(this)
+        }
+
+        if (!ShellUtils.hasRoot()) {
+            Toast.makeText(this, "无Root可能导致传感器Hook失效", Toast.LENGTH_LONG).show()
         }
 
         lifecycleScope.launch {

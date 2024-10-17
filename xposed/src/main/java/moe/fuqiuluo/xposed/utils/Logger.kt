@@ -4,7 +4,7 @@ import de.robv.android.xposed.XposedBridge
 
 object Logger {
     private fun isEnableLog(): Boolean {
-        return FakeLoc.enable
+        return FakeLoc.enableLog
     }
 
     fun info(msg: String) {

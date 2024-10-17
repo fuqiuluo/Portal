@@ -1,9 +1,14 @@
 package moe.fuqiuluo.portal.service
 
+import android.annotation.SuppressLint
+import android.content.Context
 import android.location.LocationManager
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import moe.fuqiuluo.portal.android.root.ShellUtils
 import moe.fuqiuluo.xposed.utils.FakeLoc
+import java.io.File
 
 object MockServiceHelper {
     const val PROVIDER_NAME = "portal"
@@ -188,8 +193,77 @@ object MockServiceHelper {
         return locationManager.sendExtraCommand(PROVIDER_NAME, randomKey, rely)
     }
 
+    fun loadLibrary(locationManager: LocationManager, path: String): String? {
+        if (!::randomKey.isInitialized) {
+            return null
+        }
+        val rely = Bundle()
+        rely.putString("command_id", "load_library")
+        rely.putString("path", path)
+        if(locationManager.sendExtraCommand(PROVIDER_NAME, randomKey, rely)) {
+            return rely.getString("result")
+        }
+        return null
+    }
+
     fun isServiceInit(): Boolean {
         return ::randomKey.isInitialized
     }
 
+    @SuppressLint("DiscouragedPrivateApi")
+    fun copyPortalLibrary(context: Context) {
+        if (!ShellUtils.hasRoot()) return
+
+        val isX86: Boolean = runCatching {
+            if (Build.SUPPORTED_ABIS.any { it.contains("x86") }) {
+                return@runCatching true
+            }
+            val clazz = Class.forName("dalvik.system.VMRuntime")
+            val method = clazz.getDeclaredMethod("getRuntime")
+            val runtime = method.invoke(null)
+            val field = clazz.getDeclaredField("vmInstructionSet")
+            field.isAccessible = true
+            val instructionSet = field.get(runtime) as String
+            if (instructionSet.contains("x86") ) {
+                true
+            } else false
+        }.getOrElse { false }
+        // todo: support x86
+
+        val soDir = File("/data/local/portal-lib")
+        if (!soDir.exists()) {
+            ShellUtils.executeCommand("mkdir ${soDir.absolutePath}")
+        }
+        val soFile = File(soDir, "libportal.so")
+        runCatching {
+            val tmpSoFile = File(soDir, "libportal.so.tmp").also { file ->
+                var nativeDir = context.applicationInfo.nativeLibraryDir
+                val soFile = File(nativeDir, "libportal.so")
+                if (soFile.exists()) {
+                    ShellUtils.executeCommand("cp ${soFile.absolutePath} ${file.absolutePath}")
+                } else {
+                    Log.e("MockServiceHelper", "Failed to copy portal library: ${soFile.absolutePath}")
+                    return@runCatching
+                }
+            }
+            if (soDir.exists()) {
+                val originalHash = ShellUtils.executeCommand("head -c 32 ${soFile.absolutePath}")
+                val newHash = ShellUtils.executeCommand("head -c 32 ${tmpSoFile.absolutePath}")
+                if (originalHash != newHash) {
+                    ShellUtils.executeCommand("rm ${soFile.absolutePath}")
+                    ShellUtils.executeCommand("mv ${tmpSoFile.absolutePath} ${soFile.absolutePath}")
+                }
+            } else if (tmpSoFile.exists()) {
+                ShellUtils.executeCommand("mv ${tmpSoFile.absolutePath} ${soFile.absolutePath}")
+            }
+        }.onFailure {
+            Log.w("MockServiceHelper", "Failed to copy portal library", it)
+        }
+
+        ShellUtils.executeCommand("chmod 777 ${soFile.absolutePath}")
+
+        val result = loadLibrary(context.getSystemService(Context.LOCATION_SERVICE) as LocationManager, soFile.absolutePath)
+
+        Log.d("MockServiceHelper", "load portal library result: $result")
+    }
 }

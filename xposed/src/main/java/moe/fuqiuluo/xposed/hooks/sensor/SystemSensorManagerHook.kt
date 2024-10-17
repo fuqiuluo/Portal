@@ -32,6 +32,7 @@ object SystemSensorManagerHook {
         val cSystemSensorManagerQueue = XposedHelpers.findClassIfExists("android.hardware.SystemSensorManager\$SensorEventQueue", classLoader)
             ?: return
 
+
     }
 
     private fun hookSystemSensorManager(classLoader: ClassLoader) {
@@ -49,13 +50,11 @@ object SystemSensorManagerHook {
                 Logger.debug("RegisterListenerImpl: $listener, sensor: ${args[1]}")
             }
 
-            val sensor = args[1] as Sensor
+            val sensor = args[1] as? Sensor ?: return@beforeHook
             listenerMap[listener] = sensor.type
 
             listener.javaClass.onceHookAllMethod("onSensorChanged", beforeHook {
-                if (FakeLoc.enable) {
-                    result = null
-                }
+
             })
         }
         cSystemSensorManager.declaredMethods.filter {

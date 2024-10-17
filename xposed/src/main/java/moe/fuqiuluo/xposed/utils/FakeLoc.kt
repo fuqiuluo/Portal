@@ -19,7 +19,7 @@ object FakeLoc {
     /**
      * 是否允许打印调试日志
      */
-    var enableDebugLog = true
+    var enableDebugLog = false
 
     /**
      * 模拟定位服务开关

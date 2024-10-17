@@ -1,8 +1,10 @@
 @file:Suppress("LocalVariableName", "PrivateApi", "UNCHECKED_CAST")
 package moe.fuqiuluo.xposed
 
+import android.os.Build
 import de.robv.android.xposed.IXposedHookLoadPackage
 import de.robv.android.xposed.IXposedHookZygoteInit
+import de.robv.android.xposed.XC_MethodHook
 import de.robv.android.xposed.XposedHelpers
 import de.robv.android.xposed.callbacks.XC_LoadPackage
 import moe.fuqiuluo.xposed.hooks.LocationManagerHook
@@ -13,8 +15,15 @@ import moe.fuqiuluo.xposed.hooks.telephony.miui.MiuiTelephonyManagerHook
 import moe.fuqiuluo.xposed.hooks.sensor.SystemSensorManagerHook
 import moe.fuqiuluo.xposed.hooks.telephony.TelephonyHook
 import moe.fuqiuluo.xposed.hooks.wlan.WlanHook
+import moe.fuqiuluo.xposed.utils.BinderUtils
 import moe.fuqiuluo.xposed.utils.FakeLoc
 import moe.fuqiuluo.xposed.utils.Logger
+import moe.fuqiuluo.xposed.utils.beforeHook
+import moe.fuqiuluo.xposed.utils.hookAllMethods
+import moe.fuqiuluo.xposed.utils.hookMethodAfter
+import java.io.File
+import java.util.concurrent.atomic.AtomicBoolean
+import kotlin.concurrent.thread
 
 class FakeLocation: IXposedHookLoadPackage, IXposedHookZygoteInit {
     private lateinit var cServiceManager: Class<*> // android.os.ServiceManager
@@ -97,7 +106,8 @@ class FakeLocation: IXposedHookLoadPackage, IXposedHookZygoteInit {
 
     private fun startFakeLocHook(classLoader: ClassLoader) {
         cServiceManager = XposedHelpers.findClass("android.os.ServiceManager", classLoader)
-        val cLocationManager = XposedHelpers.findClass("android.location.LocationManager", classLoader)
+        val cLocationManager =
+            XposedHelpers.findClass("android.location.LocationManager", classLoader)
 
         XposedHelpers.findClassIfExists("com.android.server.TelephonyRegistry", classLoader)?.let {
             TelephonyHook.hookTelephonyRegistry(it)
@@ -105,6 +115,7 @@ class FakeLocation: IXposedHookLoadPackage, IXposedHookZygoteInit {
 
         LocationServiceHook(classLoader)
         LocationManagerHook(cLocationManager)  // intrusive hooks
+    }
 
 //        kotlin.runCatching {
 //            val hooks = mutableListOf<XC_MethodHook.Unhook>()
@@ -174,7 +185,6 @@ class FakeLocation: IXposedHookLoadPackage, IXposedHookZygoteInit {
 //        }.onFailure {
 //            XposedBridge.log("[Portal] Failed to find SystemServer: ${it.stackTraceToString()}")
 //        }
-    }
 
 //    private fun systemServerInitOver() {
 //        XposedBridge.log("[Portal] SystemServer init over")

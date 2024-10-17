@@ -21,6 +21,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import moe.fuqiuluo.portal.R
+import moe.fuqiuluo.portal.android.root.ShellUtils
 import moe.fuqiuluo.portal.android.widget.RockerView
 import moe.fuqiuluo.portal.android.window.OverlayUtils
 import moe.fuqiuluo.portal.databinding.FragmentMockBinding
@@ -210,6 +211,11 @@ class MockFragment : Fragment() {
         if (!MockServiceHelper.isServiceInit()) {
             showToast("系统服务注入失败")
             return
+        }
+
+        if (ShellUtils.hasRoot()) {
+            ShellUtils.setEnforceMode(false) // 关闭SELinux
+            MockServiceHelper.copyPortalLibrary(requireContext())
         }
 
         lifecycleScope.launch {
