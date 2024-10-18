@@ -212,6 +212,10 @@ object RemoteCommandHandler {
                     rely.putString("result", it.stackTraceToString())
                 }
 
+                if (isLoadedLibrary) {
+                    Dobby.setStatus(FakeLoc.enable)
+                }
+
                 return true
             }
             else -> return false

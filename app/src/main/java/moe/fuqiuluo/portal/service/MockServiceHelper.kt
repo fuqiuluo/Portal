@@ -211,8 +211,8 @@ object MockServiceHelper {
     }
 
     @SuppressLint("DiscouragedPrivateApi")
-    fun copyPortalLibrary(context: Context) {
-        if (!ShellUtils.hasRoot()) return
+    fun loadPortalLibrary(context: Context): Boolean {
+        if (!ShellUtils.hasRoot()) return false
 
         val isX86: Boolean = runCatching {
             if (Build.SUPPORTED_ABIS.any { it.contains("x86") }) {
@@ -265,5 +265,7 @@ object MockServiceHelper {
         val result = loadLibrary(context.getSystemService(Context.LOCATION_SERVICE) as LocationManager, soFile.absolutePath)
 
         Log.d("MockServiceHelper", "load portal library result: $result")
+
+        return result == "success"
     }
 }

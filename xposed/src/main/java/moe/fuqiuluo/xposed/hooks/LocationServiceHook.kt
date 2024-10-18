@@ -15,6 +15,7 @@ import moe.fuqiuluo.xposed.BaseLocationHook
 import moe.fuqiuluo.xposed.RemoteCommandHandler
 import moe.fuqiuluo.xposed.hooks.gnss.GnssManagerServiceHook
 import moe.fuqiuluo.xposed.hooks.miui.MiuiBlurLocationProviderHook
+import moe.fuqiuluo.xposed.hooks.miui.MiuiLocationManagerHook
 import moe.fuqiuluo.xposed.hooks.telephony.miui.MiuiTelephonyManagerHook
 import moe.fuqiuluo.xposed.hooks.nmea.LocationNMEAHook
 import moe.fuqiuluo.xposed.hooks.provider.LocationProviderManagerHook
@@ -47,7 +48,7 @@ internal object LocationServiceHook: BaseLocationHook() {
         startDaemon(classLoader)
     }
 
-    private fun onService(cILocationManager: Class<*>) {
+    fun onService(cILocationManager: Class<*>) {
         // Got instance of ILocationManager.Stub here, you can hook it
         // Not directly Class.forName because of this thing, it can't be reflected, even if I'm system_server?!?!
 
@@ -61,6 +62,7 @@ internal object LocationServiceHook: BaseLocationHook() {
             LocationProviderManagerHook(it)
 
             MiuiBlurLocationProviderHook(it)
+            MiuiLocationManagerHook(it)
             MiuiTelephonyManagerHook(it)
         }
 
