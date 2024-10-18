@@ -36,6 +36,21 @@ location.extras?.putBoolean("portal.enable", true)
 location.extras?.putBoolean("is_mock", true)
 ```
 
+# Features
+
+- [x] **Portal** will create a notification when it is running.
+- [x] **Portal** will add extra to the `Location`.
+- [x] **Portal** will mock in any case.
+- [ ] **Portal** will mock the gps status.
+- [ ] **Portal** will mock the cell info.
+- [ ] **Portal** will mock the wifi info.
+- [x] **Portal** will mock the sensor info.
+- [x] **Portal** can move position by rocker.
+- [ ] **Portal** can set the speed in the settings.
+- [ ] **Portal** can set the altitude in the settings.
+- [ ] **Portal** can set the accuracy in the settings.
+- [ ] **Portal** will change the bearing when moving.
+
 # Thanks
 
 - [GoGoGo](https://github.com/ZCShou/GoGoGo)
