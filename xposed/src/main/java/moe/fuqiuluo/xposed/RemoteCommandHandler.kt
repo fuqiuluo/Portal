@@ -199,6 +199,10 @@ object RemoteCommandHandler {
             "load_library" -> {
                 val path = rely.getString("path") ?: return false
 
+                if (isLoadedLibrary && path.endsWith("libportal.so")) {
+                    rely.putString("result", "success")
+                    return true
+                }
                 runCatching {
                     System.load(path)
                 }.onSuccess {

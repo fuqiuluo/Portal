@@ -238,15 +238,15 @@ object MockServiceHelper {
         runCatching {
             val tmpSoFile = File(soDir, "libportal.so.tmp").also { file ->
                 var nativeDir = context.applicationInfo.nativeLibraryDir
-                val soFile = File(nativeDir, "libportal.so")
-                if (soFile.exists()) {
-                    ShellUtils.executeCommand("cp ${soFile.absolutePath} ${file.absolutePath}")
+                val apkSoFile = File(nativeDir, "libportal.so")
+                if (apkSoFile.exists()) {
+                    ShellUtils.executeCommand("cp ${apkSoFile.absolutePath} ${file.absolutePath}")
                 } else {
-                    Log.e("MockServiceHelper", "Failed to copy portal library: ${soFile.absolutePath}")
+                    Log.e("MockServiceHelper", "Failed to copy portal library: ${apkSoFile.absolutePath}")
                     return@runCatching
                 }
             }
-            if (soDir.exists()) {
+            if (soFile.exists()) {
                 val originalHash = ShellUtils.executeCommandToBytes("head -c 4096 ${soFile.absolutePath}")
                 val newHash = ShellUtils.executeCommandToBytes("head -c 4096 ${tmpSoFile.absolutePath}")
                 if (originalHash.contentEquals(newHash)) {
