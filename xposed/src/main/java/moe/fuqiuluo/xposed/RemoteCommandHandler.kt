@@ -5,6 +5,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.IBinder
 import android.os.Parcel
+import moe.fuqiuluo.dobby.Dobby
 import moe.fuqiuluo.xposed.utils.FakeLoc
 import moe.fuqiuluo.xposed.utils.BinderUtils
 import moe.fuqiuluo.xposed.utils.Logger
@@ -16,6 +17,7 @@ object RemoteCommandHandler {
     private var proxyBinders = Collections.synchronizedList(arrayListOf<IBinder>())
     private val needProxyCmd = arrayOf("start", "stop", "set_speed_amp", "set_altitude", "update_location")
     internal val randomKey by lazy { "portal_" + Random.nextDouble() }
+    private var isLoadedLibrary = false
 
     @SuppressLint("UnsafeDynamicallyLoadedCode")
     fun handleInstruction(command: String, rely: Bundle, locationListeners: Map<String, Pair<String, Any>>): Boolean {
@@ -57,11 +59,17 @@ object RemoteCommandHandler {
             }
             "start" -> {
                 FakeLoc.enable = true
+                if (isLoadedLibrary) {
+                    Dobby.setStatus(true)
+                }
                 return true
             }
             "stop" -> {
                 FakeLoc.enable = false
                 FakeLoc.hasBearings = false
+                if (isLoadedLibrary) {
+                    Dobby.setStatus(false)
+                }
                 return true
             }
             "is_start" -> {
@@ -195,6 +203,7 @@ object RemoteCommandHandler {
                     System.load(path)
                 }.onSuccess {
                     rely.putString("result", "success")
+                    isLoadedLibrary = true
                 }.onFailure {
                     rely.putString("result", it.stackTraceToString())
                 }
@@ -205,15 +214,15 @@ object RemoteCommandHandler {
         }
     }
 
-    private var hasHookSensor = false
-
-    private fun tryHookSensor(classLoader: ClassLoader = FakeLoc::class.java.classLoader!!) {
-        if (hasHookSensor || proxyBinders.isNullOrEmpty()) return
-
-
-
-        hasHookSensor = true
-    }
+//    private var hasHookSensor = false
+//
+//    private fun tryHookSensor(classLoader: ClassLoader = FakeLoc::class.java.classLoader!!) {
+//        if (hasHookSensor || proxyBinders.isNullOrEmpty()) return
+//
+//
+//
+//        hasHookSensor = true
+//    }
 
 //    private fun generateLocation(): Location {
 //        val (location, realLocation) = if (FakeLocationConfig.lastLocation != null) {

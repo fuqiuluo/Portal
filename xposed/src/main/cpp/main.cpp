@@ -5,6 +5,8 @@
 #include <unistd.h>
 #include "sensor_hook.h"
 
+bool enableSensorHook = false;
+
 JNIEXPORT jint JNICALL
 JNI_OnLoad(JavaVM* vm, void* reserved) {
     JNIEnv* env;
@@ -15,4 +17,10 @@ JNI_OnLoad(JavaVM* vm, void* reserved) {
     doSensorHook();
 
     return JNI_VERSION_1_6;
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_moe_fuqiuluo_dobby_Dobby_setStatus(JNIEnv *env, jobject thiz, jboolean status) {
+    enableSensorHook = status;
 }

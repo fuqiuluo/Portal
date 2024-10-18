@@ -106,65 +106,66 @@ object SystemSensorManagerHook {
             if (FakeLoc.enableDebugLog) {
                 Logger.debug("getAvailableFeatures: ${features.keys}")
             }
-            if (!features.contains(PackageManager.FEATURE_SENSOR_GYROSCOPE)) {
-                val gyroFeature = FeatureInfo()
-                gyroFeature.name = PackageManager.FEATURE_SENSOR_GYROSCOPE
-                gyroFeature.reqGlEsVersion = openGLVersion
-                features[PackageManager.FEATURE_SENSOR_GYROSCOPE] = gyroFeature
 
-                if (FakeLoc.enableDebugLog) {
-                    Logger.debug("Added FEATURE_SENSOR_GYROSCOPE")
-                }
-            }
-            if (!features.contains(PackageManager.FEATURE_SENSOR_COMPASS)) {
-                val compassFeature = FeatureInfo()
-                compassFeature.name = PackageManager.FEATURE_SENSOR_COMPASS
-                compassFeature.reqGlEsVersion = openGLVersion
-                features[PackageManager.FEATURE_SENSOR_COMPASS] = compassFeature
-
-                if (FakeLoc.enableDebugLog) {
-                    Logger.debug("Added FEATURE_SENSOR_COMPASS")
-                }
-            }
-
-            if (!features.contains(PackageManager.FEATURE_SENSOR_ACCELEROMETER)) {
-                val accelerometerFeature = FeatureInfo()
-                accelerometerFeature.name = PackageManager.FEATURE_SENSOR_ACCELEROMETER
-                accelerometerFeature.reqGlEsVersion = openGLVersion
-                features[PackageManager.FEATURE_SENSOR_ACCELEROMETER] = accelerometerFeature
-
-                if (FakeLoc.enableDebugLog) {
-                    Logger.debug("Added FEATURE_SENSOR_ACCELEROMETER")
-                }
-            }
-
-            if (!features.contains(PackageManager.FEATURE_SENSOR_STEP_COUNTER)) {
-                val lightFeature = FeatureInfo()
-                lightFeature.name = PackageManager.FEATURE_SENSOR_STEP_COUNTER
-                lightFeature.reqGlEsVersion = openGLVersion
-                features[PackageManager.FEATURE_SENSOR_STEP_COUNTER] = lightFeature
-
-                if (FakeLoc.enableDebugLog) {
-                    Logger.debug("Added FEATURE_SENSOR_STEP_COUNTER")
-                }
-            }
-
-            if (!features.contains(PackageManager.FEATURE_SENSOR_STEP_DETECTOR)) {
-                val lightFeature = FeatureInfo()
-                lightFeature.name = PackageManager.FEATURE_SENSOR_STEP_DETECTOR
-                lightFeature.reqGlEsVersion = openGLVersion
-                features[PackageManager.FEATURE_SENSOR_STEP_DETECTOR] = lightFeature
-
-                if (FakeLoc.enableDebugLog) {
-                    Logger.debug("Added FEATURE_SENSOR_STEP_DETECTOR")
-                }
-            }
-
-            kotlin.runCatching {
-                XposedHelpers.setObjectField(thisObject, "mAvailableFeatures", features)
-            }.onFailure {
-                Logger.warn("Failed to set mAvailableFeatures", it)
-            }
+//            if (!features.contains(PackageManager.FEATURE_SENSOR_GYROSCOPE)) {
+//                val gyroFeature = FeatureInfo()
+//                gyroFeature.name = PackageManager.FEATURE_SENSOR_GYROSCOPE
+//                gyroFeature.reqGlEsVersion = openGLVersion
+//                features[PackageManager.FEATURE_SENSOR_GYROSCOPE] = gyroFeature
+//
+//                if (FakeLoc.enableDebugLog) {
+//                    Logger.debug("Added FEATURE_SENSOR_GYROSCOPE")
+//                }
+//            }
+//            if (!features.contains(PackageManager.FEATURE_SENSOR_COMPASS)) {
+//                val compassFeature = FeatureInfo()
+//                compassFeature.name = PackageManager.FEATURE_SENSOR_COMPASS
+//                compassFeature.reqGlEsVersion = openGLVersion
+//                features[PackageManager.FEATURE_SENSOR_COMPASS] = compassFeature
+//
+//                if (FakeLoc.enableDebugLog) {
+//                    Logger.debug("Added FEATURE_SENSOR_COMPASS")
+//                }
+//            }
+//
+//            if (!features.contains(PackageManager.FEATURE_SENSOR_ACCELEROMETER)) {
+//                val accelerometerFeature = FeatureInfo()
+//                accelerometerFeature.name = PackageManager.FEATURE_SENSOR_ACCELEROMETER
+//                accelerometerFeature.reqGlEsVersion = openGLVersion
+//                features[PackageManager.FEATURE_SENSOR_ACCELEROMETER] = accelerometerFeature
+//
+//                if (FakeLoc.enableDebugLog) {
+//                    Logger.debug("Added FEATURE_SENSOR_ACCELEROMETER")
+//                }
+//            }
+//
+//            if (!features.contains(PackageManager.FEATURE_SENSOR_STEP_COUNTER)) {
+//                val lightFeature = FeatureInfo()
+//                lightFeature.name = PackageManager.FEATURE_SENSOR_STEP_COUNTER
+//                lightFeature.reqGlEsVersion = openGLVersion
+//                features[PackageManager.FEATURE_SENSOR_STEP_COUNTER] = lightFeature
+//
+//                if (FakeLoc.enableDebugLog) {
+//                    Logger.debug("Added FEATURE_SENSOR_STEP_COUNTER")
+//                }
+//            }
+//
+//            if (!features.contains(PackageManager.FEATURE_SENSOR_STEP_DETECTOR)) {
+//                val lightFeature = FeatureInfo()
+//                lightFeature.name = PackageManager.FEATURE_SENSOR_STEP_DETECTOR
+//                lightFeature.reqGlEsVersion = openGLVersion
+//                features[PackageManager.FEATURE_SENSOR_STEP_DETECTOR] = lightFeature
+//
+//                if (FakeLoc.enableDebugLog) {
+//                    Logger.debug("Added FEATURE_SENSOR_STEP_DETECTOR")
+//                }
+//            }
+//
+//            kotlin.runCatching {
+//                XposedHelpers.setObjectField(thisObject, "mAvailableFeatures", features)
+//            }.onFailure {
+//                Logger.warn("Failed to set mAvailableFeatures", it)
+//            }
             result = features
         }
     }

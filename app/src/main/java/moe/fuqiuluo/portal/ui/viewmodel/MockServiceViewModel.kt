@@ -39,12 +39,13 @@ class MockServiceViewModel: ViewModel() {
 
         if(!::rockerJob.isInitialized || rockerJob.isCancelled) {
             rockerCoroutineController.pause()
+            val delayTime = 200L
             rockerJob = GlobalScope.launch {
                 do {
-                    delay(200)
+                    delay(delayTime)
                     rockerCoroutineController.controlledCoroutine()
 
-                    if(!MockServiceHelper.move(locationManager!!, FakeLoc.speed, FakeLoc.bearing)) {
+                    if(!MockServiceHelper.move(locationManager!!, FakeLoc.speed / (1000 / delayTime), FakeLoc.bearing)) {
                         Log.e("MockServiceViewModel", "Failed to move")
                     }
                 } while (isActive)
