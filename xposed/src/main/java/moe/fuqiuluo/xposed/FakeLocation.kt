@@ -89,6 +89,7 @@ class FakeLocation: IXposedHookLoadPackage, IXposedHookZygoteInit {
             }
             "android" -> {
                 Logger.info("Debug Log Status: ${FakeLoc.enableDebugLog}")
+                FakeLoc.isSystemServerProcess = true
                 startFakeLocHook(systemClassLoader)
                 TelephonyHook.hookSubOnTransact(lpparam.classLoader)
                 WlanHook(systemClassLoader)

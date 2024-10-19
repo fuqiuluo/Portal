@@ -60,6 +60,7 @@ object BasicLocationHook: BaseLocationHook() {
 
                 val originLocation = mLocations.firstOrNull() as? Location
                     ?: Location(LocationManager.GPS_PROVIDER)
+
                 val location = Location(originLocation.provider)
 
                 val jitterLat = FakeLoc.jitterLocation()
@@ -83,7 +84,7 @@ object BasicLocationHook: BaseLocationHook() {
                 if (location.hasBearing()) {
                     location.bearing = modBearing.toFloat()
                 }
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && location.hasBearingAccuracy()) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     location.bearingAccuracyDegrees = modBearing.toFloat()
                 }
                 location.elapsedRealtimeNanos = originLocation.elapsedRealtimeNanos

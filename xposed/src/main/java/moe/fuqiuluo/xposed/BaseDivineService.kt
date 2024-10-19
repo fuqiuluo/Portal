@@ -71,7 +71,7 @@ abstract class BaseDivineService {
                     if (FakeLoc.enableDebugLog) {
                         Logger.debug("ProxyBinder($from): $bundle")
                     }
-                    if(!RemoteCommandHandler.handleInstruction(randomKey, bundle, emptyMap())) {
+                    if(!RemoteCommandHandler.handleInstruction(randomKey, bundle)) {
                         Logger.error("Failed to handle instruction in $from")
                     }
                     return true

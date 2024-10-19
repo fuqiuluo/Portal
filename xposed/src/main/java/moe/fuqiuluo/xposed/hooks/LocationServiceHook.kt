@@ -758,30 +758,35 @@ internal object LocationServiceHook: BaseLocationHook() {
 
                     if (FakeLoc.enableDebugLog)
                         Logger.debug("LocationUpdater: callOnLocationChanged: ${locationListeners.size}")
-                    locationListeners.forEach { (_, listenerWithProvider) ->
-                        val listener = listenerWithProvider.second
-                        var location = FakeLoc.lastLocation
-                        if (location == null) {
-                            location = Location(listenerWithProvider.first)
-                        } else {
-                            location.provider = listenerWithProvider.first
-                        }
-                        location = injectLocation(location)
-                        kotlin.runCatching {
-                            val locations = listOf(location)
-                            val mOnLocationChanged = XposedHelpers.findMethodBestMatch(listener.javaClass, "onLocationChanged", locations, null)
-                            XposedBridge.invokeOriginalMethod(mOnLocationChanged, listener, arrayOf(locations, null))
-                            false
-                        }.onFailure {
-                            if (it is InvocationTargetException && it.targetException is DeadObjectException) {
-                                return@onFailure
-                            }
-                            if (it !is DeadObjectException) {
-                                Logger.error("LocationUpdater", it)
-                            }
-                        }
-                    }
+
+                    callOnLocationChanged()
                 }.onFailure {
+                    Logger.error("LocationUpdater", it)
+                }
+            }
+        }
+    }
+
+    fun callOnLocationChanged() {
+        locationListeners.forEach { (_, listenerWithProvider) ->
+            val listener = listenerWithProvider.second
+            var location = FakeLoc.lastLocation
+            if (location == null) {
+                location = Location(listenerWithProvider.first)
+            } else {
+                location.provider = listenerWithProvider.first
+            }
+            location = injectLocation(location)
+            kotlin.runCatching {
+                val locations = listOf(location)
+                val mOnLocationChanged = XposedHelpers.findMethodBestMatch(listener.javaClass, "onLocationChanged", locations, null)
+                XposedBridge.invokeOriginalMethod(mOnLocationChanged, listener, arrayOf(locations, null))
+                false
+            }.onFailure {
+                if (it is InvocationTargetException && it.targetException is DeadObjectException) {
+                    return@onFailure
+                }
+                if (it !is DeadObjectException) {
                     Logger.error("LocationUpdater", it)
                 }
             }
@@ -892,6 +897,6 @@ internal object LocationServiceHook: BaseLocationHook() {
 //    }
 
     private inline fun handleInstruction(command: String, rely: Bundle): Boolean {
-        return RemoteCommandHandler.handleInstruction(command, rely, locationListeners)
+        return RemoteCommandHandler.handleInstruction(command, rely)
     }
 }

@@ -40,7 +40,6 @@ abstract class BaseLocationHook: BaseDivineService() {
         }
 
         val location = Location(originLocation.provider)
-        //location.provider = "gps"
         location.accuracy = if (FakeLoc.accuracy != 0.0f) FakeLoc.accuracy else originLocation.accuracy
         val jitterLat = FakeLoc.jitterLocation()
         location.latitude = jitterLat.first
@@ -48,7 +47,7 @@ abstract class BaseLocationHook: BaseDivineService() {
         location.altitude = FakeLoc.altitude
         val speedAmp = Random.nextDouble(-FakeLoc.speedAmplitude, FakeLoc.speedAmplitude)
         location.speed = (originLocation.speed + speedAmp).toFloat()
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && location.hasSpeedAccuracy()) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && originLocation.hasSpeedAccuracy()) {
             location.speedAccuracyMetersPerSecond = (FakeLoc.speed + speedAmp).toFloat()
         }
 
@@ -64,10 +63,8 @@ abstract class BaseLocationHook: BaseDivineService() {
         if (modBearing < 0) {
             modBearing += 360.0
         }
-        if (location.hasBearing()) {
-            location.bearing = modBearing.toFloat()
-        }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && location.hasBearingAccuracy()) {
+        location.bearing = modBearing.toFloat()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             location.bearingAccuracyDegrees = modBearing.toFloat()
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -99,10 +96,10 @@ abstract class BaseLocationHook: BaseDivineService() {
         location.extras?.putInt("meanCn0", Random.nextInt(20, 30))
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-            if (location.hasMslAltitude()) {
+            if (originLocation.hasMslAltitude()) {
                 location.mslAltitudeMeters = FakeLoc.altitude
             }
-            if (location.hasVerticalAccuracy()) {
+            if (originLocation.hasVerticalAccuracy()) {
                 location.mslAltitudeAccuracyMeters = FakeLoc.altitude.toFloat()
             }
         }

@@ -62,10 +62,8 @@ object LocationProviderManagerHook {
         if (modBearing < 0) {
             modBearing += 360.0
         }
-        if (location.hasBearing()) {
-            location.bearing = modBearing.toFloat()
-        }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && location.hasBearingAccuracy()) {
+        location.bearing = modBearing.toFloat()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && originLocation.hasBearingAccuracy()) {
             location.bearingAccuracyDegrees = modBearing.toFloat()
         }
         location.elapsedRealtimeNanos = originLocation.elapsedRealtimeNanos
@@ -289,10 +287,8 @@ object LocationProviderManagerHook {
                 if (modBearing < 0) {
                     modBearing += 360.0
                 }
-                if (location.hasBearing()) {
-                    location.bearing = modBearing.toFloat()
-                }
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && location.hasBearingAccuracy()) {
+                location.bearing = modBearing.toFloat()
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && originLocation.hasBearingAccuracy()) {
                     location.bearingAccuracyDegrees = modBearing.toFloat()
                 }
                 location.elapsedRealtimeNanos = originLocation.elapsedRealtimeNanos

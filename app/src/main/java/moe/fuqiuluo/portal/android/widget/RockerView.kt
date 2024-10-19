@@ -232,7 +232,7 @@ class RockerView(context: Context, attributeSet: AttributeSet): View(context, at
 
             MotionEvent.ACTION_UP -> {
                 if (!isLocked.get()) {
-                    listener?.onAngle(0.0)
+                    //listener?.onAngle(0.0)
                     listener?.onFinished()
                     moveRocker(mCenterPoint.x, mCenterPoint.y)
                     lockRunnable?.let {

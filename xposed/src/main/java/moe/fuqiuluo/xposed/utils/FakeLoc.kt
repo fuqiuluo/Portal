@@ -71,6 +71,8 @@ object FakeLoc {
      */
     var updateInterval = 3000L
 
+    var isSystemServerProcess = false
+
     /**
      * 上一次的位置
      */
@@ -95,7 +97,11 @@ object FakeLoc {
                 return field
             }
         }
-    var accuracy = 5.0f
+        set(value) {
+            field = value
+        }
+
+    var accuracy = 25.0f
         set(value) {
             field = if (value < 0) {
                 -value
@@ -115,20 +121,23 @@ object FakeLoc {
         return radius * c
     }
 
-    fun jitterLocation(lat: Double = latitude, lon: Double = longitude, n: Double = Random.nextDouble(-accuracy.toDouble(), accuracy.toDouble()), angle: Double = bearing): Pair<Double, Double> {
+    fun jitterLocation(lat: Double = latitude, lon: Double = longitude, n: Double = Random.nextDouble(0.0, accuracy.toDouble()), angle: Double = bearing): Pair<Double, Double> {
         val earthRadius = 6371000.0
-        val radiusInDegrees = n / earthRadius * (180 / PI)
-        val newLat = lat + radiusInDegrees * cos(Math.toRadians(angle))
-        val newLon = lon + radiusInDegrees * sin(Math.toRadians(angle)) / cos(Math.toRadians(lat))
+        val radiusInDegrees = n / 15 / earthRadius * (180 / PI)
+
+        val jitterAngle = if (Random.nextBoolean()) angle + 45 else angle - 45
+
+        val newLat = lat + radiusInDegrees * cos(Math.toRadians(jitterAngle))
+        val newLon = lon + radiusInDegrees * sin(Math.toRadians(jitterAngle)) / cos(Math.toRadians(lat))
+
         return Pair(newLat, newLon)
     }
 
     fun moveLocation(lat: Double = latitude, lon: Double = longitude, n: Double, angle: Double = bearing): Pair<Double, Double> {
-        return jitterLocation(
-            lat = lat,
-            lon = lon,
-            n = Random.nextDouble(n - 1.2, n + 1.2),
-            angle = angle
-        )
+        val earthRadius = 6371000.0
+        val radiusInDegrees = Random.nextDouble(n, n + 1.2) / earthRadius * (180 / PI)
+        val newLat = lat + radiusInDegrees * cos(Math.toRadians(angle))
+        val newLon = lon + radiusInDegrees * sin(Math.toRadians(angle)) / cos(Math.toRadians(lat))
+        return Pair(newLat, newLon)
     }
 }

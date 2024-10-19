@@ -1,26 +1,25 @@
 package moe.fuqiuluo.xposed
 
 import android.annotation.SuppressLint
-import android.os.Build
 import android.os.Bundle
 import android.os.IBinder
 import android.os.Parcel
 import moe.fuqiuluo.dobby.Dobby
+import moe.fuqiuluo.xposed.hooks.LocationServiceHook
 import moe.fuqiuluo.xposed.utils.FakeLoc
 import moe.fuqiuluo.xposed.utils.BinderUtils
 import moe.fuqiuluo.xposed.utils.Logger
-import java.io.File
 import java.util.Collections
 import kotlin.random.Random
 
 object RemoteCommandHandler {
-    private var proxyBinders = Collections.synchronizedList(arrayListOf<IBinder>())
-    private val needProxyCmd = arrayOf("start", "stop", "set_speed_amp", "set_altitude", "update_location")
+    private val proxyBinders by lazy { Collections.synchronizedList(arrayListOf<IBinder>()) }
+    private val needProxyCmd = arrayOf("start", "stop", "set_speed_amp", "set_altitude", "update_location", "move")
     internal val randomKey by lazy { "portal_" + Random.nextDouble() }
     private var isLoadedLibrary = false
 
     @SuppressLint("UnsafeDynamicallyLoadedCode")
-    fun handleInstruction(command: String, rely: Bundle, locationListeners: Map<String, Pair<String, Any>>): Boolean {
+    fun handleInstruction(command: String, rely: Bundle): Boolean {
         // Exchange key -> returns a random key -> is used to verify that it is the PortalManager
         if (command == "exchange_key") {
             val userId = BinderUtils.getCallerUid()
@@ -35,7 +34,7 @@ object RemoteCommandHandler {
         val commandId = rely.getString("command_id") ?: return false
 
         kotlin.runCatching {
-            if (proxyBinders.isNotEmpty() && needProxyCmd.contains(commandId)) {
+            if (proxyBinders.isNotEmpty() && needProxyCmd.any { it == commandId }) {
                 proxyBinders.removeIf {
                     if (it.isBinderAlive && it.pingBinder()) {
                         val data = Parcel.obtain()
@@ -127,7 +126,9 @@ object RemoteCommandHandler {
                 }
                 FakeLoc.bearing = bearing
                 FakeLoc.hasBearings = true
-                return updateCoordinate(newLoc.first, newLoc.second)
+                return updateCoordinate(newLoc.first, newLoc.second).also {
+                    if (FakeLoc.isSystemServerProcess) LocationServiceHook.callOnLocationChanged()
+                }
             }
             "update_location" -> {
                 val mode = rely.getString("mode")
