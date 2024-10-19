@@ -32,8 +32,7 @@ class Rocker(private val activity: Activity): View.OnTouchListener {
 
     init {
         layoutParams.flags = (WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
-                or WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                or WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED)
+                or WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE)
 
         layoutParams.width = WindowManager.LayoutParams.WRAP_CONTENT
         layoutParams.height = WindowManager.LayoutParams.WRAP_CONTENT

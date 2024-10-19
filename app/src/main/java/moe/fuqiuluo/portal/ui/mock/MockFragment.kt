@@ -25,6 +25,7 @@ import moe.fuqiuluo.portal.android.root.ShellUtils
 import moe.fuqiuluo.portal.android.widget.RockerView
 import moe.fuqiuluo.portal.android.window.OverlayUtils
 import moe.fuqiuluo.portal.databinding.FragmentMockBinding
+import moe.fuqiuluo.portal.ext.drawOverOtherAppsEnabled
 import moe.fuqiuluo.portal.ext.historicalLocations
 import moe.fuqiuluo.portal.ext.rawHistoricalLocations
 import moe.fuqiuluo.portal.ext.selectLocation
@@ -90,6 +91,11 @@ class MockFragment : Fragment() {
                 }
                 val checkedTextView = it as CheckedTextView
                 checkedTextView.toggle()
+
+                if (!requireContext().drawOverOtherAppsEnabled()) {
+                    Toast.makeText(requireContext(), "请授权悬浮窗权限", Toast.LENGTH_SHORT).show()
+                    return@setOnClickListener
+                }
 
                 lifecycleScope.launch(Dispatchers.Main) {
                     if (checkedTextView.isChecked) {
