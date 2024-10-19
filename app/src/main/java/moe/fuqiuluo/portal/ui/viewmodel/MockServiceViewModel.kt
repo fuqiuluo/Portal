@@ -45,7 +45,7 @@ class MockServiceViewModel: ViewModel() {
                     delay(delayTime)
                     rockerCoroutineController.controlledCoroutine()
 
-                    if(!MockServiceHelper.move(locationManager!!, FakeLoc.speed / (1000 / delayTime), FakeLoc.bearing)) {
+                    if(!MockServiceHelper.move(locationManager!!, FakeLoc.speed / (1000 / delayTime) / 0.85, FakeLoc.bearing)) {
                         Log.e("MockServiceViewModel", "Failed to move")
                     }
                 } while (isActive)

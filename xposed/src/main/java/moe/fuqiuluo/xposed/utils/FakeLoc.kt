@@ -78,7 +78,9 @@ object FakeLoc {
     var latitude = 0.0
     var longitude = 0.0
     var altitude = 80.0
-    var speed = 4.5
+
+    var speed = 3.05
+
     var speedAmplitude = 1.0
     var hasBearings = false
     var bearing = 0.0
