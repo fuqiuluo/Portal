@@ -48,10 +48,10 @@ location.extras?.putBoolean("is_mock", true)
 - [ ] **Portal** will mock the wifi info.
 - [x] **Portal** will mock the sensor info.
 - [x] **Portal** can move position by rocker.
-- [ ] **Portal** can set the speed in the settings.
-- [ ] **Portal** can set the altitude in the settings.
-- [ ] **Portal** can set the accuracy in the settings.
-- [ ] **Portal** will change the bearing when moving.
+- [x] **Portal** can set the speed in the settings.
+- [x] **Portal** can set the altitude in the settings.
+- [x] **Portal** can set the accuracy in the settings.
+- [x] **Portal** will change the bearing when moving.
 
 # Thanks
 
