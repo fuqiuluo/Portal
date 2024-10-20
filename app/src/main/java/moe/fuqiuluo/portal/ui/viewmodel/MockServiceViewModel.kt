@@ -10,6 +10,9 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import moe.fuqiuluo.portal.android.coro.CoroutineController
+import moe.fuqiuluo.portal.ext.accuracy
+import moe.fuqiuluo.portal.ext.altitude
+import moe.fuqiuluo.portal.ext.speed
 import moe.fuqiuluo.portal.service.MockServiceHelper
 import moe.fuqiuluo.portal.ui.mock.HistoricalLocation
 import moe.fuqiuluo.portal.ui.mock.Rocker
@@ -51,6 +54,11 @@ class MockServiceViewModel: ViewModel() {
                 } while (isActive)
             }
         }
+
+        FakeLoc.speed = activity.speed
+        FakeLoc.altitude = activity.altitude
+        FakeLoc.accuracy = activity.accuracy
+
         return rocker
     }
 

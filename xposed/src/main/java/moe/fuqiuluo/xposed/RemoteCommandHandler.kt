@@ -57,10 +57,19 @@ object RemoteCommandHandler {
                 return true
             }
             "start" -> {
+                val speed = rely.getDouble("speed", FakeLoc.speed)
+                val altitude = rely.getDouble("altitude", FakeLoc.altitude)
+                val accuracy = rely.getFloat("accuracy", FakeLoc.accuracy)
+
                 FakeLoc.enable = true
                 if (isLoadedLibrary) {
                     Dobby.setStatus(true)
                 }
+
+                FakeLoc.speed = speed
+                FakeLoc.altitude = altitude
+                FakeLoc.accuracy = accuracy
+
                 return true
             }
             "stop" -> {

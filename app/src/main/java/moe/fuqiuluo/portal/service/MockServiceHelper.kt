@@ -39,12 +39,20 @@ object MockServiceHelper {
         return false
     }
 
-    fun tryOpenMock(locationManager: LocationManager): Boolean {
+    fun tryOpenMock(
+        locationManager: LocationManager,
+        speed: Double,
+        altitude: Double,
+        accuracy: Float,
+    ): Boolean {
         if (!::randomKey.isInitialized) {
             return false
         }
         val rely = Bundle()
         rely.putString("command_id", "start")
+        rely.putDouble("speed", speed)
+        rely.putDouble("altitude", altitude)
+        rely.putFloat("accuracy", accuracy)
         return if(locationManager.sendExtraCommand(PROVIDER_NAME, randomKey, rely)) {
             isMockStart(locationManager)
         } else {

@@ -36,4 +36,11 @@
     <string name="colorful">独属于我的蒙娜丽莎</string>
     <string name="rocker_speed">摇杆速度</string>
     <string name="default_speed">1m/s</string>
+    <string name="selinux">SELinux</string>
+    <string name="need_open_selinux">是否开启SELinux</string>
+    <string name="altitude">定位海拔</string>
+    <string name="altitude_desc">模拟定位的海拔高度</string>
+    <string name="rocker_speed_desc">模拟移动的移动速度</string>
+    <string name="accuracy">定位精度</string>
+    <string name="accuracy_desc">模拟定位抖动的范围</string>
 </resources>

@@ -5,6 +5,7 @@ import androidx.core.content.edit
 import com.baidu.mapapi.map.BaiduMap
 import moe.fuqiuluo.portal.service.MockServiceHelper
 import moe.fuqiuluo.portal.ui.mock.HistoricalLocation
+import moe.fuqiuluo.xposed.utils.FakeLoc
 
 val Context.sharedPrefs
     get() = getSharedPreferences(MockServiceHelper.PROVIDER_NAME, Context.MODE_PRIVATE)!!
@@ -58,4 +59,32 @@ var Context.rockerCoords: Pair<Int, Int>
     set(value) = sharedPrefs.edit {
         putInt("rocker_x", value.first)
         putInt("rocker_y", value.second)
+    }
+
+var Context.speed: Double
+    get() = sharedPrefs.getFloat("speed", FakeLoc.speed.toFloat()).toDouble()
+
+    set(value) = sharedPrefs.edit {
+        putFloat("speed", value.toFloat())
+    }
+
+var Context.altitude: Double
+    get() = sharedPrefs.getFloat("altitude", FakeLoc.altitude.toFloat()).toDouble()
+
+    set(value) = sharedPrefs.edit {
+        putFloat("altitude", value.toFloat())
+    }
+
+var Context.accuracy: Float
+    get() = sharedPrefs.getFloat("accuracy", FakeLoc.accuracy)
+
+    set(value) = sharedPrefs.edit {
+        putFloat("accuracy", value)
+    }
+
+var Context.needOpenSELinux: Boolean
+    get() = sharedPrefs.getBoolean("needOpenSELinux", false)
+
+    set(value) = sharedPrefs.edit {
+        putBoolean("needOpenSELinux", value)
     }

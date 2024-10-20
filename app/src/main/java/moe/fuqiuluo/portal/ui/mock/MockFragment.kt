@@ -25,10 +25,13 @@ import moe.fuqiuluo.portal.android.root.ShellUtils
 import moe.fuqiuluo.portal.android.widget.RockerView
 import moe.fuqiuluo.portal.android.window.OverlayUtils
 import moe.fuqiuluo.portal.databinding.FragmentMockBinding
+import moe.fuqiuluo.portal.ext.altitude
 import moe.fuqiuluo.portal.ext.drawOverOtherAppsEnabled
 import moe.fuqiuluo.portal.ext.historicalLocations
+import moe.fuqiuluo.portal.ext.needOpenSELinux
 import moe.fuqiuluo.portal.ext.rawHistoricalLocations
 import moe.fuqiuluo.portal.ext.selectLocation
+import moe.fuqiuluo.portal.ext.speed
 import moe.fuqiuluo.portal.service.MockServiceHelper
 import moe.fuqiuluo.portal.ui.viewmodel.MockServiceViewModel
 import moe.fuqiuluo.portal.ui.viewmodel.MockViewModel
@@ -226,14 +229,21 @@ class MockFragment : Fragment() {
             } else {
                 showToast("无法劫持传感器")
             }
-            ShellUtils.setEnforceMode(true)
+            if (requireContext().needOpenSELinux) {
+                ShellUtils.setEnforceMode(true)
+            }
         }
 
         lifecycleScope.launch {
+            val context = requireContext()
+            val speed = context.speed
+            val altitude = context.altitude
+            val accuracy = FakeLoc.accuracy
+
             button.isClickable = false
             try {
                 withContext(Dispatchers.IO) {
-                    if (MockServiceHelper.tryOpenMock(mockServiceViewModel.locationManager!!)) {
+                    if (MockServiceHelper.tryOpenMock(mockServiceViewModel.locationManager!!, speed, altitude, accuracy)) {
                         updateMockButtonState(button, "停止模拟", R.drawable.rounded_play_disabled_24)
                     } else {
                         showToast("模拟服务启动失败")
