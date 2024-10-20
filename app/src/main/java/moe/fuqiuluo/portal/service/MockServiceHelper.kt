@@ -7,6 +7,13 @@ import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import moe.fuqiuluo.portal.android.root.ShellUtils
+import moe.fuqiuluo.portal.ext.altitude
+import moe.fuqiuluo.portal.ext.debug
+import moe.fuqiuluo.portal.ext.disableFusedProvider
+import moe.fuqiuluo.portal.ext.disableGetCurrentLocation
+import moe.fuqiuluo.portal.ext.disableRegitserLocationListener
+import moe.fuqiuluo.portal.ext.needDowngradeToCdma
+import moe.fuqiuluo.portal.ext.speed
 import moe.fuqiuluo.xposed.utils.FakeLoc
 import java.io.File
 
@@ -212,6 +219,33 @@ object MockServiceHelper {
             return rely.getString("result")
         }
         return null
+    }
+
+    fun putConfig(locationManager: LocationManager, context: Context): Boolean {
+        if (!::randomKey.isInitialized) {
+            return false
+        }
+
+        FakeLoc.altitude = context.altitude
+        FakeLoc.speed = context.speed
+        FakeLoc.enableDebugLog = context.debug
+        FakeLoc.disableGetCurrentLocation = context.disableGetCurrentLocation
+        FakeLoc.disableRegisterLocationListener = context.disableRegitserLocationListener
+        FakeLoc.disableFusedLocation = context.disableFusedProvider
+        FakeLoc.needDowngradeToCdma = context.needDowngradeToCdma
+
+        val rely = Bundle()
+        rely.putString("command_id", "put_config")
+        rely.putBoolean("enable", FakeLoc.enable)
+        rely.putDouble("altitude", FakeLoc.altitude)
+        rely.putDouble("speed", FakeLoc.speed)
+        rely.putBoolean("enable_debug_log", FakeLoc.enableDebugLog)
+        rely.putBoolean("disable_get_current_location", FakeLoc.disableGetCurrentLocation)
+        rely.putBoolean("disable_register_location_listener", FakeLoc.disableRegisterLocationListener)
+        rely.putBoolean("disable_fused_location", FakeLoc.disableFusedLocation)
+        rely.putBoolean("need_downgrade_to_2g", FakeLoc.needDowngradeToCdma)
+
+        return locationManager.sendExtraCommand(PROVIDER_NAME, randomKey, rely)
     }
 
     fun isServiceInit(): Boolean {

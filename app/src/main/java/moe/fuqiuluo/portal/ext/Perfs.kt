@@ -88,3 +88,55 @@ var Context.needOpenSELinux: Boolean
     set(value) = sharedPrefs.edit {
         putBoolean("needOpenSELinux", value)
     }
+
+var Context.needDowngradeToCdma: Boolean
+    get() = sharedPrefs.getBoolean("needDowngradeToCdma", FakeLoc.needDowngradeToCdma)
+
+    set(value) = sharedPrefs.edit {
+        putBoolean("needDowngradeToCdma", value)
+    }
+
+//var Context.updateInterval: Long
+//    get() = sharedPrefs.getLong("updateInterval", FakeLoc.updateInterval)
+//
+//    set(value) = sharedPrefs.edit {
+//        putLong("updateInterval", value)
+//    }
+//
+//var Context.hideMock: Boolean
+//    get() = sharedPrefs.getBoolean("hideMock", FakeLoc.hideMock)
+//
+//    set(value) = sharedPrefs.edit {
+//        putBoolean("hideMock", value)
+//    }
+
+var Context.debug: Boolean
+    get() = sharedPrefs.getBoolean("debug", FakeLoc.enableDebugLog)
+
+    set(value) = sharedPrefs.edit {
+        putBoolean("debug", value)
+    }
+
+var Context.disableGetCurrentLocation: Boolean
+    get() = sharedPrefs.getBoolean("disableGetCurrentLocation", FakeLoc.disableGetCurrentLocation)
+
+    set(value) = sharedPrefs.edit {
+        putBoolean("disableGetCurrentLocation", value)
+    }
+
+var Context.disableRegitserLocationListener: Boolean
+    get() = sharedPrefs.getBoolean("disableRegitserLocationListener", FakeLoc.disableRegisterLocationListener)
+
+    set(value) = sharedPrefs.edit {
+        putBoolean("disableRegitserLocationListener", value)
+    }
+
+var Context.disableFusedProvider: Boolean
+    get() = sharedPrefs.getBoolean("disableFusedProvider", FakeLoc.disableFusedLocation)
+
+    set(value) = sharedPrefs.edit {
+        putBoolean("disableFusedProvider", value)
+    }
+
+
+

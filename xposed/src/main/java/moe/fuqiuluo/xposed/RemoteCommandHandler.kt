@@ -14,7 +14,7 @@ import kotlin.random.Random
 
 object RemoteCommandHandler {
     private val proxyBinders by lazy { Collections.synchronizedList(arrayListOf<IBinder>()) }
-    private val needProxyCmd = arrayOf("start", "stop", "set_speed_amp", "set_altitude", "update_location", "move")
+    private val needProxyCmd = arrayOf("start", "stop", "set_speed_amp", "set_altitude", "set_speed", "update_location", "set_bearing", "move", "put_config")
     internal val randomKey by lazy { "portal_" + Random.nextDouble() }
     private var isLoadedLibrary = false
 
@@ -174,6 +174,28 @@ object RemoteCommandHandler {
                         return updateCoordinate(Random.nextDouble(-90.0, 90.0), Random.nextDouble(-180.0, 180.0))
                     }
                 }
+                return true
+            }
+            "put_config" -> {
+                val enable = rely.getBoolean("enable", FakeLoc.enable)
+                val speed = rely.getDouble("speed", FakeLoc.speed)
+                val altitude = rely.getDouble("altitude", FakeLoc.altitude)
+                val accuracy = rely.getFloat("accuracy", FakeLoc.accuracy)
+                val enableDebugLog = rely.getBoolean("enable_debug_log", FakeLoc.enableDebugLog)
+                val disableGetCurrentLocation = rely.getBoolean("disable_get_current_location", FakeLoc.disableGetCurrentLocation)
+                val disableRegisterLocationListener = rely.getBoolean("disable_register_location_listener", FakeLoc.disableRegisterLocationListener)
+                val disableFusedLocation = rely.getBoolean("disable_fused_location", FakeLoc.disableFusedLocation)
+                val needDowngradeToCdma = rely.getBoolean("need_downgrade_to_2g", FakeLoc.needDowngradeToCdma)
+
+                FakeLoc.enable = enable
+                FakeLoc.speed = speed
+                FakeLoc.altitude = altitude
+                FakeLoc.accuracy = accuracy
+                FakeLoc.enableDebugLog = enableDebugLog
+                FakeLoc.disableGetCurrentLocation = disableGetCurrentLocation
+                FakeLoc.disableRegisterLocationListener = disableRegisterLocationListener
+                FakeLoc.disableFusedLocation = disableFusedLocation
+                FakeLoc.needDowngradeToCdma = needDowngradeToCdma
                 return true
             }
             "sync_config" -> {
