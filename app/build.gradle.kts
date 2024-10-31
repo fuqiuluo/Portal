@@ -8,12 +8,12 @@ plugins {
 
 android {
     namespace = "moe.fuqiuluo.portal"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "moe.fuqiuluo.portal"
         minSdk = 24
-        targetSdk = 34
+        targetSdk = 35
         versionCode = getVersionCode()
         versionName = "1.0.2" + ".r${getGitCommitCount()}." + getVersionName()
 

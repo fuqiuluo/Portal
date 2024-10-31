@@ -53,4 +53,6 @@
     <string name="dfused_desc">应用使用fused（可能导致模拟失败）</string>
     <string name="cdma">网络降级</string>
     <string name="cdma_desc">将网络降级为CDMA</string>
+    <string name="hook_sensor">传感器劫持</string>
+    <string name="hook_sensor_desc">模拟步频（残缺闪退版）</string>
 </resources>
