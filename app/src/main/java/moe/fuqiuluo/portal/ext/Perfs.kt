@@ -96,6 +96,13 @@ var Context.needDowngradeToCdma: Boolean
         putBoolean("needDowngradeToCdma", value)
     }
 
+var Context.hookSensor: Boolean
+    get() = sharedPrefs.getBoolean("hookSensor", false)
+
+    set(value) = sharedPrefs.edit {
+        putBoolean("hookSensor", value)
+    }
+
 //var Context.updateInterval: Long
 //    get() = sharedPrefs.getLong("updateInterval", FakeLoc.updateInterval)
 //

@@ -28,6 +28,7 @@ import moe.fuqiuluo.portal.databinding.FragmentMockBinding
 import moe.fuqiuluo.portal.ext.altitude
 import moe.fuqiuluo.portal.ext.drawOverOtherAppsEnabled
 import moe.fuqiuluo.portal.ext.historicalLocations
+import moe.fuqiuluo.portal.ext.hookSensor
 import moe.fuqiuluo.portal.ext.needOpenSELinux
 import moe.fuqiuluo.portal.ext.rawHistoricalLocations
 import moe.fuqiuluo.portal.ext.selectLocation
@@ -223,14 +224,17 @@ class MockFragment : Fragment() {
         }
 
         if (ShellUtils.hasRoot()) {
-            ShellUtils.setEnforceMode(false) // 关闭SELinux
-            if(MockServiceHelper.loadPortalLibrary(requireContext())) {
-                showToast("传感器劫持成功")
-            } else {
-                showToast("无法劫持传感器")
-            }
-            if (requireContext().needOpenSELinux) {
-                ShellUtils.setEnforceMode(true)
+            if (requireContext().hookSensor) {
+                ShellUtils.setEnforceMode(false) // 关闭SELinux
+                if(MockServiceHelper.loadPortalLibrary(requireContext())) {
+                    showToast("传感器劫持成功")
+                } else {
+                    showToast("无法劫持传感器")
+                }
+
+                if (requireContext().needOpenSELinux) {
+                    ShellUtils.setEnforceMode(true)
+                }
             }
         }
 

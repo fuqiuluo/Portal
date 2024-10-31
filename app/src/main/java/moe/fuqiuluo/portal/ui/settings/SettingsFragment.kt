@@ -26,6 +26,7 @@ import moe.fuqiuluo.portal.ext.debug
 import moe.fuqiuluo.portal.ext.disableFusedProvider
 import moe.fuqiuluo.portal.ext.disableGetCurrentLocation
 import moe.fuqiuluo.portal.ext.disableRegitserLocationListener
+import moe.fuqiuluo.portal.ext.hookSensor
 import moe.fuqiuluo.portal.ext.needDowngradeToCdma
 import moe.fuqiuluo.portal.ext.needOpenSELinux
 import moe.fuqiuluo.portal.ext.rawHistoricalLocations
@@ -171,6 +172,18 @@ class SettingsFragment : Fragment() {
             ) {
                 context.needDowngradeToCdma = isChecked
                 showToast(if (isChecked) "已降级为CDMA" else "已取消降级为CDMA")
+                updateRemoteConfig()
+            }
+        })
+
+        binding.sensorHookSwitch.isChecked = context.hookSensor
+        binding.sensorHookSwitch.setOnCheckedChangeListener(object: CompoundButton.OnCheckedChangeListener {
+            override fun onCheckedChanged(
+                buttonView: CompoundButton?,
+                isChecked: Boolean
+            ) {
+                context.hookSensor = isChecked
+                showToast("重新启动生效")
                 updateRemoteConfig()
             }
         })
