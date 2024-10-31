@@ -1,5 +1,5 @@
 [versions]
-agp = "8.7.1"
+agp = "8.7.2"
 circularProgressButtonVersion = "1.4"
 systemRefine = "4.4.0"
 xposed = "82"
