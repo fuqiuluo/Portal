@@ -3,7 +3,7 @@ updates:
   - package-ecosystem: gradle
     directory: "/"
     schedule:
-      interval: daily
+      interval: monthly
       time: "21:00"
     target-branch: master
     groups:
