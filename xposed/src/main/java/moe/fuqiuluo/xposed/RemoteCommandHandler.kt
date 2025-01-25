@@ -63,7 +63,7 @@ object RemoteCommandHandler {
 
                 FakeLoc.enable = true
                 if (isLoadedLibrary) {
-                    Dobby.setStatus(true)
+                    //Dobby.setStatus(true)
                 }
 
                 FakeLoc.speed = speed
@@ -76,7 +76,7 @@ object RemoteCommandHandler {
                 FakeLoc.enable = false
                 FakeLoc.hasBearings = false
                 if (isLoadedLibrary) {
-                    Dobby.setStatus(false)
+                    //Dobby.setStatus(false)
                 }
                 return true
             }
