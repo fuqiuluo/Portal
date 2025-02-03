@@ -82,8 +82,13 @@ object WlanHook {
             if (FakeLoc.enableDebugLog)
                 Logger.debug("In getScanResults with caller: $packageName")
 
-            if (FakeLoc.enable && !BinderUtils.isSystemPackages(packageName) && result is List<*>) {
-                result = arrayListOf<Any>()
+            if(FakeLoc.enable && !BinderUtils.isSystemPackages(packageName)) {
+                if (result is List<*>) {
+                    result = arrayListOf<Any>()
+                } // 针对小米系列机型的wifi扫描返回
+                if (result is Array<*>) {
+                    result = arrayOf<Any>()
+                } // 针对一加系列机型的wifi扫描返回
             }
         })
     }

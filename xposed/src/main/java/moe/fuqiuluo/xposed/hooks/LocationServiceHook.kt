@@ -739,7 +739,7 @@ internal object LocationServiceHook: BaseLocationHook() {
     }
 
     private fun startDaemon(classLoader: ClassLoader) {
-        val cIRemoteCallback = XposedHelpers.findClass("android.os.IRemoteCallback", classLoader)
+        //val cIRemoteCallback = XposedHelpers.findClass("android.os.IRemoteCallback", classLoader)
         thread(
             name = "LocationUpdater",
             isDaemon = true,

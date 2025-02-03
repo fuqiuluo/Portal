@@ -342,7 +342,7 @@ class HomeFragment : Fragment() {
             val lon = BigDecimal.valueOf(markedLoc?.second ?: return false)
 
             editAddress.setText(markName ?: "位置地址")
-            editLatLon.setText("${lat.toPlainString()}, ${lon.toPlainString()}")
+            editLatLon.setText("${lon.toPlainString()}, ${lat.toPlainString()}")
 
             val builder = MaterialAlertDialogBuilder(requireContext())
             builder.setTitle(null)

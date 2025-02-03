@@ -104,6 +104,13 @@ object BasicLocationHook: BaseLocationHook() {
            Logger.error("Failed to hook LocationResult", it)
         }
 
+        runCatching {
+            val cOpLocationListener = "com.android.internal.telephony.OpLocationListener".toClassOrThrow(classLoader)
+            BlindHookLocation(cOpLocationListener)
+        }.onFailure {
+            Logger.error("Failed to hook OplusLocationListener", it)
+        }
+
 //        XposedHelpers.findAndHookMethod(Location::class.java, "getLatitude", object : XC_MethodHook() {
 //            override fun beforeHookedMethod(param: MethodHookParam) {
 //                if (!FakeLocationConfig.enable) return
