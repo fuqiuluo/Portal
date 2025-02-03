@@ -427,7 +427,7 @@ class MainActivity : AppCompatActivity() {
     private fun showDetailInfo(wgsLoc: Pair<Double, Double>, gcjLoc: LatLng) {
         val infoView = layoutInflater.inflate(R.layout.layout_loc_detail, null)
         val locDetail = infoView.findViewById<TextView>(R.id.loc_detail)
-        locDetail.text = "${wgsLoc.first.toString().take(10)}, ${wgsLoc.second.toString().take(10)}"
+        locDetail.text = "${wgsLoc.second.toString().take(10)}, ${wgsLoc.first.toString().take(10)}"
         val locAddr = infoView.findViewById<TextView>(R.id.loc_addr)
         locAddr.text = baiduMapViewModel.markName ?: "未知地址"
         val mInfoWindow = InfoWindow(BitmapDescriptorFactory.fromView(infoView), gcjLoc, -95, null)
