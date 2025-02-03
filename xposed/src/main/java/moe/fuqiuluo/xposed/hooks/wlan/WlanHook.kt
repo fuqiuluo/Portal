@@ -75,11 +75,14 @@ object WlanHook {
         })
 
         wifiClazz.hookAllMethods("getScanResults", afterHook {
-            val packageName = args[0] as String
+            val packageName = args[0] as? String
+
+            if (packageName.isNullOrEmpty()) return@afterHook
+
             if (FakeLoc.enableDebugLog)
                 Logger.debug("In getScanResults with caller: $packageName")
 
-            if (FakeLoc.enable && !BinderUtils.isSystemPackages(packageName)) {
+            if (FakeLoc.enable && !BinderUtils.isSystemPackages(packageName) && result is List<*>) {
                 result = arrayListOf<Any>()
             }
         })
