@@ -5,5 +5,6 @@
         <item>com.android.phone</item>
         <item>com.android.location.fused</item>
         <item>com.xiaomi.location.fused</item>
+        <item>com.oplus.location</item>
     </string-array>
 </resources>

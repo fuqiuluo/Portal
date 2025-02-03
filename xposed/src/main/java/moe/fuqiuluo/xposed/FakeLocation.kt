@@ -1,29 +1,21 @@
 @file:Suppress("LocalVariableName", "PrivateApi", "UNCHECKED_CAST")
 package moe.fuqiuluo.xposed
 
-import android.os.Build
 import de.robv.android.xposed.IXposedHookLoadPackage
 import de.robv.android.xposed.IXposedHookZygoteInit
-import de.robv.android.xposed.XC_MethodHook
 import de.robv.android.xposed.XposedHelpers
 import de.robv.android.xposed.callbacks.XC_LoadPackage
 import moe.fuqiuluo.xposed.hooks.LocationManagerHook
 import moe.fuqiuluo.xposed.hooks.LocationServiceHook
 import moe.fuqiuluo.xposed.hooks.fused.AndroidFusedLocationProviderHook
-import moe.fuqiuluo.xposed.hooks.fused.miui.MiFusedLocationHook
+import moe.fuqiuluo.xposed.hooks.fused.ThirdPartyLocationHook
+import moe.fuqiuluo.xposed.hooks.oplus.OplusLocationHook
 import moe.fuqiuluo.xposed.hooks.telephony.miui.MiuiTelephonyManagerHook
 import moe.fuqiuluo.xposed.hooks.sensor.SystemSensorManagerHook
 import moe.fuqiuluo.xposed.hooks.telephony.TelephonyHook
 import moe.fuqiuluo.xposed.hooks.wlan.WlanHook
-import moe.fuqiuluo.xposed.utils.BinderUtils
 import moe.fuqiuluo.xposed.utils.FakeLoc
 import moe.fuqiuluo.xposed.utils.Logger
-import moe.fuqiuluo.xposed.utils.beforeHook
-import moe.fuqiuluo.xposed.utils.hookAllMethods
-import moe.fuqiuluo.xposed.utils.hookMethodAfter
-import java.io.File
-import java.util.concurrent.atomic.AtomicBoolean
-import kotlin.concurrent.thread
 
 class FakeLocation: IXposedHookLoadPackage, IXposedHookZygoteInit {
     private lateinit var cServiceManager: Class<*> // android.os.ServiceManager
@@ -100,7 +92,10 @@ class FakeLocation: IXposedHookLoadPackage, IXposedHookZygoteInit {
                 AndroidFusedLocationProviderHook(lpparam.classLoader)
             }
             "com.xiaomi.location.fused" -> {
-                MiFusedLocationHook(lpparam.classLoader)
+                ThirdPartyLocationHook(lpparam.classLoader)
+            }
+            "com.oplus.location" -> {
+                OplusLocationHook(lpparam.classLoader)
             }
         }
     }

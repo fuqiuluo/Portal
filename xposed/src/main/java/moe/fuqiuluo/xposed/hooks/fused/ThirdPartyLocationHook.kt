@@ -1,21 +1,24 @@
-package moe.fuqiuluo.xposed.hooks.fused.miui
+package moe.fuqiuluo.xposed.hooks.fused
 
+import android.location.LocationListener
 import android.os.Bundle
 import de.robv.android.xposed.XposedHelpers
 import moe.fuqiuluo.xposed.BaseLocationHook
 import moe.fuqiuluo.xposed.hooks.blindhook.BlindHookLocation
+import moe.fuqiuluo.xposed.hooks.blindhook.BlindHookLocation.invoke
 import moe.fuqiuluo.xposed.utils.FakeLoc
 import moe.fuqiuluo.xposed.utils.Logger
 import moe.fuqiuluo.xposed.utils.hookMethodAfter
+import moe.fuqiuluo.xposed.utils.hookMethodBefore
 import moe.fuqiuluo.xposed.utils.onceHookMethodBefore
 import moe.fuqiuluo.xposed.utils.toClass
 import java.lang.reflect.Modifier
 
-object MiFusedLocationHook: BaseLocationHook() {
+object ThirdPartyLocationHook: BaseLocationHook() {
 
     operator fun invoke(classLoader: ClassLoader) {
-        if(!initDivineService("MiFusedLocationHook")) {
-            Logger.error("Failed to init DivineService in MiFusedLocationHook")
+        if(!initDivineService("ThirdPartyLocationHook")) {
+            Logger.error("Failed to init DivineService in ThirdPartyLocationHook")
             return
         }
 
@@ -40,6 +43,9 @@ object MiFusedLocationHook: BaseLocationHook() {
 
                 Logger.debug("NetworkLocationManager.onSendExtraCommand: $cmd, $extras")
             }
+            if (FakeLoc.enable) {
+                this.result = false
+            }
         }
 
         val boolFields = cNetworkLocationManager.declaredFields
@@ -47,10 +53,23 @@ object MiFusedLocationHook: BaseLocationHook() {
         boolFields.forEach {
             it.isAccessible = true
         }
+        val listenerField = cNetworkLocationManager.declaredFields
+            .filter { it.type == LocationListener::class.java && !Modifier.isStatic(it.modifiers) }
+        listenerField.forEach {
+            it.isAccessible = true
+        }
         cNetworkLocationManager.onceHookMethodBefore("requestLocationUpdates") {
             if (FakeLoc.enable) {
+                if(this.args[1] is LocationListener) {
+                    this.args[1] = null // 拒绝高德地图注册私有listener
+                }
+                listenerField.forEach { it.set(thisObject, null) }
                 boolFields.forEach { it.setBoolean(thisObject, false) }
             }
+        }
+
+        cNetworkLocationManager.hookMethodBefore("updateOffLocEnable") {
+            this.result = Unit
         }
 
         BlindHookLocation(cNetworkLocationManager)
@@ -78,6 +97,8 @@ object MiFusedLocationHook: BaseLocationHook() {
 
             BlindHookLocation(bdLocationClient)
         }
+
+
     }
 
     private fun hookTencent(classLoader: ClassLoader) {
