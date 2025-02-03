@@ -317,8 +317,8 @@ class HomeFragment : Fragment() {
                 if (latLonArray.size != 2) {
                     editLatLon.error = "经纬度格式错误"
                 } else {
-                    val lat = latLonArray[0].trim().toDoubleOrNull()
-                    val lon = latLonArray[1].trim().toDoubleOrNull()
+                    val lon = latLonArray[0].trim().toDoubleOrNull()
+                    val lat = latLonArray[1].trim().toDoubleOrNull()
                     if (!checkLatLon(lat, lon)) {
                         editLatLon.error = "经纬度格式错误"
                     }
@@ -351,8 +351,8 @@ class HomeFragment : Fragment() {
                 .setView(dialogView)
                 .setPositiveButton("保存") { _, _ ->
                     val latLonArray = editLatLon.text.toString().split(",")
-                    val newLat = latLonArray[0].trim().toDoubleOrNull()
-                    val newLon = latLonArray[1].trim().toDoubleOrNull()
+                    val newLon = latLonArray[0].trim().toDoubleOrNull()
+                    val newLat = latLonArray[1].trim().toDoubleOrNull()
                     var name = editName.text?.toString()
                     val address = editAddress.text?.toString()
                     if (name.isNullOrBlank()) {
