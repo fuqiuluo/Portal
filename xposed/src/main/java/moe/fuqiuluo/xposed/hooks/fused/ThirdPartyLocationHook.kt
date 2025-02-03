@@ -15,7 +15,6 @@ import moe.fuqiuluo.xposed.utils.toClass
 import java.lang.reflect.Modifier
 
 object ThirdPartyLocationHook: BaseLocationHook() {
-
     operator fun invoke(classLoader: ClassLoader) {
         if(!initDivineService("ThirdPartyLocationHook")) {
             Logger.error("Failed to init DivineService in ThirdPartyLocationHook")

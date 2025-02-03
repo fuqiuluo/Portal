@@ -18,6 +18,10 @@ abstract class BaseDivineService {
      * so a binder is used to talk.
      */
     protected fun initDivineService(from: String, retryCount: Int = 0): Boolean {
+        if (FakeLoc.isSystemServerProcess) {
+            return true
+        }
+
         fun tryFetchLocationManager(): LocationManager? {
             var locationManager = BinderUtils.getSystemContext()?.getSystemService(Context.LOCATION_SERVICE) as? LocationManager
             var count = 0

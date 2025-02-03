@@ -87,6 +87,8 @@ class FakeLocation: IXposedHookLoadPackage, IXposedHookZygoteInit {
                 WlanHook(systemClassLoader)
                 AndroidFusedLocationProviderHook(lpparam.classLoader)
                 SystemSensorManagerHook(lpparam.classLoader)
+
+                ThirdPartyLocationHook(lpparam.classLoader)
             }
             "com.android.location.fused" -> {
                 AndroidFusedLocationProviderHook(lpparam.classLoader)
