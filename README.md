@@ -6,6 +6,8 @@
 
 QQ交流群：599533037
 
+![QRCODE](img/qrcode.jpg)
+
 The virtual positioning module based on LSPosed only provides Hook system services to achieve virtual positioning, and cannot be integrated into the APP.
 
 The purpose of this application is to help developers debug the simulation tool of the location information program, and the application will automatically create features once it is installed and launched。
