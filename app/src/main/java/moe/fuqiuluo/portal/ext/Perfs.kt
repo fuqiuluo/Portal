@@ -16,7 +16,6 @@ var Context.selectLocation: HistoricalLocation?
             HistoricalLocation.fromString(it)
         }
     }
-
     set(value) = sharedPrefs.edit {
         putString("selectedLocation", value?.toString())
     }
@@ -32,16 +31,25 @@ var Context.rawHistoricalLocations: Set<String>
     get() {
         return sharedPrefs.getStringSet("locations", emptySet()) ?: emptySet()
     }
-
     set(value) {
         sharedPrefs.edit {
             putStringSet("locations", value)
         }
     }
 
+var Context.jsonHistoricalRoutes: String
+    get() {
+        return sharedPrefs.getString("routes", null) ?: ""
+    }
+    set(value) {
+        sharedPrefs.edit {
+            putString("routes", value)
+        }
+    }
+
+
 var Context.mapType: Int
     get() = sharedPrefs.getInt("mapType", BaiduMap.MAP_TYPE_NORMAL)
-
     set(value) = sharedPrefs.edit {
         putInt("mapType", value)
     }
@@ -55,7 +63,6 @@ var Context.rockerCoords: Pair<Int, Int>
         val y = sharedPrefs.getInt("rocker_y", 0)
         return Pair(x, y)
     }
-
     set(value) = sharedPrefs.edit {
         putInt("rocker_x", value.first)
         putInt("rocker_y", value.second)
@@ -63,42 +70,36 @@ var Context.rockerCoords: Pair<Int, Int>
 
 var Context.speed: Double
     get() = sharedPrefs.getFloat("speed", FakeLoc.speed.toFloat()).toDouble()
-
     set(value) = sharedPrefs.edit {
         putFloat("speed", value.toFloat())
     }
 
 var Context.altitude: Double
     get() = sharedPrefs.getFloat("altitude", FakeLoc.altitude.toFloat()).toDouble()
-
     set(value) = sharedPrefs.edit {
         putFloat("altitude", value.toFloat())
     }
 
 var Context.accuracy: Float
     get() = sharedPrefs.getFloat("accuracy", FakeLoc.accuracy)
-
     set(value) = sharedPrefs.edit {
         putFloat("accuracy", value)
     }
 
 var Context.needOpenSELinux: Boolean
     get() = sharedPrefs.getBoolean("needOpenSELinux", false)
-
     set(value) = sharedPrefs.edit {
         putBoolean("needOpenSELinux", value)
     }
 
 var Context.needDowngradeToCdma: Boolean
     get() = sharedPrefs.getBoolean("needDowngradeToCdma", FakeLoc.needDowngradeToCdma)
-
     set(value) = sharedPrefs.edit {
         putBoolean("needDowngradeToCdma", value)
     }
 
 var Context.hookSensor: Boolean
     get() = sharedPrefs.getBoolean("hookSensor", false)
-
     set(value) = sharedPrefs.edit {
         putBoolean("hookSensor", value)
     }
@@ -119,28 +120,27 @@ var Context.hookSensor: Boolean
 
 var Context.debug: Boolean
     get() = sharedPrefs.getBoolean("debug", FakeLoc.enableDebugLog)
-
     set(value) = sharedPrefs.edit {
         putBoolean("debug", value)
     }
 
 var Context.disableGetCurrentLocation: Boolean
     get() = sharedPrefs.getBoolean("disableGetCurrentLocation", FakeLoc.disableGetCurrentLocation)
-
     set(value) = sharedPrefs.edit {
         putBoolean("disableGetCurrentLocation", value)
     }
 
 var Context.disableRegitserLocationListener: Boolean
-    get() = sharedPrefs.getBoolean("disableRegitserLocationListener", FakeLoc.disableRegisterLocationListener)
-
+    get() = sharedPrefs.getBoolean(
+        "disableRegitserLocationListener",
+        FakeLoc.disableRegisterLocationListener
+    )
     set(value) = sharedPrefs.edit {
         putBoolean("disableRegitserLocationListener", value)
     }
 
 var Context.disableFusedProvider: Boolean
     get() = sharedPrefs.getBoolean("disableFusedProvider", FakeLoc.disableFusedLocation)
-
     set(value) = sharedPrefs.edit {
         putBoolean("disableFusedProvider", value)
     }

@@ -18,6 +18,18 @@
         tools:layout="@layout/fragment_mock" />
 
     <fragment
+        android:id="@+id/nav_route_gallery"
+        android:name="moe.fuqiuluo.portal.ui.mock.RouteMockFragment"
+        android:label="@string/menu_route_mock"
+        tools:layout="@layout/fragment_route_mock" />
+
+    <fragment
+        android:id="@+id/nav_route_edit"
+        android:name="moe.fuqiuluo.portal.ui.mock.RouteEditFragment"
+        android:label="@string/menu_route_mock_edit"
+        tools:layout="@layout/fragment_route_edit" />
+
+    <fragment
         android:id="@+id/nav_slideshow"
         android:name="moe.fuqiuluo.portal.ui.settings.SettingsFragment"
         android:label="@string/menu_setting"

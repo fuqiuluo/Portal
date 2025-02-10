@@ -66,16 +66,16 @@ import moe.fuqiuluo.portal.android.permission.RequestPermissions
 import moe.fuqiuluo.portal.android.root.ShellUtils
 import moe.fuqiuluo.portal.android.window.OverlayUtils
 import moe.fuqiuluo.portal.android.window.StatusBarUtil
-import moe.fuqiuluo.portal.databinding.ActivityMainBinding
-import moe.fuqiuluo.portal.ui.notification.NotificationUtils
-import moe.fuqiuluo.portal.ui.viewmodel.BaiduMapViewModel
-import moe.fuqiuluo.portal.ui.viewmodel.MockServiceViewModel
 import moe.fuqiuluo.portal.bdmap.Poi
 import moe.fuqiuluo.portal.bdmap.toPoi
+import moe.fuqiuluo.portal.databinding.ActivityMainBinding
 import moe.fuqiuluo.portal.ext.Loc4j
 import moe.fuqiuluo.portal.ext.gcj02
 import moe.fuqiuluo.portal.ext.isFullScreen
 import moe.fuqiuluo.portal.ext.wgs84
+import moe.fuqiuluo.portal.ui.notification.NotificationUtils
+import moe.fuqiuluo.portal.ui.viewmodel.BaiduMapViewModel
+import moe.fuqiuluo.portal.ui.viewmodel.MockServiceViewModel
 
 class MainActivity : AppCompatActivity() {
     private lateinit var appBarConfiguration: AppBarConfiguration
@@ -180,7 +180,7 @@ class MainActivity : AppCompatActivity() {
                 // menu should be considered as top level destinations.
                 appBarConfiguration = AppBarConfiguration(
                     setOf(
-                        R.id.nav_home, R.id.nav_gallery, R.id.nav_slideshow
+                        R.id.nav_home, R.id.nav_gallery, R.id.nav_route_gallery, R.id.nav_slideshow
                     ), drawerLayout
                 )
 

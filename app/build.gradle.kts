@@ -165,6 +165,8 @@ dependencies {
 
     implementation(libs.okhttp)
 
+    implementation(libs.fastjson)
+
     implementation(fileTree(mapOf(
         "dir" to "libs",
         "include" to listOf("*.jar")
