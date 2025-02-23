@@ -3,11 +3,13 @@
 
 package moe.fuqiuluo.xposed.hooks
 
+import android.location.GnssStatus
 import android.location.Location
 import android.os.Build
 import android.os.Bundle
 import android.os.DeadObjectException
 import android.os.IInterface
+import android.os.Parcel
 import de.robv.android.xposed.XC_MethodHook
 import de.robv.android.xposed.XposedBridge
 import de.robv.android.xposed.XposedHelpers
@@ -31,8 +33,129 @@ import java.lang.reflect.Method
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.concurrent.thread
+import kotlin.random.Random
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
+
+private const val MIN_SATELLITES = 8
+private const val MAX_SATELLITES = 35 // 北斗系统实际可见卫星数上限
+
+// 载噪比范围，考虑不同轨道类型
+private const val GEO_MIN_CN0 = 30.0f  // GEO卫星信号较强
+private const val GEO_MAX_CN0 = 45.0f
+private const val IGSO_MIN_CN0 = 25.0f
+private const val IGSO_MAX_CN0 = 42.0f
+private const val MEO_MIN_CN0 = 20.0f  // MEO卫星信号相对较弱
+private const val MEO_MAX_CN0 = 40.0f
+
+// 北斗频率
+private const val BDS_B1I_FREQ = 1561.098f // MHz
+private const val BDS_B2I_FREQ = 1207.140f
+private const val BDS_B3I_FREQ = 1268.520f
+
+private val satelliteList = listOf(
+    BDSSatellite(1, OrbitType.GEO),
+    BDSSatellite(2, OrbitType.GEO),
+    BDSSatellite(3, OrbitType.GEO),
+    BDSSatellite(4, OrbitType.GEO),
+    BDSSatellite(5, OrbitType.GEO),
+    BDSSatellite(6, OrbitType.IGSO),
+    BDSSatellite(7, OrbitType.IGSO),
+    BDSSatellite(8, OrbitType.IGSO),
+    BDSSatellite(9, OrbitType.IGSO),
+    BDSSatellite(10, OrbitType.IGSO),
+    BDSSatellite(11, OrbitType.MEO),
+    BDSSatellite(12, OrbitType.MEO),
+    BDSSatellite(13, OrbitType.IGSO),
+    BDSSatellite(14, OrbitType.MEO),
+    BDSSatellite(16, OrbitType.IGSO),
+    BDSSatellite(19, OrbitType.MEO),
+    BDSSatellite(20, OrbitType.MEO),
+    BDSSatellite(21, OrbitType.MEO),
+    BDSSatellite(22, OrbitType.MEO),
+    BDSSatellite(23, OrbitType.MEO),
+    BDSSatellite(24, OrbitType.MEO),
+    BDSSatellite(25, OrbitType.MEO),
+    BDSSatellite(26, OrbitType.MEO),
+    BDSSatellite(27, OrbitType.MEO),
+    BDSSatellite(28, OrbitType.MEO),
+    BDSSatellite(29, OrbitType.MEO),
+    BDSSatellite(30, OrbitType.MEO),
+    BDSSatellite(31, OrbitType.IGSO),
+    BDSSatellite(32, OrbitType.MEO),
+    BDSSatellite(33, OrbitType.MEO),
+    BDSSatellite(34, OrbitType.MEO),
+    BDSSatellite(35, OrbitType.MEO),
+    BDSSatellite(36, OrbitType.MEO),
+    BDSSatellite(37, OrbitType.MEO),
+    BDSSatellite(38, OrbitType.IGSO),
+    BDSSatellite(39, OrbitType.IGSO),
+    BDSSatellite(40, OrbitType.IGSO),
+    BDSSatellite(41, OrbitType.MEO),
+    BDSSatellite(42, OrbitType.MEO),
+    BDSSatellite(43, OrbitType.MEO),
+    BDSSatellite(44, OrbitType.MEO),
+    BDSSatellite(45, OrbitType.MEO),
+    BDSSatellite(46, OrbitType.MEO),
+    BDSSatellite(56, OrbitType.IGSO),
+    BDSSatellite(57, OrbitType.MEO),
+    BDSSatellite(58, OrbitType.MEO),
+    BDSSatellite(59, OrbitType.GEO),
+    BDSSatellite(60, OrbitType.GEO),
+    BDSSatellite(61, OrbitType.GEO),
+    BDSSatellite(62, OrbitType.GEO),
+    BDSSatellite(48, OrbitType.MEO),
+    BDSSatellite(50, OrbitType.MEO),
+    BDSSatellite(47, OrbitType.MEO),
+    BDSSatellite(49, OrbitType.MEO),
+//    BDSSatellite(130, OrbitType.GEO),
+//    BDSSatellite(143, OrbitType.GEO),
+//    BDSSatellite(144, OrbitType.GEO),
+)
+
+object GnssFlags {
+    // 基本标志位
+    const val SVID_FLAGS_NONE = 0
+    const val SVID_FLAGS_HAS_EPHEMERIS_DATA = (1 shl 0)
+    const val SVID_FLAGS_HAS_ALMANAC_DATA = (1 shl 1)
+    const val SVID_FLAGS_USED_IN_FIX = (1 shl 2)
+    const val SVID_FLAGS_HAS_CARRIER_FREQUENCY = (1 shl 3)
+    const val SVID_FLAGS_HAS_BASEBAND_CN0 = (1 shl 4)
+
+    // 位移宽度
+    const val SVID_SHIFT_WIDTH = 12
+    const val CONSTELLATION_TYPE_SHIFT_WIDTH = 8
+    const val CONSTELLATION_TYPE_MASK = 0xf
+
+    // 星座类型（与 Android GnssStatus.CONSTELLATION_ 常量对应）
+    const val CONSTELLATION_GPS = 1
+    const val CONSTELLATION_SBAS = 2
+    const val CONSTELLATION_GLONASS = 3
+    const val CONSTELLATION_QZSS = 4
+    const val CONSTELLATION_BEIDOU = 5
+    const val CONSTELLATION_GALILEO = 6
+    const val CONSTELLATION_IRNSS = 7
+}
+
+sealed class OrbitType(val minCn0: Float, val maxCn0: Float, val elevationRange: ClosedRange<Float>) {
+    object GEO : OrbitType(GEO_MIN_CN0, GEO_MAX_CN0, 35f..50f)
+    object IGSO : OrbitType(IGSO_MIN_CN0, IGSO_MAX_CN0, 20f..60f)
+    object MEO : OrbitType(MEO_MIN_CN0, MEO_MAX_CN0, 0f..90f)
+}
+
+data class BDSSatellite(
+    val prn: Int,
+    val type: OrbitType,
+)
+
+data class MockGnssData(
+    val svCount: Int,
+    val svidWithFlags: IntArray,
+    val cn0s: FloatArray,
+    val elevations: FloatArray,
+    val azimuths: FloatArray,
+    val carrierFreqs: FloatArray
+)
 
 internal object LocationServiceHook: BaseLocationHook() {
     val locationListeners = ConcurrentHashMap<String, Pair<String, Any>>()
@@ -156,8 +279,6 @@ internal object LocationServiceHook: BaseLocationHook() {
             //}
             // android 12 and later
             // remove this method
-            if (hasThrowable()) return@beforeHook
-
             val provider = kotlin.runCatching {
                 XposedHelpers.callMethod(args[0], "getProvider") as? String
             }.getOrNull() ?: "gps"
@@ -186,46 +307,10 @@ internal object LocationServiceHook: BaseLocationHook() {
                 result = null
                 return@beforeHook
             }
-
-            // milliseconds
-//                    val updateInterval = kotlin.runCatching {
-//                        val currentInterval = XposedHelpers.getLongField(request, "mInterval")
-//                        if (currentInterval > FakeLocationConfig.updateInterval) {
-//                            FakeLocationConfig.updateInterval
-//                        } else {
-//                            currentInterval
-//                        }
-//                    }.getOrElse {
-//                        runCatching {
-//                            XposedHelpers.callMethod(request, "getInterval") as Long
-//                        }.getOrElse {
-//                            FakeLocationConfig.updateInterval
-//                        }
-//                    }
-//                    val updateFastestInterval = kotlin.runCatching {
-//                        val currentInterval = XposedHelpers.getLongField(request, "mFastestInterval")
-//                        if (currentInterval > FakeLocationConfig.updateInterval) {
-//                            FakeLocationConfig.updateInterval
-//                        } else {
-//                            currentInterval
-//                        }
-//                    }.getOrElse {
-//                        kotlin.runCatching {
-//                            XposedHelpers.callMethod(request, "getFastestInterval") as Long
-//                        }.getOrElse {
-//                            (updateInterval / 6.0).toLong()
-//                        }
-//                    }
-//                    kotlin.runCatching {
-//                        XposedHelpers.callMethod(thisObject, "setInterval", updateInterval)
-//                        XposedHelpers.callMethod(thisObject, "setFastestInterval", updateFastestInterval)
-//                    }.onFailure {
-//                        XposedBridge.log("[Portal] modify locationRequest failed: ${it.stackTraceToString()}")
-//                    }
         })
-        cILocationManager.hookAllMethods("removeUpdates", afterHook {
-
-        })
+//        cILocationManager.hookAllMethods("removeUpdates", afterHook {
+//
+//        })
         cILocationManager.hookAllMethods("registerLocationListener", beforeHook {
             // android 12 ~ android 15
             // void registerLocationListener(String provider, in LocationRequest request, in ILocationListener listener, String packageName, @nullable String attributionTag, String listenerId);
@@ -273,44 +358,10 @@ internal object LocationServiceHook: BaseLocationHook() {
                 result = null
                 return@beforeHook
             }
-//                    val updateInterval = kotlin.runCatching {
-//                        val currentInterval = XposedHelpers.getLongField(request, "mInterval")
-//                        if (currentInterval > FakeLocationConfig.updateInterval) {
-//                            FakeLocationConfig.updateInterval
-//                        } else {
-//                            currentInterval
-//                        }
-//                    }.getOrElse {
-//                        runCatching {
-//                            XposedHelpers.callMethod(request, "getInterval") as Long
-//                        }.getOrElse {
-//                            FakeLocationConfig.updateInterval
-//                        }
-//                    }
-//                    val updateFastestInterval = kotlin.runCatching {
-//                        val currentInterval = XposedHelpers.getLongField(request, "mFastestInterval")
-//                        if (currentInterval > FakeLocationConfig.updateInterval) {
-//                            FakeLocationConfig.updateInterval
-//                        } else {
-//                            currentInterval
-//                        }
-//                    }.getOrElse {
-//                        kotlin.runCatching {
-//                            XposedHelpers.callMethod(request, "getFastestInterval") as Long
-//                        }.getOrElse {
-//                            (updateInterval / 6.0).toLong()
-//                        }
-//                    }
-
-//                    kotlin.runCatching {
-//                        XposedHelpers.callMethod(thisObject, "setIntervalMillis", updateInterval)
-//                    }.onFailure {
-//                        XposedBridge.log("[Portal] change locationRequest failed: ${it.stackTraceToString()}")
-//                    }
         })
-        cILocationManager.hookAllMethods("unregisterLocationListener", afterHook {
-
-        })
+//        cILocationManager.hookAllMethods("unregisterLocationListener", afterHook {
+//
+//        })
 
         run {
             cILocationManager.hookAllMethods("addGnssBatchingCallback", beforeHook {
@@ -411,65 +462,169 @@ internal object LocationServiceHook: BaseLocationHook() {
             }
         })
 
-//        // Does not involve satellite information falsification (illegal)
-//        if(XposedBridge.hookAllMethods(cILocationManager, "registerGnssStatusCallback", object: XC_MethodHook() {
-//                override fun afterHookedMethod(param: MethodHookParam?) {
-//                    if(hasHookRegisterGnssStatusCallback.get() || param == null || param.args.isEmpty() || param.args[0] == null) return
-//
-//                    val callback = param.args[0] ?: return
-//                    val cIGnssStatusListener = callback.javaClass
-//
-//                    //val cGnssStatus by lazy { XposedHelpers.findClass("android.location.GnssStatus", cIGnssStatusListener.classLoader) }
-//                    if(XposedBridge.hookAllMethods(cIGnssStatusListener, "onSvStatusChanged", object: XC_MethodHook() {
-//                        override fun beforeHookedMethod(param: MethodHookParam?) {
-//                            if (param == null) return
-//                            XposedBridge.log("[Portal] onSvStatusChanged")
-//                            // android 7.0.0
-//                            // void onSvStatusChanged(int svCount, in int[] svidWithFlags, in float[] cn0s,
-//                            //            in float[] elevations, in float[] azimuths);
-//                            // android 8.0.0
-//                            // void onSvStatusChanged(int svCount, in int[] svidWithFlags, in float[] cn0s,
-//                            //            in float[] elevations, in float[] azimuths,
-//                            //            in float[] carrierFreqs);
-//                            // android 11
-//                            //  void onSvStatusChanged(int svCount, in int[] svidWithFlags, in float[] cn0s,
-//                            //            in float[] elevations, in float[] azimuths,
-//                            //            in float[] carrierFreqs, in float[] basebandCn0s);
-//                            // android 12 ~ 15
-//                            // void onSvStatusChanged(in GnssStatus gnssStatus);
-//                            if (param.args[0] is Int) {
-//                                val svCount = param.args[0] as Int
+
+        if(XposedBridge.hookAllMethods(cILocationManager, "registerGnssStatusCallback", object: XC_MethodHook() {
+                override fun afterHookedMethod(param: MethodHookParam?) {
+                    if(param == null || param.args.isEmpty() || param.args[0] == null) return
+
+                    val callback = param.args[0] ?: return
+                    val cIGnssStatusListener = callback.javaClass
+
+                    if (!FakeLoc.enable) {
+                        return
+                    } else if(FakeLoc.enableDebugLog) {
+                        Logger.debug("registerGnssStatusCallback: injected!")
+                    }
+
+                    //val cGnssStatus by lazy { XposedHelpers.findClass("android.location.GnssStatus", cIGnssStatusListener.classLoader) }
+                    if(XposedBridge.hookAllMethods(cIGnssStatusListener, "onSvStatusChanged", object: XC_MethodHook() {
+                            override fun beforeHookedMethod(param: MethodHookParam?) {
+                                if (param == null) return
+                                Logger.info("onSvStatusChanged")
+                                // android 7.0.0
+                                // void onSvStatusChanged(int svCount, in int[] svidWithFlags, in float[] cn0s,
+                                //            in float[] elevations, in float[] azimuths);
+                                // android 8.0.0
+                                // void onSvStatusChanged(int svCount, in int[] svidWithFlags, in float[] cn0s,
+                                //            in float[] elevations, in float[] azimuths,
+                                //            in float[] carrierFreqs);
+                                // android 11
+                                //  void onSvStatusChanged(int svCount, in int[] svidWithFlags, in float[] cn0s,
+                                //            in float[] elevations, in float[] azimuths,
+                                //            in float[] carrierFreqs, in float[] basebandCn0s);
+                                // android 12 ~ 15
+                                // void onSvStatusChanged(in GnssStatus gnssStatus);
+
+                                // https://www.csno-tarc.cn/system/constellation
+
+                                if (!FakeLoc.enable) return
+
+                                val svCount = Random.nextInt(MIN_SATELLITES, MAX_SATELLITES + 1)
+                                val mockGps = MockGnssData(
+                                    svCount = svCount,
+                                    svidWithFlags = IntArray(svCount),
+                                    cn0s = FloatArray(svCount),
+                                    elevations = FloatArray(svCount),
+                                    azimuths = FloatArray(svCount),
+                                    carrierFreqs = FloatArray(svCount)
+                                ).apply {
+                                    val selectedSatellites = satelliteList.shuffled().take(svCount)
+
+                                    selectedSatellites.forEachIndexed { index, sat ->
+                                        svidWithFlags[index] = 0
+
+                                        val hasEphemeris = Random.nextFloat() > 0.1f    // 90%概率有星历
+                                        val hasAlmanac = Random.nextFloat() > 0.05f     // 95%概率有年历
+                                        val usedInFix = Random.nextFloat() > 0.3f       // 70%概率用于定位
+                                        val hasCarrierFreq = true                       // 总是有载波频率
+                                        val hasBasebandCn0 = true                       // 总是有基带载噪比
+
+                                        var flags = GnssFlags.SVID_FLAGS_NONE
+
+                                        // 设置基本标志位
+                                        if (hasEphemeris) flags = flags or GnssFlags.SVID_FLAGS_HAS_EPHEMERIS_DATA
+                                        if (hasAlmanac) flags = flags or GnssFlags.SVID_FLAGS_HAS_ALMANAC_DATA
+                                        if (usedInFix) flags = flags or GnssFlags.SVID_FLAGS_USED_IN_FIX
+                                        if (hasCarrierFreq) flags = flags or GnssFlags.SVID_FLAGS_HAS_CARRIER_FREQUENCY
+                                        if (hasBasebandCn0) flags = flags or GnssFlags.SVID_FLAGS_HAS_BASEBAND_CN0
+
+                                        // 组合SVID、星座类型和标志位
+                                        svidWithFlags[index] = (sat.prn shl GnssFlags.SVID_SHIFT_WIDTH) or
+                                                ((GnssFlags.CONSTELLATION_BEIDOU and GnssFlags.CONSTELLATION_TYPE_MASK) shl GnssFlags.CONSTELLATION_TYPE_SHIFT_WIDTH) or
+                                                flags
+
+                                        cn0s[index] = when (sat.type) {
+                                            is OrbitType.GEO -> Random.nextFloat(GEO_MIN_CN0, GEO_MAX_CN0)
+                                            is OrbitType.IGSO -> Random.nextFloat(IGSO_MIN_CN0, IGSO_MAX_CN0)
+                                            is OrbitType.MEO -> Random.nextFloat(MEO_MIN_CN0, MEO_MAX_CN0)
+                                        }
+                                        elevations[index] = Random.nextFloat(sat.type.elevationRange.start, sat.type.elevationRange.endInclusive)
+                                        azimuths[index] = Random.nextFloat(0f, 360f)
+                                        carrierFreqs[index] = when (Random.nextInt(3)) {
+                                            0 -> BDS_B1I_FREQ
+                                            1 -> BDS_B2I_FREQ
+                                            else -> BDS_B3I_FREQ
+                                        }
+                                    }
+                                }
+
+                                if (param.args[0] is Int) {
+//                                var svCount = param.args[0] as Int
 //                                val svidWithFlags = param.args[1] as IntArray
 //                                val cn0s = param.args[2] as FloatArray
 //                                val elevations = param.args[3] as FloatArray
 //                                val azimuths = param.args[4] as FloatArray
-//
-//                            } else {
-//                                val gnssStatus = param.args[0]
-//
-//                            }
-//                        }
-//                    }).isEmpty()) {
-//                        XposedBridge.log("[Portal] hook onSvStatusChanged failed")
-//                    }
-//
-//                    if(Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
-//                        if(XposedBridge.hookAllMethods(cIGnssStatusListener, "onNmeaReceived", object: XC_MethodHook() {
-//                            override fun beforeHookedMethod(param: MethodHookParam?) {
-//                                if (param == null) return
-//                                XposedBridge.log("[Portal] onNmeaReceived")
-//
-//                            }
-//                        }).isEmpty()) {
-//                            XposedBridge.log("[Portal] hook onNmeaReceived failed")
-//                        }
-//                    }
-//
-//                    hasHookRegisterGnssStatusCallback.set(true)
-//                }
-//        }).isEmpty()) {
-//            XposedBridge.log("[Portal] hook registerGnssStatusCallback failed")
-//        }
+//                                val carrierFreqs = if (param.args.size > 5) param.args[5] as FloatArray else null
+
+                                    param.args[0] = svCount
+                                    param.args[1] = mockGps.svidWithFlags
+                                    param.args[2] = mockGps.cn0s
+                                    param.args[3] = mockGps.elevations
+                                    param.args[4] = mockGps.azimuths
+                                    if (param.args.size > 5) {
+                                        param.args[5] = mockGps.carrierFreqs
+                                    }
+
+                                    if (param.args.size > 6) {
+                                        param.args[6] = FloatArray(svCount) {
+                                            mockGps.cn0s[it] - Random.nextFloat(2f, 5f)
+                                        }
+                                    }
+                                    return
+                                }
+
+                                if (param.args[0] != null && param.args[0].javaClass.name == "android.location.GnssStatus") {
+                                    runCatching {
+                                        val mConstructor = param.args[0].javaClass.declaredConstructors.firstOrNull {
+                                            it.parameterTypes.size == 7
+                                        }.also {
+                                            it?.isAccessible = true
+                                        }
+
+                                        if (mConstructor != null) {
+                                            param.args[0] = mConstructor.newInstance(
+                                                svCount,
+                                                mockGps.svidWithFlags,
+                                                mockGps.cn0s,
+                                                mockGps.elevations,
+                                                mockGps.azimuths,
+                                                mockGps.carrierFreqs,
+                                                FloatArray(svCount) {
+                                                    mockGps.cn0s[it] - Random.nextFloat(2f, 5f)
+                                                }
+                                            )
+                                        } else {
+                                            Logger.error("onSvStatusChanged: unsupported version: ${param.method}, constructor not found")
+                                        }
+                                    }.onFailure {
+                                        XposedBridge.log(it)
+                                    }
+                                    return
+                                }
+
+                                Logger.error("onSvStatusChanged: unsupported version: ${param.method}")
+                            }
+                        }).isEmpty()) {
+                        XposedBridge.log("[Portal] hook onSvStatusChanged failed")
+                    }
+
+                    if(Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+                        if(XposedBridge.hookAllMethods(cIGnssStatusListener, "onNmeaReceived", object: XC_MethodHook() {
+                                override fun beforeHookedMethod(param: MethodHookParam?) {
+                                    if (param == null) return
+                                    if (FakeLoc.enableDebugLog) {
+                                        Logger.info("onNmeaReceived")
+                                    }
+                                    param.result = null
+                                }
+                            }).isEmpty()) {
+                            XposedBridge.log("[Portal] hook onNmeaReceived failed")
+                        }
+                    }
+                }
+            }).isEmpty()) {
+            XposedBridge.log("[Portal] hook registerGnssStatusCallback failed")
+        }
 
         // android 11+
         // @EnforcePermission("LOCATION_HARDWARE")
@@ -541,21 +696,27 @@ internal object LocationServiceHook: BaseLocationHook() {
 
         cILocationManager.hookAllMethods("getAllProviders", afterHook {
             if(FakeLoc.enable) {
-                result = listOf("gps", "passive")
-            }
-
-            if(FakeLoc.enableDebugLog) {
-                Logger.debug("getAllProviders: ${(result as List<*>).joinToString(",")}!")
+                result = if (result is List<*>) {
+                    listOf("gps", "passive")
+                } else if (result is Array<*>) {
+                    arrayOf("gps", "passive")
+                } else {
+                    Logger.error("getAllProviders: result is not List or Array")
+                    return@afterHook
+                }
             }
         })
 
         cILocationManager.hookAllMethods("getProviders", afterHook {
             if(FakeLoc.enable) {
-                result = listOf("gps", "passive")
-            }
-
-            if(FakeLoc.enableDebugLog) {
-                Logger.debug("getProviders: ${(result as List<*>).joinToString(",")}!")
+                result = if (result is List<*>) {
+                    listOf("gps", "passive")
+                } else if (result is Array<*>) {
+                    arrayOf("gps", "passive")
+                } else {
+                    Logger.error("getProviders: result is not List or Array")
+                    return@afterHook
+                }
             }
         })
 
@@ -617,7 +778,6 @@ internal object LocationServiceHook: BaseLocationHook() {
                         param.result = false
                         return
                     }
-
 
                     // Not the provider of the portal, does not process
                     if (provider != "portal") {
@@ -802,44 +962,55 @@ internal object LocationServiceHook: BaseLocationHook() {
                 val isHooked = AtomicBoolean(false)
                 XposedBridge.hookMethod(m, object : XC_MethodHook() {
                     override fun beforeHookedMethod(param: MethodHookParam?) {
-                        if (param == null) return
+                        if (param?.thisObject == null || param.args.size < 4) return
 
                         val thisObject = param.thisObject
-                        val code = param.args[0] as Int
-//                val data = param.args[1] as Parcel
-//                val reply = param.args[2] as Parcel
-//                val flags = param.args[3] as Int
+                        val code = param.args[0] as? Int ?: return
+                        val data = param.args[1] as? Parcel ?: return
+                        val reply = param.args[2] as? Parcel ?: return
+                        val flags = param.args[3] as? Int ?: return
 
-                        synchronized(this) {
-                            if (!isHooked.get()) {
-                                onService(thisObject.javaClass)
-                                isHooked.set(true)
+                        if (isHooked.compareAndSet(false, true)) {
+                            onService(thisObject.javaClass)
+                        }
+
+                        if (!FakeLoc.enable) {
+                            return
+                        }
+
+                        // TRANSACTION_isProviderEnabledForUser
+                        when (code) {
+                            47 -> {
+                                val provider = data.readString()
+                                val userId = data.readInt()
+                                if (provider == "portal") {
+                                    if (userId == 0) {
+                                        val uid = BinderUtils.getCallerUid()
+                                        reply.writeNoException()
+                                        reply.writeInt(if (BinderUtils.isLocationProviderEnabled(uid)) 1 else 0)
+                                    }
+                                } else if(provider == "gps") {
+                                    reply.writeNoException()
+                                    reply.writeInt(1)
+                                } else if (!FakeLoc.disableFusedLocation && provider == "fused") {
+                                    reply.writeNoException()
+                                    reply.writeInt(1)
+                                } else {
+                                    reply.writeNoException()
+                                    reply.writeInt(0)
+                                }
+                                param.result = true
                             }
+
                         }
 
                         if (FakeLoc.enable && code == 43) {
                             param.result = true
                         }
 
-//                if (FakeLocationConfig.DEBUG && code == 59) {
-//                    val data = param.args[1] as Parcel
-//                    val provider = data.readString()
-//                    val command = data.readString()
-//                    val extras = data.readTypedObject(Bundle.CREATOR)
-//                    XposedBridge.log("[Portal] ILocationManager.Stub: onTransact(code=$code, provider=$provider, command=$command, extras=$extras)")
-//                    param.result = true
-//                }
-
                         if (FakeLoc.enableDebugLog) {
                             Logger.debug("ILocationManager.Stub: onTransact(code=$code)")
                         }
-
-//                when(code) {
-//                    TRANSACTION_getLastLocation -> handleGetLastLocation(thisObject, data, reply)
-//                    else -> {
-//                        XposedBridge.log("[Portal] ILocationManager.Stub: code = $code")
-//                    }
-//                }
                     }
                 })
             }
@@ -899,4 +1070,8 @@ internal object LocationServiceHook: BaseLocationHook() {
     private inline fun handleInstruction(command: String, rely: Bundle): Boolean {
         return RemoteCommandHandler.handleInstruction(command, rely)
     }
+}
+
+private fun Random.nextFloat(min: Float, max: Float): Float {
+    return nextFloat() * (max - min) + min
 }

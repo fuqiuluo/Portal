@@ -104,101 +104,15 @@ class FakeLocation: IXposedHookLoadPackage, IXposedHookZygoteInit {
 
     private fun startFakeLocHook(classLoader: ClassLoader) {
         cServiceManager = XposedHelpers.findClass("android.os.ServiceManager", classLoader)
-        val cLocationManager =
-            XposedHelpers.findClass("android.location.LocationManager", classLoader)
 
         XposedHelpers.findClassIfExists("com.android.server.TelephonyRegistry", classLoader)?.let {
             TelephonyHook.hookTelephonyRegistry(it)
         } // for MUMU emulator
 
+        val cLocationManager =
+            XposedHelpers.findClass("android.location.LocationManager", classLoader)
+
         LocationServiceHook(classLoader)
         LocationManagerHook(cLocationManager)  // intrusive hooks
     }
-
-//        kotlin.runCatching {
-//            val hooks = mutableListOf<XC_MethodHook.Unhook>()
-//            val hookGetService = object: XC_MethodHook() {
-//                override fun beforeHookedMethod(param: MethodHookParam?) {
-//                    if (param == null) return
-//                    val name = param.args[0] as String
-//                    val service = if(param.args.size >= 2) {
-//                        param.args[1] as IBinder
-//                    } else {
-//                        (param.result as? IBinder) ?: return
-//                    }
-//
-//                    kotlin.runCatching {
-//                        val cLocationManager = XposedHelpers.findClass("android.location.LocationManager", service.javaClass.classLoader!!)
-//                        LocationServiceHook(cLocationManager.classLoader!!)
-//                        LocationManagerHook(cLocationManager)  // intrusive hooks
-//                    }.onFailure {
-//                        XposedBridge.log("[Portal] Failed to hook LocationManager: ${it.stackTraceToString()}")
-//                    }
-//
-////                    // Some strange emulator services don't have a location name, so there's no restriction here
-////                    if (name.contains("location", ignoreCase = true) && // 一加系统服务名大写
-////                        name != "location_time_zone_manager" // AVOID FUCKING WRONG SERVICE TOO
-////                    ) {
-////                        XposedBridge.log("[Portal] Add service: $name -> $service")
-////                    }
-//
-//                    for (hook in hooks) {
-//                        hook.unhook()
-//                    }
-//                }
-//            }
-//            hooks.addAll(XposedBridge.hookAllMethods(cServiceManager, "rawGetService", hookGetService).toList())
-//            hooks.addAll(XposedBridge.hookAllMethods(cServiceManager, "addService", hookGetService))
-//            hooks.addAll(XposedBridge.hookAllMethods(cServiceManager, "getService", hookGetService))
-//            hooks.addAll(XposedBridge.hookAllMethods(cServiceManager, "checkService", hookGetService))
-//            hooks.addAll(XposedBridge.hookAllMethods(cServiceManager, "waitForService", hookGetService))
-//        }.onSuccess {
-//            return
-//        }.onFailure {
-//            XposedBridge.log("[Portal] Failed to hook ServiceManager.addService: ${it.stackTraceToString()}")
-//        }
-//
-//        kotlin.runCatching { XposedHelpers.findClass("com.android.server.SystemServer", classLoader) }.onSuccess { cSystemServer ->
-//            val mSystemServerRun = kotlin.runCatching { cSystemServer.getDeclaredMethod("run") }.getOrNull()
-//            val mSystemServerStartOtherServices = kotlin.runCatching { cSystemServer.getDeclaredMethod("startOtherServices") }.getOrNull()
-//
-//            if (mSystemServerStartOtherServices == null && mSystemServerRun == null) {
-//                XposedBridge.log("[Portal] Failed to find SystemServer.run or SystemServer.startOtherServices")
-//                return@onSuccess
-//            }
-//
-//            if (mSystemServerRun != null) {
-//                XposedBridge.hookMethod(mSystemServerRun, object : XC_MethodHook() {
-//                    override fun beforeHookedMethod(param: MethodHookParam?) {
-//                        systemServerInitOver()
-//                    }
-//                })
-//            } else {
-//                XposedBridge.hookMethod(mSystemServerStartOtherServices, object : XC_MethodHook() {
-//                    override fun beforeHookedMethod(param: MethodHookParam?) {
-//                        systemServerInitOver()
-//                    }
-//                })
-//            }
-//        }.onFailure {
-//            XposedBridge.log("[Portal] Failed to find SystemServer: ${it.stackTraceToString()}")
-//        }
-
-//    private fun systemServerInitOver() {
-//        XposedBridge.log("[Portal] SystemServer init over")
-//        // Debug: Print ServiceManager.sCache
-//        val cCache = mServiceManagerCache?.get(null) as? Map<String, IBinder>
-//        if (cCache == null) {
-//            XposedBridge.log("[Portal] Failed to get ServiceManager.sCache")
-//            return
-//        }
-//
-//        cCache.forEach { (name, service) ->
-//            XposedBridge.log("[Portal] Service: $name -> $service")
-//        }
-//
-//        // todo：This method is too chicken, let's realize it in the next life~!
-//        // append: wtf?
-//        XposedBridge.log("[Portal] unsupported mode: systemServerInitOver")
-//    }
 }

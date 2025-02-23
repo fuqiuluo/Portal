@@ -53,6 +53,9 @@ object LocationManagerHook: BaseLocationHook() {
                         val locations = param.args[0] as List<*>
                         param.args[0] = locations.map { injectLocation(it as Location) }
                     }
+                    else -> {
+                        Logger.error("Unknown method when hook hookOnLocation: ${param.method}")
+                    }
                 }
             }
         }
@@ -65,7 +68,6 @@ object LocationManagerHook: BaseLocationHook() {
                         if (param == null || param.args.size > 1 || param.args[1] == null) return
 
                         val listener = param.args[1]
-
                         listener.javaClass.onceHookAllMethod("onLocationChanged", hookOnLocation)
                     }
                 })
@@ -77,7 +79,13 @@ object LocationManagerHook: BaseLocationHook() {
             override fun beforeHookedMethod(param: MethodHookParam?) {
                 if (param == null || param.args.isEmpty() || param.args[1] == null) return
 
-                param.args.filterIsInstance<android.location.LocationListener>().forEach {
+                param.args.filterIsInstance<android.location.LocationListener>().also {
+                    if (it.isEmpty()) {
+                        Logger.error("No LocationListener found in requestLocationUpdates: ${param.method}(${
+                            param.args?.joinToString { it?.javaClass.toString() }
+                        })")
+                    }
+                }.forEach {
                     it.javaClass.onceHookAllMethod("onLocationChanged", hookOnLocation)
                 }
             }

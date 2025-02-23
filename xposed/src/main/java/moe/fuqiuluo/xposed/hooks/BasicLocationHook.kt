@@ -104,27 +104,6 @@ object BasicLocationHook: BaseLocationHook() {
            Logger.error("Failed to hook LocationResult", it)
         }
 
-        runCatching {
-            val cOpLocationListener = "com.android.internal.telephony.OpLocationListener".toClassOrThrow(classLoader)
-            BlindHookLocation(cOpLocationListener)
-        }.onFailure {
-            Logger.error("Failed to hook OplusLocationListener", it)
-        }
-
-//        XposedHelpers.findAndHookMethod(Location::class.java, "getLatitude", object : XC_MethodHook() {
-//            override fun beforeHookedMethod(param: MethodHookParam) {
-//                if (!FakeLocationConfig.enable) return
-//                param.result = FakeLocationConfig.latitude + ((if(Random.nextBoolean()) -1 else 1) * (Random.nextInt(1, (FakeLocationConfig.accuracy * 10000).toInt()).toDouble() / 10000.0) * 8.99E-6)
-//            }
-//        })
-//
-//        XposedHelpers.findAndHookMethod(Location::class.java, "getLongitude", object : XC_MethodHook() {
-//            override fun beforeHookedMethod(param: MethodHookParam) {
-//                if (!FakeLocationConfig.enable) return
-//                param.result = FakeLocationConfig.longitude + ((if(Random.nextBoolean()) -1 else 1) * (Random.nextInt(1, (FakeLocationConfig.accuracy * 10000).toInt()).toDouble() / 10000.0) * 8.99E-6)
-//            }
-//        })
-
         Location::class.java.hookAllMethodsBefore("set") {
             if (!FakeLoc.enable) return@hookAllMethodsBefore
             args[0] = injectLocation(args[0] as Location)

@@ -14,17 +14,12 @@ import kotlin.random.Random
 abstract class BaseLocationHook: BaseDivineService() {
     fun injectLocation(originLocation: Location, realLocation: Boolean = true): Location {
         if (realLocation) {
-            if (FakeLoc.lastLocation == null) {
-                //FakeLocationConfig.latitude = location.latitude
-                //FakeLocationConfig.longitude = location.longitude
-            }
             if (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                     originLocation.provider == LocationManager.GPS_PROVIDER && originLocation.isComplete
                 } else {
                     originLocation.provider == LocationManager.GPS_PROVIDER
                 }
             ) {
-                //FakeLoc.accuracy = originLocation.accuracy
                 FakeLoc.lastLocation = originLocation
             }
         } else {
@@ -91,7 +86,7 @@ abstract class BaseLocationHook: BaseDivineService() {
             location.extras = Bundle()
         }
         location.extras?.putBoolean(RemoteCommandHandler.randomKey, true)
-        location.extras?.putInt("satellites", Random.nextInt(8, 20))
+        location.extras?.putInt("satellites", Random.nextInt(8, 45))
         location.extras?.putInt("maxCn0", Random.nextInt(30, 50))
         location.extras?.putInt("meanCn0", Random.nextInt(20, 30))
 

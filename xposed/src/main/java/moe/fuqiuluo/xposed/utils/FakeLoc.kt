@@ -24,6 +24,7 @@ object FakeLoc {
     /**
      * 模拟定位服务开关
      */
+    @Volatile
     var enable = false
 
     /**
@@ -49,7 +50,7 @@ object FakeLoc {
     /**
      * 是否允许NMEA模块
      */
-    var enableNMEA = true
+    var enableNMEA = false
 
     /**
      * 是否隐藏模拟位置
@@ -76,15 +77,23 @@ object FakeLoc {
     /**
      * 上一次的位置
      */
+    @Volatile
     var lastLocation: Location? = null
+    @Volatile
     var latitude = 0.0
+    @Volatile
     var longitude = 0.0
+    @Volatile
     var altitude = 80.0
 
+    @Volatile
     var speed = 3.05
 
     var speedAmplitude = 1.0
+
+    @Volatile
     var hasBearings = false
+
     var bearing = 0.0
         get() {
             if (hasBearings) {
