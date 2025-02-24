@@ -315,17 +315,19 @@ class MainActivity : AppCompatActivity() {
         ImageViewCompat.setImageTintList(voiceBack, color)
 
         val mSearchList = binding.appBarMain.searchListView
-        mSearchList.onItemClickListener = OnItemClickListener { _, view, _, _ ->
+        mSearchList.onItemClickListener = OnItemClickListener { parent, view, pos, id ->
             val lngText = (view.findViewById<View>(R.id.poi_longitude) as TextView).text.toString()
             val latText = (view.findViewById<View>(R.id.poi_latitude) as TextView).text.toString()
             with(baiduMapViewModel) {
                 markName = (view.findViewById<View>(R.id.poi_name) as TextView).text.toString()
-                val lng = lngText.toDouble() // gcj02
+
+                val lng = lngText.toDouble() // wgs84
                 val lat = latText.toDouble()
-                markedLoc = Loc4j.gcj2wgs(lat, lng)
-                val mapStatusUpdate = MapStatusUpdateFactory.newLatLng(LatLng(lat, lng))
+                markedLoc = lat to lng
                 if (isExists) {
-                    baiduMap.setMapStatus(mapStatusUpdate)
+                    val gcjLoc = markedLoc!!.gcj02
+                    val location = LatLng(gcjLoc.latitude, gcjLoc.longitude)
+                    baiduMap.setMapStatus(MapStatusUpdateFactory.newLatLng(location))
                 } else {
                     Toast.makeText(this@MainActivity, "地图未加载", Toast.LENGTH_SHORT).show()
                 }
@@ -341,16 +343,16 @@ class MainActivity : AppCompatActivity() {
             mSuggestionSearch = SuggestionSearch.newInstance()
             mSuggestionSearch?.setOnGetSuggestionResultListener { suggestionResult ->
                 if (suggestionResult == null || suggestionResult.allSuggestions == null) {
-                    Toast.makeText(this@MainActivity, "未找到相关结果", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@MainActivity, "未搜索到相关位置", Toast.LENGTH_SHORT).show()
                 } else {
                     val data = suggestionResult.toPoi(
                         baiduMapViewModel.currentLocation
-                    ).map { it.toMap() }
+                    ).map { it.toMap() } // wgs84
 
                     val simAdapt = SimpleAdapter(
                         this@MainActivity, data,
                         R.layout.layout_search_poi_item,
-                        arrayOf(Poi.KEY_NAME, Poi.KEY_ADDRESS, Poi.KEY_LONGITUDE, Poi.KEY_LATITUDE, Poi.KEY_TAG),
+                        arrayOf(Poi.KEY_NAME, Poi.KEY_ADDRESS, Poi.KEY_LONGITUDE_RAW, Poi.KEY_LATITUDE_RAW, Poi.KEY_TAG),
                         intArrayOf(R.id.poi_name, R.id.poi_address, R.id.poi_longitude, R.id.poi_latitude, R.id.poi_tag)
                     )
                     mSearchList.setAdapter(simAdapt)

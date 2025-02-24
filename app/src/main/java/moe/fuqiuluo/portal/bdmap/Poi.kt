@@ -18,6 +18,8 @@ data class Poi(
         const val KEY_ADDRESS = "address"
         const val KEY_LONGITUDE = "longitude"
         const val KEY_LATITUDE = "latitude"
+        const val KEY_LONGITUDE_RAW = "longitude_raw"
+        const val KEY_LATITUDE_RAW = "latitude_raw"
         const val KEY_TAG = "tag"
     }
 
@@ -28,6 +30,8 @@ data class Poi(
             KEY_LONGITUDE to longitude.toString().take(5),
             KEY_LATITUDE to latitude.toString().take(5),
             KEY_TAG to tag,
+            KEY_LONGITUDE_RAW to longitude.toString(),
+            KEY_LATITUDE_RAW to latitude.toString(),
         )
     }
 
