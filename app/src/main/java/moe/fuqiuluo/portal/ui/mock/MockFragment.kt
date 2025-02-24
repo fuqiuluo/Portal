@@ -193,7 +193,9 @@ class MockFragment : Fragment() {
                             }
                             showToast("已删除位置")
                         }
-                        .setNegativeButton("取消", null)
+                        .setNegativeButton("取消", { _, _ ->
+                            historicalLocationAdapter.notifyItemChanged(position)
+                        })
                         .show()
                 }
             }

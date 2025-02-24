@@ -7,7 +7,7 @@ import android.view.WindowManager
 import androidx.annotation.ColorInt
 
 object StatusBarUtil {
-    fun transparentStatusBar(activity: Activity, isDark: Boolean) {
+    fun transparentStatusBar(activity: Activity) {
         activity.requestWindowFeature(Window.FEATURE_NO_TITLE)
         activity.window.addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
         activity.window.statusBarColor = Color.TRANSPARENT

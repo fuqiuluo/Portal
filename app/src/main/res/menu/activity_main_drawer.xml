@@ -9,7 +9,7 @@
             android:icon="@drawable/baseline_edit_location_alt_24"
             android:title="@string/menu_home" />
         <item
-            android:id="@+id/nav_gallery"
+            android:id="@+id/nav_mock"
             android:icon="@drawable/baseline_label_important_24"
             android:title="@string/menu_mock" />
         <item

@@ -2,32 +2,28 @@
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.MaterialComponents.Light.NoActionBar">
         <item name="colorPrimaryVariant">@color/purple_700</item>
-        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorOnPrimary">@color/red500</item>
         <item name="colorSecondary">@color/portal_appbar_color</item>
         <item name="colorSecondaryVariant">@color/portal_appbar_color_center</item>
+
+
         <item name="colorOnSecondary">@color/white</item>
+        <item name="colorPrimary">@color/theme_appbar_color</item>
+        <item name="colorControlHighlight">@color/theme_focused_touch</item>
 
-        <item name="colorPrimary">@color/portal_appbar_color</item>
         <item name="colorPrimaryDark">@color/portal_appbar_color</item>
-
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="windowActionModeOverlay">true</item>
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
         <item name="android:windowTranslucentStatus">true</item>
-
         <item name="colorControlNormal">@color/white</item>
         <item name="colorControlActivated">@color/portal_appbar_color_dark</item>
-        <item name="colorControlHighlight">@color/white</item>
-
         <item name="android:textColorHint">@android:color/white</item>
         <item name="android:editTextColor">@android:color/white</item>
-
         <item name="searchViewStyle">@style/Portal.SearchViewStyle</item>
-
         <item name="selectableItemBackgroundBorderless">@drawable/ripple_effect</item>
-
         <item name="sliderStyle">@style/Portal.SliderTheme</item>
     </style>
 

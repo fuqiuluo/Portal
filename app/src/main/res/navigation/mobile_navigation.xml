@@ -12,7 +12,7 @@
         tools:layout="@layout/fragment_home" />
 
     <fragment
-        android:id="@+id/nav_gallery"
+        android:id="@+id/nav_mock"
         android:name="moe.fuqiuluo.portal.ui.mock.MockFragment"
         android:label="@string/menu_mock"
         tools:layout="@layout/fragment_mock" />

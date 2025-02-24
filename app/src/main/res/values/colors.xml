@@ -20,6 +20,17 @@
     <color name="flashing_background_color">@android:color/black</color>
     <color name="ic_launcher_background">#00B0FF</color>
 
+    <color name="theme_appbar_color">#5F5F5F</color>
+    <color name="theme_side_nav_text_color">#FFFFFF</color>
+    <color name="theme_side_nav_start_color">#373737</color>
+    <color name="theme_side_nav_center_color">#494949</color>
+    <color name="theme_side_nav_end_color">#373737</color>
+    <color name="theme_appbar_text_color">#FFFFFF</color>
+    <color name="theme_appbar_icon_color">#FFFFFF</color>
+    <color name="theme_nav_icon_color">#0D0D0D</color>
+    <color name="theme_active">#5F5F5F</color>
+    <color name="theme_focused_touch">#A0A0A0</color>
+
     <color name="portal_appbar_color">#5F5F5F</color>
     <color name="portal_appbar_color_center">#494949</color>
     <color name="portal_appbar_color_dark">#373737</color>

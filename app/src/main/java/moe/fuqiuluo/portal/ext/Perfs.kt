@@ -54,9 +54,6 @@ var Context.mapType: Int
         putInt("mapType", value)
     }
 
-val Context.isFullScreen: Boolean
-    get() = sharedPrefs.getBoolean("full_screen", false)
-
 var Context.rockerCoords: Pair<Int, Int>
     get() {
         val x = sharedPrefs.getInt("rocker_x", 0)

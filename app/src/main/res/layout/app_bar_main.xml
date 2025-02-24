@@ -20,8 +20,8 @@
             app:title="@string/app_name"
             app:theme="@style/AppTheme.Portal.ToolBarOverlay"
             app:popupTheme="@style/AppTheme.Portal.PopupTheme"
-            app:titleTextColor="@color/white"
-            app:subtitleTextColor="@color/white"
+            app:titleTextColor="@color/theme_appbar_text_color"
+            app:subtitleTextColor="@color/theme_appbar_text_color"
             app:collapseIcon="@drawable/baseline_arrow_back_24" />
 
     </com.google.android.material.appbar.AppBarLayout>

@@ -71,7 +71,6 @@ import moe.fuqiuluo.portal.bdmap.toPoi
 import moe.fuqiuluo.portal.databinding.ActivityMainBinding
 import moe.fuqiuluo.portal.ext.Loc4j
 import moe.fuqiuluo.portal.ext.gcj02
-import moe.fuqiuluo.portal.ext.isFullScreen
 import moe.fuqiuluo.portal.ext.wgs84
 import moe.fuqiuluo.portal.ui.notification.NotificationUtils
 import moe.fuqiuluo.portal.ui.viewmodel.BaiduMapViewModel
@@ -144,14 +143,11 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        StatusBarUtil.transparentStatusBar(this, false)
+        StatusBarUtil.transparentStatusBar(this)
+        //StatusBarUtil.setStatusBarColor(this, ContextCompat.getColor(this, R.color.red500))
 
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.N) {
             window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-        }
-
-        if (isFullScreen) {
-            StatusBarUtil.fullScreen(this)
         }
 
         if (!ShellUtils.hasRoot()) {
@@ -171,16 +167,17 @@ class MainActivity : AppCompatActivity() {
 
                 setSupportActionBar(binding.appBarMain.toolbar)
 
+                binding.appBarMain.toolbar.setBackgroundColor(ContextCompat.getColor(this@MainActivity, R.color.theme_appbar_color))
                 val drawerLayout: DrawerLayout = binding.drawerLayout
                 val navView: NavigationView = binding.navView
-                navView.itemIconTintList = ContextCompat.getColorStateList(this@MainActivity, R.color.portal_nav_icon)
+                navView.itemIconTintList = ContextCompat.getColorStateList(this@MainActivity, R.color.theme_nav_icon_color)
                 val navController = findNavController(R.id.nav_host_fragment_content_main)
 
                 // Passing each menu ID as a set of Ids because each
                 // menu should be considered as top level destinations.
                 appBarConfiguration = AppBarConfiguration(
                     setOf(
-                        R.id.nav_home, R.id.nav_gallery, R.id.nav_route_gallery, R.id.nav_slideshow
+                        R.id.nav_home, R.id.nav_mock, R.id.nav_route_gallery, R.id.nav_slideshow
                     ), drawerLayout
                 )
 
@@ -188,7 +185,7 @@ class MainActivity : AppCompatActivity() {
                 navView.setupWithNavController(navController)
 
                 binding.appBarMain.toolbar.navigationIcon?.colorFilter = PorterDuffColorFilter(
-                    ContextCompat.getColor(this@MainActivity, R.color.white), PorterDuff.Mode.SRC_IN
+                    ContextCompat.getColor(this@MainActivity, R.color.theme_appbar_icon_color), PorterDuff.Mode.SRC_IN
                 )
 
                 navController.addOnDestinationChangedListener { _, dest, _ ->
