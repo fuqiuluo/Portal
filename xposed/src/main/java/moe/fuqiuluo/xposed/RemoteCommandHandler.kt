@@ -222,10 +222,7 @@ object RemoteCommandHandler {
                 return true
             }
             "broadcast_location" -> {
-//                for (listener in locationListeners) {
-//                    if (!listener.asBinder().pingBinder()) continue
-//
-//                }
+                LocationServiceHook.callOnLocationChanged()
                 return true
             }
             "load_library" -> {

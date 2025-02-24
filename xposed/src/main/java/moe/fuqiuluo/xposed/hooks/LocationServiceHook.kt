@@ -31,6 +31,7 @@ import moe.fuqiuluo.xposed.utils.onceHookAllMethod
 import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.concurrent.thread
 import kotlin.random.Random
@@ -158,7 +159,7 @@ data class MockGnssData(
 )
 
 internal object LocationServiceHook: BaseLocationHook() {
-    val locationListeners = ConcurrentHashMap<String, Pair<String, Any>>()
+    val locationListeners = LinkedBlockingQueue<Pair<String, Any>>()
 
     // A random command is generated to prevent some apps from detecting Portal
     operator fun invoke(classLoader: ClassLoader) {
@@ -168,7 +169,7 @@ internal object LocationServiceHook: BaseLocationHook() {
         } else {
             onService(cLocationManagerService)
         }
-        startDaemon(classLoader)
+        //startDaemon(classLoader)
     }
 
     fun onService(cILocationManager: Class<*>) {
@@ -282,20 +283,16 @@ internal object LocationServiceHook: BaseLocationHook() {
             val provider = kotlin.runCatching {
                 XposedHelpers.callMethod(args[0], "getProvider") as? String
             }.getOrNull() ?: "gps"
-            val listener = args[1] ?: return@beforeHook
+            val listener = args.filterIsInstance<IInterface>().firstOrNull() ?: run {
+                Logger.error("requestLocationUpdates: listener is null: $method")
+                return@beforeHook
+            }
 
             if(FakeLoc.enableDebugLog) {
                 Logger.debug("requestLocationUpdates: injected! $listener")
             }
 
-            val listenerKey = Uuid.random().toHexString()
-            if (listener is IInterface) {
-                val binder = listener.asBinder()
-                binder.linkToDeath({
-                    removeLocationListener(listenerKey)
-                }, 0)
-            }
-            locationListeners[listenerKey] = provider to listener
+            locationListeners.add(provider to listener)
             hookILocationListener(listener)
 
             if (FakeLoc.disableRegisterLocationListener) {
@@ -308,9 +305,16 @@ internal object LocationServiceHook: BaseLocationHook() {
                 return@beforeHook
             }
         })
-//        cILocationManager.hookAllMethods("removeUpdates", afterHook {
-//
-//        })
+        cILocationManager.hookAllMethods("removeUpdates", afterHook {
+            val listener = args.filterIsInstance<IInterface>().firstOrNull() ?: run {
+                Logger.error("removeUpdates: listener is null: $method")
+                return@afterHook
+            }
+            if(FakeLoc.enableDebugLog) {
+                Logger.debug("removeUpdates: injected! $listener")
+            }
+            locationListeners.removeIf { it.second == listener }
+        })
         cILocationManager.hookAllMethods("registerLocationListener", beforeHook {
             // android 12 ~ android 15
             // void registerLocationListener(String provider, in LocationRequest request, in ILocationListener listener, String packageName, @nullable String attributionTag, String listenerId);
@@ -328,20 +332,16 @@ internal object LocationServiceHook: BaseLocationHook() {
             } else {
                 args[0] as? String
             } ?: "gps"
-            val listener = args[2] ?: return@beforeHook
+            val listener = args.filterIsInstance<IInterface>().firstOrNull() ?: run {
+                Logger.error("registerLocationListener: listener is null: $method")
+                return@beforeHook
+            }
 
             if(FakeLoc.enableDebugLog) {
                 Logger.debug("registerLocationListener: injected! $listener")
             }
 
-            val listenerKey = Uuid.random().toHexString()
-            if (listener is IInterface) {
-                val binder = listener.asBinder()
-                binder.linkToDeath({
-                    removeLocationListener(listenerKey)
-                }, 0)
-            }
-            locationListeners[listenerKey] = provider to listener
+            locationListeners.add(provider to listener)
             hookILocationListener(listener)
 
             if (FakeLoc.disableRegisterLocationListener) {
@@ -359,9 +359,16 @@ internal object LocationServiceHook: BaseLocationHook() {
                 return@beforeHook
             }
         })
-//        cILocationManager.hookAllMethods("unregisterLocationListener", afterHook {
-//
-//        })
+        cILocationManager.hookAllMethods("unregisterLocationListener", afterHook {
+            val listener = args.filterIsInstance<IInterface>().firstOrNull() ?: run {
+                Logger.error("unregisterLocationListener: listener is null: $method")
+                return@afterHook
+            }
+            if(FakeLoc.enableDebugLog) {
+                Logger.debug("unregisterLocationListener: injected! $listener")
+            }
+            locationListeners.removeIf { it.second == listener }
+        })
 
         run {
             cILocationManager.hookAllMethods("addGnssBatchingCallback", beforeHook {
@@ -480,7 +487,6 @@ internal object LocationServiceHook: BaseLocationHook() {
                     if(XposedBridge.hookAllMethods(cIGnssStatusListener, "onSvStatusChanged", object: XC_MethodHook() {
                             override fun beforeHookedMethod(param: MethodHookParam?) {
                                 if (param == null) return
-                                Logger.info("onSvStatusChanged")
                                 // android 7.0.0
                                 // void onSvStatusChanged(int svCount, in int[] svidWithFlags, in float[] cn0s,
                                 //            in float[] elevations, in float[] azimuths);
@@ -637,16 +643,11 @@ internal object LocationServiceHook: BaseLocationHook() {
                     Logger.debug("startGnssBatch: injected!")
                 }
 
-                val listener = args[1] ?: return@beforeHook
-
-                val listenerKey = Uuid.random().toHexString()
-                if (listener is IInterface) {
-                    val binder = listener.asBinder()
-                    binder.linkToDeath({
-                        removeLocationListener(listenerKey)
-                    }, 0)
+                val listener = args.filterIsInstance<IInterface>().firstOrNull() ?: run {
+                    Logger.error("startGnssBatch: listener is null: $method")
+                    return@beforeHook
                 }
-                locationListeners[listenerKey] = "gps" to listener
+                locationListeners.add("GnssBatch" to listener)
 
                 if (FakeLoc.disableRegisterLocationListener) {
                     result = null
@@ -661,6 +662,8 @@ internal object LocationServiceHook: BaseLocationHook() {
                     Logger.debug("stopGnssBatch: injected!")
                 }
             }
+
+            locationListeners.removeIf { it.first == "GnssBatch" }
         })
 
         //  void requestListenerFlush(String provider, in ILocationListener listener, int requestCode);
@@ -670,15 +673,11 @@ internal object LocationServiceHook: BaseLocationHook() {
                     Logger.debug("requestListenerFlush: injected!")
                 }
 
-                val listener = args[1] ?: return@beforeHook
-                val listenerKey = Uuid.random().toHexString()
-                if (listener is IInterface) {
-                    val binder = listener.asBinder()
-                    binder.linkToDeath({
-                        removeLocationListener(listenerKey)
-                    }, 0)
+                val listener = args.filterIsInstance<IInterface>().firstOrNull() ?: run {
+                    Logger.error("requestListenerFlush: listener is null: $method")
+                    return@beforeHook
                 }
-                locationListeners[listenerKey] = "gps" to listener
+                locationListeners.add("gps" to listener)
 
                 if (FakeLoc.disableRegisterLocationListener) {
                     result = null
@@ -898,37 +897,37 @@ internal object LocationServiceHook: BaseLocationHook() {
         }
     }
 
-    private fun startDaemon(classLoader: ClassLoader) {
-        //val cIRemoteCallback = XposedHelpers.findClass("android.os.IRemoteCallback", classLoader)
-        thread(
-            name = "LocationUpdater",
-            isDaemon = true,
-            start = true,
-        ) {
-            while (true) {
-                kotlin.runCatching {
-                    if (!FakeLoc.enable) {
-                        Thread.sleep(3000)
-                        return@runCatching
-                    } else {
-                        Thread.sleep(FakeLoc.updateInterval)
-                    }
-
-                    if (!FakeLoc.enable) return@runCatching // Prevent the last loop from being executed
-
-                    if (FakeLoc.enableDebugLog)
-                        Logger.debug("LocationUpdater: callOnLocationChanged: ${locationListeners.size}")
-
-                    callOnLocationChanged()
-                }.onFailure {
-                    Logger.error("LocationUpdater", it)
-                }
-            }
-        }
-    }
+//    private fun startDaemon(classLoader: ClassLoader) {
+//        //val cIRemoteCallback = XposedHelpers.findClass("android.os.IRemoteCallback", classLoader)
+//        thread(
+//            name = "LocationUpdater",
+//            isDaemon = true,
+//            start = true,
+//        ) {
+//            while (true) {
+//                kotlin.runCatching {
+//                    if (!FakeLoc.enable) {
+//                        Thread.sleep(3000)
+//                        return@runCatching
+//                    } else {
+//                        Thread.sleep(FakeLoc.updateInterval)
+//                    }
+//
+//                    if (!FakeLoc.enable) return@runCatching // Prevent the last loop from being executed
+//
+//                    if (FakeLoc.enableDebugLog)
+//                        Logger.debug("LocationUpdater: callOnLocationChanged: ${locationListeners.size}")
+//
+//                    callOnLocationChanged()
+//                }.onFailure {
+//                    Logger.error("LocationUpdater", it)
+//                }
+//            }
+//        }
+//    }
 
     fun callOnLocationChanged() {
-        locationListeners.forEach { (_, listenerWithProvider) ->
+        locationListeners.forEach { listenerWithProvider ->
             val listener = listenerWithProvider.second
             var location = FakeLoc.lastLocation
             if (location == null) {
@@ -941,7 +940,6 @@ internal object LocationServiceHook: BaseLocationHook() {
                 val locations = listOf(location)
                 val mOnLocationChanged = XposedHelpers.findMethodBestMatch(listener.javaClass, "onLocationChanged", locations, null)
                 XposedBridge.invokeOriginalMethod(mOnLocationChanged, listener, arrayOf(locations, null))
-                false
             }.onFailure {
                 if (it is InvocationTargetException && it.targetException is DeadObjectException) {
                     return@onFailure
@@ -1042,10 +1040,6 @@ internal object LocationServiceHook: BaseLocationHook() {
 //                })
 //            }
 //        }
-    }
-
-    internal fun removeLocationListener(key: String) {
-        locationListeners.remove(key)
     }
 
 //    // This method is not used because it is not guaranteed that each device processes the data stream consistently

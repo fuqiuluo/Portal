@@ -51,6 +51,12 @@ class MockServiceViewModel: ViewModel() {
                     if(!MockServiceHelper.move(locationManager!!, FakeLoc.speed / (1000 / delayTime) / 0.85, FakeLoc.bearing)) {
                         Log.e("MockServiceViewModel", "Failed to move")
                     }
+
+                    if (MockServiceHelper.broadcastLocation(locationManager!!)) {
+                        Log.d("MockServiceViewModel", "Broadcast location")
+                    } else {
+                        Log.e("MockServiceViewModel", "Failed to broadcast location")
+                    }
                 } while (isActive)
             }
         }
