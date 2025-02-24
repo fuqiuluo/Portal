@@ -49,6 +49,10 @@ object RemoteCommandHandler {
             Logger.error("Failed to transact with proxyBinder", it)
         }
 
+        if (FakeLoc.enableDebugLog) {
+            Logger.debug("commandId=$commandId, rely=$rely")
+        }
+
         when (commandId) {
             "set_proxy" -> {
                 rely.getBinder("proxy")?.let {
@@ -218,7 +222,6 @@ object RemoteCommandHandler {
                 rely.putBoolean("hide_mock", FakeLoc.hideMock)
                 rely.putBoolean("hook_wifi", FakeLoc.hookWifi)
                 rely.putBoolean("need_downgrade_to_2g", FakeLoc.needDowngradeToCdma)
-                rely.putLong("update_interval", FakeLoc.updateInterval)
                 return true
             }
             "broadcast_location" -> {

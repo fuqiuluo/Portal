@@ -19,7 +19,7 @@ object FakeLoc {
     /**
      * 是否允许打印调试日志
      */
-    var enableDebugLog = false
+    var enableDebugLog = true
 
     /**
      * 模拟定位服务开关
@@ -67,11 +67,6 @@ object FakeLoc {
      */
     var needDowngradeToCdma = true
 
-    /**
-     * 位置更新间隔（太小可能导致IBinder异常）
-     */
-    var updateInterval = 3000L
-
     var isSystemServerProcess = false
 
     /**
@@ -94,6 +89,7 @@ object FakeLoc {
     @Volatile
     var hasBearings = false
 
+    @Volatile
     var bearing = 0.0
         get() {
             if (hasBearings) {
@@ -105,9 +101,6 @@ object FakeLoc {
                 field += 0.5
                 return field
             }
-        }
-        set(value) {
-            field = value
         }
 
     var accuracy = 25.0f

@@ -30,6 +30,7 @@ import moe.fuqiuluo.portal.ext.hookSensor
 import moe.fuqiuluo.portal.ext.needDowngradeToCdma
 import moe.fuqiuluo.portal.ext.needOpenSELinux
 import moe.fuqiuluo.portal.ext.rawHistoricalLocations
+import moe.fuqiuluo.portal.ext.reportDuration
 import moe.fuqiuluo.portal.ext.speed
 import moe.fuqiuluo.portal.service.MockServiceHelper
 import moe.fuqiuluo.portal.ui.viewmodel.MockServiceViewModel
@@ -187,6 +188,24 @@ class SettingsFragment : Fragment() {
                 updateRemoteConfig()
             }
         })
+
+        binding.reportDurationLayout.setOnClickListener {
+            showDialog("设置上报间隔", binding.reportDurationValue.text.toString().let {
+                it.substring(0, it.length - 2)
+            }) {
+                val value = it.toIntOrNull()
+                if (value == null || value < 0) {
+                    Toast.makeText(context, "上报间隔不合法", Toast.LENGTH_SHORT).show()
+                    return@showDialog
+                } else if (value > 1000) {
+                    Toast.makeText(context, "上报间隔不能大于1s", Toast.LENGTH_SHORT).show()
+                    return@showDialog
+                }
+                context.reportDuration = value
+                binding.reportDurationValue.text = "%dms".format(value)
+                showToast("重新启动APP生效")
+            }
+        }
 
 
         return root

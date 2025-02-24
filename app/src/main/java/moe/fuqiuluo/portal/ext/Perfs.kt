@@ -47,6 +47,11 @@ var Context.jsonHistoricalRoutes: String
         }
     }
 
+var Context.reportDuration: Int
+    get() = sharedPrefs.getInt("reportDuration", 100)
+    set(value) = sharedPrefs.edit {
+        putInt("reportDuration", value)
+    }
 
 var Context.mapType: Int
     get() = sharedPrefs.getInt("mapType", BaiduMap.MAP_TYPE_NORMAL)

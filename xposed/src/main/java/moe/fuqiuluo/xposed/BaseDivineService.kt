@@ -121,7 +121,6 @@ abstract class BaseDivineService {
             FakeLoc.hideMock = rely.getBoolean("hide_mock", FakeLoc.hideMock)
             FakeLoc.hookWifi = rely.getBoolean("hook_wifi", FakeLoc.hookWifi)
             FakeLoc.needDowngradeToCdma = rely.getBoolean("need_downgrade_to_2g", FakeLoc.needDowngradeToCdma)
-            FakeLoc.updateInterval = rely.getLong("update_interval", FakeLoc.updateInterval)
             Logger.debug("Synced config for DivineService")
         } else {
             Logger.error("Failed to sync config for DivineService")

@@ -12,6 +12,7 @@ import kotlinx.coroutines.launch
 import moe.fuqiuluo.portal.android.coro.CoroutineController
 import moe.fuqiuluo.portal.ext.accuracy
 import moe.fuqiuluo.portal.ext.altitude
+import moe.fuqiuluo.portal.ext.reportDuration
 import moe.fuqiuluo.portal.ext.speed
 import moe.fuqiuluo.portal.service.MockServiceHelper
 import moe.fuqiuluo.portal.ui.mock.HistoricalLocation
@@ -42,7 +43,7 @@ class MockServiceViewModel: ViewModel() {
 
         if(!::rockerJob.isInitialized || rockerJob.isCancelled) {
             rockerCoroutineController.pause()
-            val delayTime = 200L
+            val delayTime = activity.reportDuration.toLong()
             rockerJob = GlobalScope.launch {
                 do {
                     delay(delayTime)
@@ -52,11 +53,11 @@ class MockServiceViewModel: ViewModel() {
                         Log.e("MockServiceViewModel", "Failed to move")
                     }
 
-                    if (MockServiceHelper.broadcastLocation(locationManager!!)) {
-                        Log.d("MockServiceViewModel", "Broadcast location")
-                    } else {
-                        Log.e("MockServiceViewModel", "Failed to broadcast location")
-                    }
+//                    if (MockServiceHelper.broadcastLocation(locationManager!!)) {
+//                        Log.d("MockServiceViewModel", "Broadcast location")
+//                    } else {
+//                        Log.e("MockServiceViewModel", "Failed to broadcast location")
+//                    }
                 } while (isActive)
             }
         }

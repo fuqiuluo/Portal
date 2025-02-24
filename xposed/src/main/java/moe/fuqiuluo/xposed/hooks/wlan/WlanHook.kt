@@ -12,6 +12,7 @@ import moe.fuqiuluo.xposed.utils.BinderUtils
 import moe.fuqiuluo.xposed.utils.FakeLoc
 import moe.fuqiuluo.xposed.utils.Logger
 import moe.fuqiuluo.xposed.utils.afterHook
+import moe.fuqiuluo.xposed.utils.beforeHook
 import moe.fuqiuluo.xposed.utils.hookAllMethods
 import moe.fuqiuluo.xposed.utils.hookMethodAfter
 import moe.fuqiuluo.xposed.utils.toClass
@@ -61,10 +62,10 @@ object WlanHook {
     private fun hookWifiServiceImpl(wifiClazz: Class<*>) {
         if (!FakeLoc.hookWifi) return
 
-        wifiClazz.hookAllMethods("getConnectionInfo", afterHook {
+        wifiClazz.hookAllMethods("getConnectionInfo", beforeHook {
             val packageName = args[0] as String
             if (FakeLoc.enableDebugLog)
-                Logger.debug("In getConnectionInfo with caller: $packageName")
+                Logger.debug("In getConnectionInfo with caller: $packageName, state: ${FakeLoc.enable}")
 
             if (FakeLoc.enable && !BinderUtils.isSystemPackages(packageName)) {
                 val wifiInfo = WifiInfo::class.java.getConstructor().newInstance()
@@ -74,13 +75,12 @@ object WlanHook {
             }
         })
 
-        wifiClazz.hookAllMethods("getScanResults", afterHook {
+        wifiClazz.hookAllMethods("getScanResults", beforeHook {
             val packageName = args[0] as? String
-
-            if (packageName.isNullOrEmpty()) return@afterHook
+            if (packageName.isNullOrEmpty()) return@beforeHook
 
             if (FakeLoc.enableDebugLog)
-                Logger.debug("In getScanResults with caller: $packageName")
+                Logger.debug("In getScanResults with caller: $packageName, state: ${FakeLoc.enable}")
 
             if(FakeLoc.enable && !BinderUtils.isSystemPackages(packageName)) {
                 if (result is List<*>) {

@@ -19,13 +19,19 @@ object BlindHook {
 
                 it.onceHook(BlindHookForRETLocation(handler))
                 count++
-            } else if (it.parameterTypes.contains(Location::class.java)) {
-                if (FakeLoc.enableDebugLog) {
-                    Logger.debug("BlindHookV1 ${it.name}: ${it.parameterTypes.joinToString()}")
-                }
+                return@forEach
+            }
 
-                it.onceHook(BlindHookForLocation(it.parameterTypes.indexOf(Location::class.java), handler))
-                count++
+            it.parameterTypes.forEachIndexed { index, type ->
+                if (type == Location::class.java) {
+                    if (FakeLoc.enableDebugLog) {
+                        Logger.debug("BlindHookV2 ${it.name}: ${it.parameterTypes.joinToString()}")
+                    }
+
+                    it.onceHook(BlindHookForLocation(index, handler))
+                    count++
+                    return@forEach
+                }
             }
         }
         return count

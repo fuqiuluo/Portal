@@ -193,7 +193,6 @@ internal object LocationServiceHook: BaseLocationHook() {
         LocationNMEAHook(cILocationManager)
 
         if(cILocationManager.hookAllMethods("getLastLocation", afterHook {
-                if (result == null) return@afterHook
                 // android 7.0.0 ~ 10.0.0
                 // Location getLastLocation(in LocationRequest request, String packageName);
                 // android 11.0.0
@@ -207,19 +206,15 @@ internal object LocationServiceHook: BaseLocationHook() {
                 // Route Simulation: Move according to a preset route
                 //val uid = FqlUtils.getCallerUid()
                 // Determine whether it is an app that needs a hook
-                if (!FakeLoc.enable || BinderUtils.isSystemAppsCall()) return@afterHook
+                if (!FakeLoc.enable) return@afterHook
 
                 // It can't be null, because I'm judging in the previous step
-                val location = result as Location
-
-//                if (!FakeLocationConfig.isInitTempLocation()) {
-//                    FakeLocationConfig.initTempLocation(location)
-//                }
+                val location = result as? Location ?: Location("gps")
 
                 result = injectLocation(location)
 
                 if(FakeLoc.enableDebugLog) {
-                    Logger.debug("getLastLocation: injected! ${result}")
+                    Logger.debug("getLastLocation: injected! $result")
                 }
         }).isEmpty()) {
             Logger.error("hook getLastLocation failed")
@@ -295,7 +290,7 @@ internal object LocationServiceHook: BaseLocationHook() {
             locationListeners.add(provider to listener)
             hookILocationListener(listener)
 
-            if (FakeLoc.disableRegisterLocationListener) {
+            if (FakeLoc.disableRegisterLocationListener || FakeLoc.enable) {
                 result = null
                 return@beforeHook
             }
@@ -338,7 +333,7 @@ internal object LocationServiceHook: BaseLocationHook() {
             }
 
             if(FakeLoc.enableDebugLog) {
-                Logger.debug("registerLocationListener: injected! $listener")
+                Logger.debug("registerLocationListener: injected! $listener, from ${BinderUtils.getUidPackageNames()}")
             }
 
             locationListeners.add(provider to listener)
@@ -349,7 +344,7 @@ internal object LocationServiceHook: BaseLocationHook() {
                 return@beforeHook
             }
 
-            if(FakeLoc.enable && !BinderUtils.isSystemAppsCall() && provider == "network") {
+            if(FakeLoc.enable) {
                 result = null
                 return@beforeHook
             }
@@ -649,7 +644,7 @@ internal object LocationServiceHook: BaseLocationHook() {
                 }
                 locationListeners.add("GnssBatch" to listener)
 
-                if (FakeLoc.disableRegisterLocationListener) {
+                if (FakeLoc.disableRegisterLocationListener || FakeLoc.enable) {
                     result = null
                 }
 
@@ -679,7 +674,7 @@ internal object LocationServiceHook: BaseLocationHook() {
                 }
                 locationListeners.add("gps" to listener)
 
-                if (FakeLoc.disableRegisterLocationListener) {
+                if (FakeLoc.disableRegisterLocationListener || FakeLoc.enable) {
                     result = null
                 }
 
@@ -774,6 +769,11 @@ internal object LocationServiceHook: BaseLocationHook() {
 
                     // If the GPS provider is enabled, the GPS provider is disabled
                     if(provider == "gps" && FakeLoc.enable) {
+                        param.result = false
+                        return
+                    }
+
+                    if(provider == "LOCATION_BIG_DATA" && FakeLoc.enable) {
                         param.result = false
                         return
                     }
@@ -931,18 +931,23 @@ internal object LocationServiceHook: BaseLocationHook() {
             val listener = listenerWithProvider.second
             var location = FakeLoc.lastLocation
             if (location == null) {
-                location = Location(listenerWithProvider.first)
-            } else {
-                location.provider = listenerWithProvider.first
+                location = if (listenerWithProvider.first == "GnssBatch") {
+                    Location("gps")
+                } else {
+                    Location(listenerWithProvider.first)
+                }
             }
             location = injectLocation(location)
             kotlin.runCatching {
                 val locations = listOf(location)
                 val mOnLocationChanged = XposedHelpers.findMethodBestMatch(listener.javaClass, "onLocationChanged", locations, null)
+                if (mOnLocationChanged == null) {
+                    throw NoSuchMethodException("onLocationChanged")
+                }
                 XposedBridge.invokeOriginalMethod(mOnLocationChanged, listener, arrayOf(locations, null))
             }.onFailure {
                 if (it is InvocationTargetException && it.targetException is DeadObjectException) {
-                    return@onFailure
+                    return@forEach
                 }
                 if (it !is DeadObjectException) {
                     Logger.error("LocationUpdater", it)
@@ -1041,25 +1046,6 @@ internal object LocationServiceHook: BaseLocationHook() {
 //            }
 //        }
     }
-
-//    // This method is not used because it is not guaranteed that each device processes the data stream consistently
-//    private fun handleGetLastLocation(thisObject: Any, data: Parcel, reply: Parcel) = kotlin.runCatching { // Add a catch to prevent the whole thing from blowing up
-//        // mService.getLastLocation(provider, lastLocationRequest,
-//        //                    mContext.getPackageName(), mContext.getAttributionTag());
-//        val provider = data.readString()
-//        val lastLocationRequest = data.readTypedObject(LastLocationRequest.CREATOR)
-//        val packageName = data.readString()
-//        val attributionTag = data.readString()
-//
-//        val location = XposedHelpers.callMethod(thisObject,
-//            "getLastLocation",
-//            provider, lastLocationRequest, packageName, attributionTag
-//        ) as? Location
-//        if(location == null || !FqlUtils.isEnableHookApp()) {
-//            reply.writeNoException()
-//            reply.writeTypedObject(location, TRANSACTION_getLastLocation)
-//        }
-//    }
 
     private inline fun handleInstruction(command: String, rely: Bundle): Boolean {
         return RemoteCommandHandler.handleInstruction(command, rely)
