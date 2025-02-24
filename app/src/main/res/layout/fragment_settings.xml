@@ -4,29 +4,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="10dp"
+    android:padding="8dp"
     tools:context=".ui.settings.SettingsFragment">
-
-    <com.google.android.material.textview.MaterialTextView
-        android:id="@+id/settings_title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/app_name"
-        style="@style/TextAppearance.AppCompat.Menu"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <com.google.android.material.divider.MaterialDivider
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@id/settings_title"
-        app:layout_constraintStart_toStartOf="parent" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        app:layout_constraintTop_toBottomOf="@id/settings_title"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 
         <LinearLayout
@@ -34,7 +19,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:padding="5dp">
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -61,17 +47,12 @@
                 app:useMaterialThemeColors="true"/>
         </LinearLayout>
 
-        <com.google.android.material.divider.MaterialDivider
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:layout_constraintTop_toBottomOf="@id/selinux_layout"
-            app:layout_constraintStart_toStartOf="parent" />
-
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/altitude_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
+            android:padding="5dp"
             android:layout_marginTop="4dp"
             android:layout_marginBottom="4dp">
 
@@ -104,17 +85,13 @@
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <com.google.android.material.divider.MaterialDivider
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:layout_constraintTop_toBottomOf="@id/altitude_layout"
-            app:layout_constraintStart_toStartOf="parent" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/speed_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
+            android:padding="5dp"
             android:layout_marginTop="4dp"
             android:layout_marginBottom="4dp">
 
@@ -147,17 +124,12 @@
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <com.google.android.material.divider.MaterialDivider
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:layout_constraintTop_toBottomOf="@id/speed_layout"
-            app:layout_constraintStart_toStartOf="parent" />
-
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/accuracy_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
+            android:padding="5dp"
             android:layout_marginTop="4dp"
             android:layout_marginBottom="4dp">
 
@@ -190,16 +162,11 @@
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <com.google.android.material.divider.MaterialDivider
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:layout_constraintTop_toBottomOf="@id/accuracy_layout"
-            app:layout_constraintStart_toStartOf="parent" />
-
         <LinearLayout
             android:id="@+id/debug_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:padding="5dp"
             android:gravity="center_vertical"
             android:orientation="horizontal">
             <LinearLayout
@@ -228,17 +195,12 @@
                 app:useMaterialThemeColors="true"/>
         </LinearLayout>
 
-        <com.google.android.material.divider.MaterialDivider
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:layout_constraintTop_toBottomOf="@id/debug_layout"
-            app:layout_constraintStart_toStartOf="parent" />
-
         <LinearLayout
             android:id="@+id/dgc_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
+            android:padding="5dp"
             android:orientation="horizontal">
             <LinearLayout
                 android:layout_width="0dp"
@@ -266,17 +228,12 @@
                 app:useMaterialThemeColors="true"/>
         </LinearLayout>
 
-        <com.google.android.material.divider.MaterialDivider
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:layout_constraintTop_toBottomOf="@id/dgc_layout"
-            app:layout_constraintStart_toStartOf="parent" />
-
         <LinearLayout
             android:id="@+id/rll_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
+            android:padding="5dp"
             android:orientation="horizontal">
             <LinearLayout
                 android:layout_width="0dp"
@@ -304,17 +261,12 @@
                 app:useMaterialThemeColors="true"/>
         </LinearLayout>
 
-        <com.google.android.material.divider.MaterialDivider
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:layout_constraintTop_toBottomOf="@id/rll_layout"
-            app:layout_constraintStart_toStartOf="parent" />
-
         <LinearLayout
             android:id="@+id/dfused_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
+            android:padding="5dp"
             android:orientation="horizontal">
             <LinearLayout
                 android:layout_width="0dp"
@@ -342,17 +294,12 @@
                 app:useMaterialThemeColors="true"/>
         </LinearLayout>
 
-        <com.google.android.material.divider.MaterialDivider
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:layout_constraintTop_toBottomOf="@id/dfused_layout"
-            app:layout_constraintStart_toStartOf="parent" />
-
         <LinearLayout
             android:id="@+id/cdma_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
+            android:padding="5dp"
             android:orientation="horizontal">
             <LinearLayout
                 android:layout_width="0dp"
@@ -380,17 +327,12 @@
                 app:useMaterialThemeColors="true"/>
         </LinearLayout>
 
-        <com.google.android.material.divider.MaterialDivider
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:layout_constraintTop_toBottomOf="@id/cdma_layout"
-            app:layout_constraintStart_toStartOf="parent" />
-
         <LinearLayout
             android:id="@+id/sensor_hook_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
+            android:padding="5dp"
             android:orientation="horizontal">
             <LinearLayout
                 android:layout_width="0dp"

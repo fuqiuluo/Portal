@@ -52,14 +52,14 @@
     <string name="accuracy_desc">模拟定位抖动的范围</string>
     <string name="debug">调试模式</string>
     <string name="debug_desc">是否打印调试日志</string>
-    <string name="dgc">GetCurrentLocation接口</string>
-    <string name="dgc_desc">是否允许应用使用GetCurrentLocation</string>
-    <string name="rll">RegisterLocationListener接口</string>
-    <string name="rll_desc">是否允许应用registerLocationListener</string>
-    <string name="dfused">禁用Fused位置提供器</string>
-    <string name="dfused_desc">应用使用fused（可能导致模拟失败）</string>
+    <string name="dgc">允许获取当前位置（新）</string>
+    <string name="dgc_desc">是否允许调用GetCurrentLocation</string>
+    <string name="rll">允许注册位置监听器</string>
+    <string name="rll_desc">是否允许应用注册位置监听器</string>
+    <string name="dfused">禁用融合定位</string>
+    <string name="dfused_desc">是否禁用融合定位</string>
     <string name="cdma">网络降级</string>
     <string name="cdma_desc">将网络降级为CDMA</string>
     <string name="hook_sensor">传感器劫持</string>
-    <string name="hook_sensor_desc">模拟步频（残缺闪退版）</string>
+    <string name="hook_sensor_desc">模拟步频（待完善）</string>
 </resources>
