@@ -9,7 +9,9 @@ import moe.fuqiuluo.portal.ext.Loc4j
 
 fun SuggestionResult.toPoi(
     currentLocation: Pair<Double, Double>? = null
-) = this.allSuggestions.map {
+) = this.allSuggestions
+    .filter { it.key != null && it.pt != null }
+    .map {
     val gcj02Lat = it.pt.latitude
     val gcj02Lon = it.pt.longitude
     val (lat, lon) = Loc4j.gcj2wgs(gcj02Lat, gcj02Lon)
