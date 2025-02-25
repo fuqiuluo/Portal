@@ -942,9 +942,14 @@ internal object LocationServiceHook: BaseLocationHook() {
                 val locations = listOf(location)
                 val mOnLocationChanged = XposedHelpers.findMethodBestMatch(listener.javaClass, "onLocationChanged", locations, null)
                 if (mOnLocationChanged == null) {
-                    throw NoSuchMethodException("onLocationChanged")
+                    val mOnLocationChanged = XposedHelpers.findMethodBestMatch(listener.javaClass, "onLocationChanged", location)
+                    if (mOnLocationChanged == null) {
+                        throw NoSuchMethodException("onLocationChanged")
+                    }
+                    XposedBridge.invokeOriginalMethod(mOnLocationChanged, listener, arrayOf(location))
+                } else {
+                    XposedBridge.invokeOriginalMethod(mOnLocationChanged, listener, arrayOf(locations, null))
                 }
-                XposedBridge.invokeOriginalMethod(mOnLocationChanged, listener, arrayOf(locations, null))
             }.onFailure {
                 if (it is InvocationTargetException && it.targetException is DeadObjectException) {
                     return@forEach
