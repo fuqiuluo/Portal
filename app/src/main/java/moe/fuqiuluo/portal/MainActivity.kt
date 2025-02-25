@@ -42,6 +42,9 @@ import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.NavController
+import androidx.navigation.NavController.OnDestinationChangedListener
+import androidx.navigation.NavDestination
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
@@ -69,7 +72,6 @@ import moe.fuqiuluo.portal.android.window.StatusBarUtil
 import moe.fuqiuluo.portal.bdmap.Poi
 import moe.fuqiuluo.portal.bdmap.toPoi
 import moe.fuqiuluo.portal.databinding.ActivityMainBinding
-import moe.fuqiuluo.portal.ext.Loc4j
 import moe.fuqiuluo.portal.ext.gcj02
 import moe.fuqiuluo.portal.ext.wgs84
 import moe.fuqiuluo.portal.ui.notification.NotificationUtils
@@ -177,7 +179,7 @@ class MainActivity : AppCompatActivity() {
                 // menu should be considered as top level destinations.
                 appBarConfiguration = AppBarConfiguration(
                     setOf(
-                        R.id.nav_home, R.id.nav_mock, R.id.nav_route_gallery, R.id.nav_slideshow
+                        R.id.nav_home, R.id.nav_mock, R.id.nav_route_gallery, R.id.nav_settings
                     ), drawerLayout
                 )
 
@@ -188,11 +190,23 @@ class MainActivity : AppCompatActivity() {
                     ContextCompat.getColor(this@MainActivity, R.color.theme_appbar_icon_color), PorterDuff.Mode.SRC_IN
                 )
 
-                navController.addOnDestinationChangedListener { _, dest, _ ->
-                    val isHomeFragment = dest.id == R.id.nav_home
-                    val menu = binding.appBarMain.toolbar.menu
-                    menu.findItem(R.id.action_search)?.isVisible = isHomeFragment
-                }
+                navController.addOnDestinationChangedListener(object: OnDestinationChangedListener {
+                    val menuIdMapping = mapOf(
+                        R.id.nav_home to R.id.action_search,
+                        //R.id.nav_settings to R.id.action_info
+                    )
+
+                    override fun onDestinationChanged(
+                        controller: NavController,
+                        destination: NavDestination,
+                        arguments: Bundle?
+                    ) {
+                        menuIdMapping.forEach { (key, value) ->
+                            val menu = binding.appBarMain.toolbar.menu
+                            menu.findItem(value)?.isVisible = key == destination.id
+                        }
+                    }
+                })
             }
         }
 
@@ -338,7 +352,6 @@ class MainActivity : AppCompatActivity() {
                 searchItem.collapseActionView()
             }
         }
-
         if (mSuggestionSearch == null) {
             mSuggestionSearch = SuggestionSearch.newInstance()
             mSuggestionSearch?.setOnGetSuggestionResultListener { suggestionResult ->
@@ -397,8 +410,6 @@ class MainActivity : AppCompatActivity() {
                 return true
             }
         })
-
-
         return true
     }
 

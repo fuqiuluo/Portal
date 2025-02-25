@@ -6,6 +6,16 @@
         android:orderInCategory="100"
         android:icon="@drawable/baseline_search_24"
         android:title="@string/action_search"
+        android:visible="true"
         app:actionViewClass="androidx.appcompat.widget.SearchView"
+        app:showAsAction="ifRoom|collapseActionView"/>
+
+    <item
+        android:id="@+id/action_info"
+        android:orderInCategory="100"
+        android:icon="@drawable/baseline_info_outline_24"
+        android:title="@string/action_info"
+        android:visible="false"
+        app:actionViewClass="moe.fuqiuluo.portal.android.widget.DeveloperView"
         app:showAsAction="ifRoom|collapseActionView"/>
 </menu>

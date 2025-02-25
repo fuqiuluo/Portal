@@ -938,26 +938,36 @@ internal object LocationServiceHook: BaseLocationHook() {
                 }
             }
             location = injectLocation(location)
+            var called = false
+            var error: Throwable? = null
             kotlin.runCatching {
                 val locations = listOf(location)
                 val mOnLocationChanged = XposedHelpers.findMethodBestMatch(listener.javaClass, "onLocationChanged", locations, null)
-                if (mOnLocationChanged == null) {
-                    val mOnLocationChanged = XposedHelpers.findMethodBestMatch(listener.javaClass, "onLocationChanged", location)
-                    if (mOnLocationChanged == null) {
-                        throw NoSuchMethodException("onLocationChanged")
-                    }
-                    XposedBridge.invokeOriginalMethod(mOnLocationChanged, listener, arrayOf(location))
-                } else {
-                    XposedBridge.invokeOriginalMethod(mOnLocationChanged, listener, arrayOf(locations, null))
-                }
+                XposedBridge.invokeOriginalMethod(mOnLocationChanged, listener, arrayOf(locations, null))
+                called = true
             }.onFailure {
                 if (it is InvocationTargetException && it.targetException is DeadObjectException) {
                     return@forEach
                 }
-                if (it !is DeadObjectException) {
-                    Logger.error("LocationUpdater", it)
-                }
+                error = it
             }
+
+            if (!called) runCatching {
+                val mOnLocationChanged = XposedHelpers.findMethodBestMatch(listener.javaClass, "onLocationChanged", location)
+                XposedBridge.invokeOriginalMethod(mOnLocationChanged, listener, arrayOf(location))
+                called = true
+            }.onFailure {
+                if (it is InvocationTargetException && it.targetException is DeadObjectException) {
+                    return@forEach
+                }
+                error = it
+            }
+
+            if (!called) {
+                Logger.error("callOnLocationChanged failed: " + error?.stackTraceToString())
+                Logger.error("The listener all methods: " + listener.javaClass.declaredMethods.joinToString { it.name })
+            }
+
         }
     }
 

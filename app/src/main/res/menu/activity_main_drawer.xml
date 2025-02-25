@@ -17,7 +17,7 @@
             android:icon="@drawable/baseline_route_24"
             android:title="@string/menu_route_mock" />
         <item
-            android:id="@+id/nav_slideshow"
+            android:id="@+id/nav_settings"
             android:icon="@drawable/baseline_settings_24"
             android:title="@string/menu_setting" />
     </group>
