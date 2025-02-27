@@ -62,4 +62,5 @@
     <string name="cdma_desc">将网络降级为CDMA</string>
     <string name="hook_sensor">传感器劫持</string>
     <string name="hook_sensor_desc">模拟步频（待完善）</string>
+    <string name="show_route">显示路线</string>
 </resources>

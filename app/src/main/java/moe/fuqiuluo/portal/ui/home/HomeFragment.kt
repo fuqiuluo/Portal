@@ -5,6 +5,7 @@ import android.animation.AnimatorListenerAdapter
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
+import android.graphics.Color
 import android.graphics.Point
 import android.os.Bundle
 import android.util.Log
@@ -29,6 +30,7 @@ import com.baidu.mapapi.map.MapStatusUpdateFactory
 import com.baidu.mapapi.map.MarkerOptions
 import com.baidu.mapapi.map.MyLocationConfiguration
 import com.baidu.mapapi.map.MyLocationData
+import com.baidu.mapapi.map.PolylineOptions
 import com.baidu.mapapi.model.LatLng
 import com.baidu.mapapi.search.geocode.ReverseGeoCodeOption
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -37,16 +39,18 @@ import kotlinx.coroutines.launch
 import moe.fuqiuluo.portal.MainActivity
 import moe.fuqiuluo.portal.Portal
 import moe.fuqiuluo.portal.R
-import moe.fuqiuluo.portal.databinding.FragmentHomeBinding
-import moe.fuqiuluo.portal.ui.viewmodel.BaiduMapViewModel
-import moe.fuqiuluo.portal.ui.viewmodel.HomeViewModel
 import moe.fuqiuluo.portal.bdmap.locateMe
 import moe.fuqiuluo.portal.bdmap.setMapConfig
+import moe.fuqiuluo.portal.databinding.FragmentHomeBinding
 import moe.fuqiuluo.portal.ext.gcj02
 import moe.fuqiuluo.portal.ext.mapType
 import moe.fuqiuluo.portal.ext.rawHistoricalLocations
+import moe.fuqiuluo.portal.ext.selectRoute
 import moe.fuqiuluo.portal.ext.wgs84
+import moe.fuqiuluo.portal.ui.viewmodel.BaiduMapViewModel
+import moe.fuqiuluo.portal.ui.viewmodel.HomeViewModel
 import java.math.BigDecimal
+import java.util.List
 import kotlin.random.Random
 
 class HomeFragment : Fragment() {
@@ -93,16 +97,23 @@ class HomeFragment : Fragment() {
             uiSettings.isOverlookingGesturesEnabled = true
             isMyLocationEnabled = true
 
-            setMapConfig(baiduMapViewModel.perspectiveState, if (Random.nextBoolean()) R.drawable.icon_my_location else null)
+            setMapConfig(
+                baiduMapViewModel.perspectiveState,
+                if (Random.nextBoolean()) R.drawable.icon_my_location else null
+            )
 
-            setOnMapClickListener(object: BaiduMap.OnMapClickListener {
+            setOnMapClickListener(object : BaiduMap.OnMapClickListener {
                 override fun onMapClick(loc: LatLng) {
                     // 默认获取的gcj02坐标，需要转换一下
                     baiduMapViewModel.markedLoc = loc.wgs84
 
                     lifecycleScope.launch {
                         baiduMapViewModel.showDetailView = false
-                        baiduMapViewModel.mGeoCoder?.reverseGeoCode(ReverseGeoCodeOption().location(loc))
+                        baiduMapViewModel.mGeoCoder?.reverseGeoCode(
+                            ReverseGeoCodeOption().location(
+                                loc
+                            )
+                        )
                     }
 
                     // Fixed the issue that getting geolocation information was stuck
@@ -154,7 +165,7 @@ class HomeFragment : Fragment() {
         option.setCoorType(Portal.DEFAULT_COORD_STR)
         option.setScanSpan(1000)
         mLocationClient.locOption = option
-        mLocationClient.registerLocationListener(object: BDAbstractLocationListener() {
+        mLocationClient.registerLocationListener(object : BDAbstractLocationListener() {
             override fun onReceiveLocation(loc: BDLocation?) {
                 if (loc == null) return
                 val locData = MyLocationData.Builder()
@@ -183,9 +194,11 @@ class HomeFragment : Fragment() {
                 R.id.map_type_normal -> {
                     binding.bmapView.map.mapType = BaiduMap.MAP_TYPE_NORMAL
                 }
+
                 R.id.map_type_satellite -> {
                     binding.bmapView.map.mapType = BaiduMap.MAP_TYPE_SATELLITE
                 }
+
                 else -> {
                     Log.e("HomeFragment", "Unknown location view mode: $checkedId")
                 }
@@ -213,7 +226,8 @@ class HomeFragment : Fragment() {
                     fab.alpha = 1f
                     fab.scaleX = 1f
                     fab.scaleY = 1f
-                    val translationX = ObjectAnimator.ofFloat(fab, "translationX", 0f, 20f + index * 8f)
+                    val translationX =
+                        ObjectAnimator.ofFloat(fab, "translationX", 0f, 20f + index * 8f)
                     translationX.duration = 200
                     animators.add(translationX)
                 }
@@ -274,12 +288,36 @@ class HomeFragment : Fragment() {
         }
 
         binding.fabAdd.setOnClickListener {
-            if(!showAddLocationDialog()) {
+            if (!showAddLocationDialog()) {
                 Toast.makeText(requireContext(), "选择位置异常", Toast.LENGTH_SHORT).show()
             }
         }
 
+        binding.showRoute.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) {
+                requireContext().selectRoute?.route?.let {
+                    previewRoute(it)
+                }
+            } else {
+                baiduMapViewModel.baiduMap.clear()
+            }
+        }
+
         return root
+    }
+
+    private fun previewRoute(points: kotlin.collections.List<LatLng>) {
+        baiduMapViewModel.baiduMap.clear() // 清除之前的所有覆盖物
+
+        // 绘制之前记录的点到点的线
+        for (i in 0 until points.size - 1) {
+            baiduMapViewModel.baiduMap.addOverlay(
+                PolylineOptions()
+                    .color(Color.RED)
+                    .width(10)
+                    .points(List.of<LatLng>(points[i], points[i + 1]))
+            )
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -363,16 +401,26 @@ class HomeFragment : Fragment() {
                         Toast.makeText(requireContext(), "地址不能为空", Toast.LENGTH_SHORT).show()
                         return@setPositiveButton
                     }
-                    if(!checkLatLon(newLat, newLon)) {
-                        Toast.makeText(requireContext(), "经纬度格式错误", Toast.LENGTH_SHORT).show()
+                    if (!checkLatLon(newLat, newLon)) {
+                        Toast.makeText(requireContext(), "经纬度格式错误", Toast.LENGTH_SHORT)
+                            .show()
                         return@setPositiveButton
                     }
 
-                    fun MutableSet<String>.addLocation(name: String, address: String, lat: Double, lon: Double): Boolean {
+                    fun MutableSet<String>.addLocation(
+                        name: String,
+                        address: String,
+                        lat: Double,
+                        lon: Double
+                    ): Boolean {
                         if (any { it.split(",")[0] == name }) {
                             return false
                         }
-                        add("$name,$address,${BigDecimal.valueOf(lat).toPlainString()},${BigDecimal.valueOf(lon).toPlainString()}")
+                        add(
+                            "$name,$address,${
+                                BigDecimal.valueOf(lat).toPlainString()
+                            },${BigDecimal.valueOf(lon).toPlainString()}"
+                        )
                         return true
                     }
 
@@ -454,10 +502,12 @@ class HomeFragment : Fragment() {
 
                         mGeoCoder?.reverseGeoCode(ReverseGeoCodeOption().location(LatLng(lat, lon)))
                     } else {
-                        Toast.makeText(requireContext(), "请输入有效的经纬度！", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(requireContext(), "请输入有效的经纬度！", Toast.LENGTH_SHORT)
+                            .show()
                     }
                 }.onFailure {
-                    Toast.makeText(requireContext(), "请输入有效的经纬度！", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), "请输入有效的经纬度！", Toast.LENGTH_SHORT)
+                        .show()
                 }
             }
             .setNegativeButton("取消", null)
