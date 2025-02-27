@@ -56,17 +56,18 @@
             </intent-filter>
         </activity>
 
+        <!-- 百度地图定位服务 -->
         <service
             android:name="com.baidu.location.f"
             android:enabled="true"
             android:foregroundServiceType="location"
             android:process=":remote"
             tools:ignore="ForegroundServicePermission" />
-
         <meta-data
             android:name="com.baidu.lbsapi.API_KEY"
             android:value="UzCD3gLYg3M9Ue2749hm1jsHX2DyfMUF" />
 
+        <!-- Xposed 模块配置 -->
         <meta-data
             android:name="xposedmodule"
             android:value="true" />

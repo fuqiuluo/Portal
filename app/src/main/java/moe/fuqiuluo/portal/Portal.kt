@@ -14,7 +14,6 @@ class Portal: Application() {
 
         SDKInitializer.initialize(this)
         SDKInitializer.setCoordType(DEFAULT_COORD_TYPE)
-
     }
 
     companion object {

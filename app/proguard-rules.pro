@@ -27,3 +27,6 @@
 -keepclassmembers class com.dd.StrokeGradientDrawable {
     public void setStrokeColor(int);
 }
+
+-dontwarn com.tencent.bugly.**
+-keep public class com.tencent.bugly.**{*;}
