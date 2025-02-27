@@ -343,7 +343,7 @@ class RouteEditFragment : Fragment() {
         for (i in 0 until mPoints.size - 1) {
             baiduMapViewModel.baiduMap.addOverlay(
                 PolylineOptions()
-                    .color(Color.RED)
+                    .color(Color.argb(178, 0, 78, 255))
                     .width(10)
                     .points(List.of<LatLng>(mPoints[i], mPoints[i + 1]))
             )
@@ -357,7 +357,7 @@ class RouteEditFragment : Fragment() {
         for (i in 0 until mPoints.size - 1) {
             baiduMapViewModel.baiduMap.addOverlay(
                 PolylineOptions()
-                    .color(Color.RED)
+                    .color(Color.argb(178, 0, 78, 255))
                     .width(10)
                     .points(List.of<LatLng>(mPoints[i], mPoints[i + 1]))
             )
@@ -365,7 +365,7 @@ class RouteEditFragment : Fragment() {
 
         baiduMapViewModel.baiduMap.addOverlay(
             PolylineOptions()
-                .color(Color.RED)
+                .color(Color.argb(178, 0, 78, 255))
                 .width(10)
                 .points(List.of<LatLng>(start, end))
         )

@@ -313,7 +313,7 @@ class HomeFragment : Fragment() {
         for (i in 0 until points.size - 1) {
             baiduMapViewModel.baiduMap.addOverlay(
                 PolylineOptions()
-                    .color(Color.RED)
+                    .color(Color.argb(178, 0, 78, 255))
                     .width(10)
                     .points(List.of<LatLng>(points[i], points[i + 1]))
             )
