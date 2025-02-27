@@ -4,12 +4,8 @@ import android.app.Application
 import com.baidu.location.LocationClient
 import com.baidu.mapapi.CoordType
 import com.baidu.mapapi.SDKInitializer
-import com.google.firebase.Firebase
-import com.google.firebase.analytics.FirebaseAnalytics
-import com.google.firebase.analytics.ktx.analytics
-import com.google.firebase.crashlytics.FirebaseCrashlytics
-import com.google.firebase.crashlytics.ktx.crashlytics
-import com.google.firebase.initialize
+import com.tencent.bugly.crashreport.CrashReport
+import moe.fuqiuluo.portal.android.Bugly
 
 class Portal: Application() {
 
@@ -22,8 +18,12 @@ class Portal: Application() {
         SDKInitializer.initialize(this)
         SDKInitializer.setCoordType(DEFAULT_COORD_TYPE)
 
-        Firebase.initialize(this)
-        FirebaseCrashlytics.getInstance().isCrashlyticsCollectionEnabled = true
+        CrashReport.initCrashReport(applicationContext)
+
+        CrashReport.setDeviceId(applicationContext, Bugly.getUniqueDeviceId(applicationContext))
+        CrashReport.setDeviceModel(applicationContext, Bugly.getDeviceModel())
+
+        //CrashReport.setAllThreadStackEnable(applicationContext, true, true)
     }
 
     companion object {

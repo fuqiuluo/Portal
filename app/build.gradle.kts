@@ -5,9 +5,6 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.serialization)
-
-    id("com.google.gms.google-services") // 请勿删除，否删除后视为盗版！将追究相关责任！
-    id("com.google.firebase.crashlytics")
 }
 
 android {
@@ -32,6 +29,10 @@ android {
         if (!googleServicesFile.exists()) {
             throw GradleException("在 CI 环境中必须提供 google-services.json 文件!")
         }
+
+        manifestPlaceholders["BUGLY_APPID"] = "222f9ef298"
+        manifestPlaceholders["APP_CHANNEL"] = "f1b1b1b1-1b1b-1b1b-1b1b-1b1b1b1b1b1b"
+
     }
 
     buildTypes {
@@ -42,10 +43,12 @@ android {
                 "proguard-rules.pro"
             )
             manifestPlaceholders["APP_VERSION"] = defaultConfig.versionName ?: "UnknownVersion"
+            manifestPlaceholders["BUGLY_ENABLE_DEBUG"] = "false"
         }
 
         debug {
             manifestPlaceholders["APP_VERSION"] = "${defaultConfig.versionName}-debug"
+            manifestPlaceholders["BUGLY_ENABLE_DEBUG"] = "true"
         }
     }
 
@@ -183,10 +186,7 @@ dependencies {
     implementation(libs.kotlinx.serialization)
     implementation(libs.kotlin.reflect)
 
-    // Firebase
-    implementation(platform("com.google.firebase:firebase-bom:33.9.0"))
-    implementation(libs.firebase.analytics)
-    implementation(libs.firebase.crashlytics)
+    implementation(libs.bugly)
 
     implementation(fileTree(mapOf(
         "dir" to "libs",
