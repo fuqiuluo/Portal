@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 android {
@@ -12,7 +13,7 @@ android {
 
     defaultConfig {
         applicationId = "moe.fuqiuluo.portal"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 35
         versionCode = getVersionCode()
         versionName = "1.0.3" + ".r${getGitCommitCount()}." + getVersionName()
@@ -166,6 +167,8 @@ dependencies {
     implementation(libs.okhttp)
 
     implementation(libs.fastjson)
+    implementation(libs.kotlinx.serialization)
+    implementation(libs.kotlin.reflect)
 
     implementation(fileTree(mapOf(
         "dir" to "libs",

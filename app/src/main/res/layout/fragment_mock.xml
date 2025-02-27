@@ -118,6 +118,7 @@
                         android:layout_weight="1"
                         android:layout_height="match_parent"
                         android:gravity="end|center">
+
                         <CheckedTextView
                             android:id="@+id/rocker"
                             android:layout_width="wrap_content"
@@ -125,9 +126,9 @@
                             android:checkMark="?android:attr/listChoiceIndicatorMultiple"
                             android:checkMarkTint="@color/portal_mock_off"
                             android:checked="false"
+                            android:gravity="center"
                             android:text="@string/rocker"
                             android:textColor="@color/portal_mock_off"
-                            android:gravity="center"
                             android:textSize="12sp" />
                     </LinearLayout>
                 </LinearLayout>

@@ -44,9 +44,9 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="@string/none_route"
-                        android:textStyle="bold"
                         android:textAppearance="@style/TextAppearance.AppCompat.Title"
-                        android:textColor="@color/black"/>
+                        android:textColor="@color/black"
+                        android:textStyle="bold" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -79,6 +79,25 @@
                             app:iconTint="@color/white"
                             app:cornerRadius="12dp"/>
 
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_height="match_parent"
+                        android:gravity="end|center">
+
+                        <CheckedTextView
+                            android:id="@+id/rocker"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:checkMark="?android:attr/listChoiceIndicatorMultiple"
+                            android:checkMarkTint="@color/portal_mock_off"
+                            android:checked="false"
+                            android:gravity="center"
+                            android:text="@string/rocker"
+                            android:textColor="@color/portal_mock_off"
+                            android:textSize="12sp" />
                     </LinearLayout>
                 </LinearLayout>
 

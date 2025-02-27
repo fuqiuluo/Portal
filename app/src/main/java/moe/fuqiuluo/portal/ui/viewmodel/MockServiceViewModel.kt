@@ -16,6 +16,7 @@ import moe.fuqiuluo.portal.ext.reportDuration
 import moe.fuqiuluo.portal.ext.speed
 import moe.fuqiuluo.portal.service.MockServiceHelper
 import moe.fuqiuluo.portal.ui.mock.HistoricalLocation
+import moe.fuqiuluo.portal.ui.mock.HistoricalRoute
 import moe.fuqiuluo.portal.ui.mock.Rocker
 import moe.fuqiuluo.xposed.utils.FakeLoc
 
@@ -33,7 +34,7 @@ class MockServiceViewModel: ViewModel() {
         }
 
     var selectedLocation: HistoricalLocation? = null
-
+    var selectedRoute: HistoricalRoute? = null
 
 
     fun initRocker(activity: Activity): Rocker {

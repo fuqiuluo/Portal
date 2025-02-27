@@ -2,9 +2,11 @@ package moe.fuqiuluo.portal.ext
 
 import android.content.Context
 import androidx.core.content.edit
+import com.alibaba.fastjson2.JSON
 import com.baidu.mapapi.map.BaiduMap
 import moe.fuqiuluo.portal.service.MockServiceHelper
 import moe.fuqiuluo.portal.ui.mock.HistoricalLocation
+import moe.fuqiuluo.portal.ui.mock.HistoricalRoute
 import moe.fuqiuluo.xposed.utils.FakeLoc
 
 val Context.sharedPrefs
@@ -18,6 +20,23 @@ var Context.selectLocation: HistoricalLocation?
     }
     set(value) = sharedPrefs.edit {
         putString("selectedLocation", value?.toString())
+    }
+
+var Context.selectRoute: HistoricalRoute?
+    get() {
+        return sharedPrefs.getString("selectedRoute", null)?.let {
+            try {
+                JSON.parseObject(it, HistoricalRoute::class.java)
+            } catch (e: Exception) {
+                sharedPrefs.edit {
+                    putString("selectedRoute", "")
+                }
+                null
+            }
+        }
+    }
+    set(value) = sharedPrefs.edit {
+        putString("selectedRoute", JSON.toJSONString(value))
     }
 
 val Context.historicalLocations: List<HistoricalLocation>
