@@ -64,7 +64,12 @@ import com.baidu.mapapi.search.geocode.ReverseGeoCodeResult
 import com.baidu.mapapi.search.sug.SuggestionSearch
 import com.baidu.mapapi.search.sug.SuggestionSearchOption
 import com.google.android.material.navigation.NavigationView
+import com.google.firebase.Firebase
+import com.google.firebase.analytics.FirebaseAnalytics
+import com.google.firebase.analytics.analytics
+import com.google.firebase.crashlytics.crashlytics
 import kotlinx.coroutines.launch
+import moe.fuqiuluo.portal.Portal.Companion.DEFAULT_COORD_STR
 import moe.fuqiuluo.portal.android.permission.RequestPermissions
 import moe.fuqiuluo.portal.android.root.ShellUtils
 import moe.fuqiuluo.portal.android.window.OverlayUtils
@@ -79,6 +84,8 @@ import moe.fuqiuluo.portal.ui.viewmodel.BaiduMapViewModel
 import moe.fuqiuluo.portal.ui.viewmodel.MockServiceViewModel
 
 class MainActivity : AppCompatActivity() {
+    private lateinit var firebaseAnalytics: FirebaseAnalytics
+
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
 
@@ -142,15 +149,23 @@ class MainActivity : AppCompatActivity() {
         return denied.isEmpty()
     }
 
+    private fun setupFirebase() {
+        Firebase.crashlytics.isCrashlyticsCollectionEnabled = true
+
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        setupFirebase()
         StatusBarUtil.transparentStatusBar(this)
         //StatusBarUtil.setStatusBarColor(this, ContextCompat.getColor(this, R.color.red500))
 
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.N) {
             window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
         }
+
+        firebaseAnalytics = Firebase.analytics
 
         if (!ShellUtils.hasRoot()) {
             Toast.makeText(this, "无Root可能导致传感器Hook失效", Toast.LENGTH_LONG).show()

@@ -1,6 +1,7 @@
 [versions]
 agp = "8.7.1"
 circularProgressButtonVersion = "1.4"
+firebaseBom = "33.9.0"
 systemRefine = "4.4.0"
 xposed = "82"
 hiddenapibypass = "4.3"
@@ -24,6 +25,9 @@ jetbrainsKotlinJvm = "2.0.21"
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 dmytrodanylyk-circular-progress-button = { module = "com.github.dmytrodanylyk:circular-progress-button", version.ref = "circularProgressButtonVersion" }
+firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
+firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
+firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics" }
 refine-annotation-core = { group = "dev.rikka.tools.refine", name = "annotation", version.ref = "systemRefine" }
 refine-annotation-processor = { group = "dev.rikka.tools.refine", name = "annotation-processor", version.ref = "systemRefine" }
 refine-runtime = { group = "dev.rikka.tools.refine", name = "runtime", version.ref = "systemRefine" }

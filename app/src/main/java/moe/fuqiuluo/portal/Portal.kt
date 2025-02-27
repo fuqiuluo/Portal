@@ -4,8 +4,15 @@ import android.app.Application
 import com.baidu.location.LocationClient
 import com.baidu.mapapi.CoordType
 import com.baidu.mapapi.SDKInitializer
+import com.google.firebase.Firebase
+import com.google.firebase.analytics.FirebaseAnalytics
+import com.google.firebase.analytics.ktx.analytics
+import com.google.firebase.crashlytics.FirebaseCrashlytics
+import com.google.firebase.crashlytics.ktx.crashlytics
+import com.google.firebase.initialize
 
 class Portal: Application() {
+
     override fun onCreate() {
         super.onCreate()
 
@@ -14,6 +21,9 @@ class Portal: Application() {
 
         SDKInitializer.initialize(this)
         SDKInitializer.setCoordType(DEFAULT_COORD_TYPE)
+
+        Firebase.initialize(this)
+        FirebaseCrashlytics.getInstance().isCrashlyticsCollectionEnabled = true
     }
 
     companion object {

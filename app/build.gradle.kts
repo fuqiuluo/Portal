@@ -5,6 +5,9 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.serialization)
+
+    id("com.google.gms.google-services") // 请勿删除，否删除后视为盗版！将追究相关责任！
+    id("com.google.firebase.crashlytics")
 }
 
 android {
@@ -39,12 +42,10 @@ android {
                 "proguard-rules.pro"
             )
             manifestPlaceholders["APP_VERSION"] = defaultConfig.versionName ?: "UnknownVersion"
-            manifestPlaceholders["BUGLY_ENABLE_DEBUG"] = "false"
         }
 
         debug {
             manifestPlaceholders["APP_VERSION"] = "${defaultConfig.versionName}-debug"
-            manifestPlaceholders["BUGLY_ENABLE_DEBUG"] = "true"
         }
     }
 
@@ -181,6 +182,11 @@ dependencies {
     implementation(libs.fastjson)
     implementation(libs.kotlinx.serialization)
     implementation(libs.kotlin.reflect)
+
+    // Firebase
+    implementation(platform("com.google.firebase:firebase-bom:33.9.0"))
+    implementation(libs.firebase.analytics)
+    implementation(libs.firebase.crashlytics)
 
     implementation(fileTree(mapOf(
         "dir" to "libs",
