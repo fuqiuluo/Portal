@@ -3,6 +3,7 @@ package moe.fuqiuluo.portal.android.widget
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Path
@@ -12,7 +13,6 @@ import android.graphics.drawable.ColorDrawable
 import android.os.Handler
 import android.os.Looper
 import android.util.AttributeSet
-import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.widget.Toast
@@ -20,7 +20,6 @@ import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.drawable.toBitmap
 import moe.fuqiuluo.portal.R
 import java.util.concurrent.atomic.AtomicBoolean
-import kotlin.math.abs
 import kotlin.math.acos
 import kotlin.math.cos
 import kotlin.math.min
@@ -29,6 +28,7 @@ import kotlin.math.sqrt
 
 
 // https://github.com/lqxue/RockerView/blob/master/app/src/main/java/com/zcsj/rockerview/RockerView.java
+@SuppressLint("UseCompatLoadingForDrawables")
 class RockerView(context: Context, attributeSet: AttributeSet): View(context, attributeSet) {
     private var mAreaBackgroundPaint: Paint
     private var mRockerPaint: Paint
@@ -47,7 +47,10 @@ class RockerView(context: Context, attributeSet: AttributeSet): View(context, at
     private var mRockerColor = 0
     private var mAreaColor = 0
     private var isLocked = AtomicBoolean(false)
+    private var isAuto = AtomicBoolean(false)
     var listener: OnMoveListener? = null
+    private var robotBitmap: Bitmap? = null
+
 
     init {
         val typedArray = context.obtainStyledAttributes(attributeSet, R.styleable.RockerView)
@@ -75,6 +78,7 @@ class RockerView(context: Context, attributeSet: AttributeSet): View(context, at
         mRockerPaint = Paint()
         mRockerPaint.isAntiAlias = true
         mRockerPaint.color = mRockerColor
+        robotBitmap = resources.getDrawable(R.drawable.baseline_robot_24, null)?.toBitmap()
 
         mCenterPoint = Point()
         mRockerPosition = Point()
@@ -131,6 +135,16 @@ class RockerView(context: Context, attributeSet: AttributeSet): View(context, at
             mRockerPosition.x.toFloat(),
             mRockerPosition.y.toFloat(), mRockerInnerCircleRadius, mRockerPaint
         )
+        if (isAuto.get()) {
+            robotBitmap?.let {
+                canvas.drawBitmap(
+                    it,
+                    mRockerPosition.x.toFloat() - 30,
+                    mRockerPosition.y.toFloat() - 30,
+                    mRockerPaint
+                )
+            }
+        }
         if (isLocked.get()) {
             drawLock(canvas)
         }
@@ -309,6 +323,11 @@ class RockerView(context: Context, attributeSet: AttributeSet): View(context, at
         // joystick back to center
         mRockerPosition = Point()
         isLocked.set(false)
+        invalidate()
+    }
+
+    fun autoing() {
+        isAuto.set(true)
         invalidate()
     }
 
