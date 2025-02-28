@@ -24,6 +24,15 @@ android {
             abiFilters.clear()
             abiFilters.addAll(listOf("arm64-v8a"))
         }
+
+        val googleServicesFile = project.file("google-services.json")
+        if (!googleServicesFile.exists()) {
+            throw GradleException("在 CI 环境中必须提供 google-services.json 文件!")
+        }
+
+        manifestPlaceholders["BUGLY_APPID"] = "222f9ef298"
+        manifestPlaceholders["APP_CHANNEL"] = "f1b1b1b1-1b1b-1b1b-1b1b-1b1b1b1b1b1b"
+
     }
 
     buildTypes {
@@ -33,6 +42,13 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            manifestPlaceholders["APP_VERSION"] = defaultConfig.versionName ?: "UnknownVersion"
+            manifestPlaceholders["BUGLY_ENABLE_DEBUG"] = "false"
+        }
+
+        debug {
+            manifestPlaceholders["APP_VERSION"] = "${defaultConfig.versionName}-debug"
+            manifestPlaceholders["BUGLY_ENABLE_DEBUG"] = "true"
         }
     }
 
@@ -169,6 +185,8 @@ dependencies {
     implementation(libs.fastjson)
     implementation(libs.kotlinx.serialization)
     implementation(libs.kotlin.reflect)
+
+    implementation(libs.bugly)
 
     implementation(fileTree(mapOf(
         "dir" to "libs",
