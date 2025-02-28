@@ -37,8 +37,8 @@
 
                 <androidx.appcompat.widget.AppCompatImageView
                     android:id="@+id/move"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
                     android:importantForAccessibility="no"
                     android:contentDescription="@string/app_name"
                     android:src="@drawable/baseline_adjust_24"
@@ -58,13 +58,110 @@
                     tools:ignore="SmallSp" />
 
                 <androidx.appcompat.widget.AppCompatImageView
+                    android:id="@+id/auto"
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:importantForAccessibility="no"
+                    android:contentDescription="@string/app_name"
+                    android:src="@drawable/baseline_robot_24"
+                    app:tint="#373737"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+
+                <androidx.appcompat.widget.AppCompatImageView
                     android:id="@+id/expand_menu"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
                     android:importantForAccessibility="no"
                     android:contentDescription="@string/app_name"
                     android:src="@drawable/baseline_control_camera_24"
                     app:tint="#373737"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/auto_card"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginBottom="8dp"
+        app:contentPadding="4dp"
+        app:cardCornerRadius="12dp"
+        app:cardBackgroundColor="@color/white"
+        android:layout_gravity="center"
+        app:cardElevation="4dp">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:id="@+id/auto_play"
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:importantForAccessibility="no"
+                    android:contentDescription="@string/app_name"
+                    android:src="@drawable/baseline_play_24"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="10sp"
+                    android:text="@string/app_name"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:visibility="gone"
+                    app:layout_constraintStart_toEndOf="@id/auto_play"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:ignore="SmallSp" />
+
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:id="@+id/auto_status"
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:importantForAccessibility="no"
+                    android:contentDescription="@string/app_name"
+                    android:src="@drawable/baseline_settings_24"
+                    app:tint="#373737"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="10sp"
+                    android:text="@string/app_name"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:visibility="gone"
+                    app:layout_constraintStart_toEndOf="@id/auto_status"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:ignore="SmallSp" />
+
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:id="@+id/auto_lock"
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:importantForAccessibility="no"
+                    android:contentDescription="@string/app_name"
+                    android:background="@drawable/baseline_lock_24"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 

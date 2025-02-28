@@ -12,23 +12,31 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.WindowManager
 import android.widget.Toast
+import androidx.cardview.widget.CardView
 import moe.fuqiuluo.portal.R
 import moe.fuqiuluo.portal.android.widget.RockerView
 import moe.fuqiuluo.portal.ext.rockerCoords
 
 
 @SuppressLint("RtlHardcoded", "ClickableViewAccessibility")
-class Rocker(private val activity: Activity): View.OnTouchListener {
-    private val root by lazy { LayoutInflater.from(activity).inflate(R.layout.layout_rocker, null)!! }
+class Rocker(private val activity: Activity) : View.OnTouchListener {
+    private val root by lazy {
+        LayoutInflater.from(activity).inflate(R.layout.layout_rocker, null)!!
+    }
     private val layoutParams by lazy {
-        WindowManager.LayoutParams(WindowManager.LayoutParams.WRAP_CONTENT, WindowManager.LayoutParams.WRAP_CONTENT,
-            0, 0, PixelFormat.TRANSPARENT)
+        WindowManager.LayoutParams(
+            WindowManager.LayoutParams.WRAP_CONTENT, WindowManager.LayoutParams.WRAP_CONTENT,
+            0, 0, PixelFormat.TRANSPARENT
+        )
     }
     private val windowManager by lazy { activity.getSystemService(Context.WINDOW_SERVICE) as WindowManager }
     private var startX = 0
     private var startY = 0
 
     var isStart = false
+    private var autoCardVisible = false
+    var autoStatus = false
+    var autoLockStatus = false
 
     init {
         layoutParams.flags = (WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
@@ -53,6 +61,35 @@ class Rocker(private val activity: Activity): View.OnTouchListener {
 
         root.findViewById<View>(R.id.expand_menu).setOnClickListener {
             Toast.makeText(activity, "暂不支持", Toast.LENGTH_SHORT).show()
+        }
+        val autoCard = root.findViewById<CardView>(R.id.auto_card)
+        autoCard.visibility = if (autoCardVisible) View.VISIBLE else View.GONE
+        root.findViewById<View>(R.id.auto).setOnClickListener {
+            autoCardVisible = !autoCardVisible
+            if (autoCardVisible) {
+                autoCard.visibility = View.GONE
+            } else {
+                autoCard.visibility = View.VISIBLE
+            }
+        }
+        root.findViewById<View>(R.id.auto_play).setOnClickListener {
+            autoStatus = !autoStatus
+            if (autoStatus) {
+                root.findViewById<View>(R.id.auto_play).setBackgroundResource(R.drawable.baseline_stop_24)
+            } else {
+                root.findViewById<View>(R.id.auto_play).setBackgroundResource(R.drawable.baseline_play_24)
+            }
+        }
+        root.findViewById<View>(R.id.auto_status).setOnClickListener {
+
+        }
+        root.findViewById<View>(R.id.auto_lock).setOnClickListener {
+            autoLockStatus = !autoLockStatus
+            if (autoLockStatus) {
+                root.findViewById<View>(R.id.auto_lock).setBackgroundResource(R.drawable.baseline_lock_24)
+            } else {
+                root.findViewById<View>(R.id.auto_lock).setBackgroundResource(R.drawable.baseline_manual_24)
+            }
         }
     }
 
