@@ -773,7 +773,7 @@ internal object LocationServiceHook: BaseLocationHook() {
                         return
                     }
 
-                    if(provider == "LOCATION_BIG_DATA" && FakeLoc.enable) {
+                    if(provider == "LOCATION_BIG_DATA") {
                         param.result = false
                         return
                     }
