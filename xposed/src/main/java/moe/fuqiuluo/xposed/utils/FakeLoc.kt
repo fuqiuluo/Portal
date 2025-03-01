@@ -1,6 +1,5 @@
 package moe.fuqiuluo.xposed.utils
 
-import android.hardware.SensorManager
 import android.location.Location
 import kotlin.math.PI
 import kotlin.math.atan2
@@ -66,8 +65,12 @@ object FakeLoc {
      * 将网络定位降级为Cdma
      */
     var needDowngradeToCdma = true
-
     var isSystemServerProcess = false
+
+    /**
+     * 反定位复原加强（启用后将导致部分应用在关闭Portal后需要重新启动才能重新获取定位）
+     */
+    //var enableEnhancedAntiLocRestoration = true
 
     /**
      * 上一次的位置
