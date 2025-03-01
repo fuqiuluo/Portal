@@ -55,6 +55,7 @@ object RemoteCommandHandler {
 
         when (commandId) {
             "set_proxy" -> {
+                Logger.info("SubProxyBinder: ${rely.getBinder("proxy")} from ${BinderUtils.getUidPackageNames()}!")
                 rely.getBinder("proxy")?.let {
                     proxyBinders.add(it)
                 }
@@ -280,6 +281,7 @@ object RemoteCommandHandler {
             FakeLoc.longitude = newLon
             return true
         } else {
+            Logger.error("Invalid latitude or longitude: $newLat, $newLon")
             return false
         }
     }

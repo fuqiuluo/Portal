@@ -927,6 +927,9 @@ internal object LocationServiceHook: BaseLocationHook() {
 //    }
 
     fun callOnLocationChanged() {
+        if (FakeLoc.enableDebugLog) {
+            Logger.debug("==> callOnLocationChanged: ${locationListeners.size}")
+        }
         locationListeners.forEach { listenerWithProvider ->
             val listener = listenerWithProvider.second
             var location = FakeLoc.lastLocation
@@ -967,7 +970,10 @@ internal object LocationServiceHook: BaseLocationHook() {
                 Logger.error("callOnLocationChanged failed: " + error?.stackTraceToString())
                 Logger.error("The listener all methods: " + listener.javaClass.declaredMethods.joinToString { it.name })
             }
+        }
 
+        if (FakeLoc.enableDebugLog) {
+            Logger.debug("==> callOnLocationChanged: end")
         }
     }
 

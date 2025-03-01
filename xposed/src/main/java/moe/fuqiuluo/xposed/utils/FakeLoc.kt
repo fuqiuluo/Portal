@@ -72,24 +72,17 @@ object FakeLoc {
     /**
      * 上一次的位置
      */
-    @Volatile
-    var lastLocation: Location? = null
-    @Volatile
-    var latitude = 0.0
-    @Volatile
-    var longitude = 0.0
-    @Volatile
-    var altitude = 80.0
+    @Volatile var lastLocation: Location? = null
+    @Volatile var latitude = 0.0
+    @Volatile var longitude = 0.0
+    @Volatile var altitude = 80.0
 
-    @Volatile
-    var speed = 3.05
+    @Volatile var speed = 3.05
 
     var speedAmplitude = 1.0
 
-    @Volatile
-    var hasBearings = false
+    @Volatile var hasBearings = false
 
-    @Volatile
     var bearing = 0.0
         get() {
             if (hasBearings) {
