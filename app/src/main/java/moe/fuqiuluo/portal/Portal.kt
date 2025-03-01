@@ -20,8 +20,10 @@ class Portal: Application() {
 
         CrashReport.initCrashReport(applicationContext)
 
+        CrashReport.setUserId(applicationContext, Bugly.getUniqueDeviceId(applicationContext))
         CrashReport.setDeviceId(applicationContext, Bugly.getUniqueDeviceId(applicationContext))
         CrashReport.setDeviceModel(applicationContext, Bugly.getDeviceModel())
+        CrashReport.setCollectPrivacyInfo(applicationContext, true)
 
         //CrashReport.setAllThreadStackEnable(applicationContext, true, true)
     }
