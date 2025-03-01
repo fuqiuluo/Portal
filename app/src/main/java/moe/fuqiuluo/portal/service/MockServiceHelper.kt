@@ -91,6 +91,18 @@ object MockServiceHelper {
         return null
     }
 
+    fun getLocationListenerSize(locationManager: LocationManager): Int? {
+        if (!::randomKey.isInitialized) {
+            return null
+        }
+        val rely = Bundle()
+        rely.putString("command_id", "get_listener_size")
+        if(locationManager.sendExtraCommand(PROVIDER_NAME, randomKey, rely)) {
+            return rely.getInt("size")
+        }
+        return null
+    }
+
     fun broadcastLocation(locationManager: LocationManager): Boolean {
         if (!::randomKey.isInitialized) {
             return false

@@ -144,7 +144,8 @@ class MockFragment : Fragment() {
         val locations = requireContext().historicalLocations
 
         binding.mockLocationCard.setOnClickListener {
-            Toast.makeText(requireContext(), "Location${MockServiceHelper.getLocation(mockServiceViewModel.locationManager!!)}", Toast.LENGTH_SHORT).show()
+            val location = MockServiceHelper.getLocation(mockServiceViewModel.locationManager!!)
+            Toast.makeText(requireContext(), "Location$location, ListenerSize: ${MockServiceHelper.getLocationListenerSize(mockServiceViewModel.locationManager!!)}", Toast.LENGTH_SHORT).show()
         }
 
         // 2024.10.10: sort historical locations

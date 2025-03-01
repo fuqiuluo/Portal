@@ -94,6 +94,10 @@ object RemoteCommandHandler {
                 rely.putDouble("lon", FakeLoc.longitude)
                 return true
             }
+            "get_listener_size" -> {
+                rely.putInt("size", LocationServiceHook.locationListeners.size)
+                return true
+            }
             "get_speed" -> {
                 rely.putDouble("speed", FakeLoc.speed)
                 return true
