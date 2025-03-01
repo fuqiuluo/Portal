@@ -98,6 +98,9 @@
         <meta-data
             android:name="BUGLY_ENABLE_DEBUG"
             android:value="${BUGLY_ENABLE_DEBUG}" />
+        <meta-data
+            android:name="BUGLY_BUILD_ENV"
+            android:value="${BUGLY_BUILD_ENV}" />
 
         <!--适配华为（huawei）刘海屏-->
         <meta-data
