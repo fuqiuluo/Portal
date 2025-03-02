@@ -20,7 +20,7 @@ object MiuiBlurLocationProviderHook: BaseLocationHook() {
     operator fun invoke(classLoader: ClassLoader) {
         val cMiuiBlurLocationManagerImpl = XposedHelpers.findClassIfExists("com.android.server.location.MiuiBlurLocationManagerImpl", classLoader)
         if (cMiuiBlurLocationManagerImpl != null) {
-            BlindHookLocation(cMiuiBlurLocationManagerImpl)
+            BlindHookLocation(cMiuiBlurLocationManagerImpl, classLoader)
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                 val hooker: XC_MethodHook.MethodHookParam.() -> Unit = {
@@ -72,11 +72,6 @@ object MiuiBlurLocationProviderHook: BaseLocationHook() {
                     result = cellInfos
                 }
             })
-        }
-
-        val cGnssLocationProviderImpl = XposedHelpers.findClassIfExists("com.android.server.location.gnss.GnssLocationProviderImpl", classLoader)
-        if (cGnssLocationProviderImpl != null) {
-            BlindHookLocation(cGnssLocationProviderImpl)
         }
     }
 

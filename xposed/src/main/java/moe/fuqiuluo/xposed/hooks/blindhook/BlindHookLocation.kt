@@ -7,8 +7,8 @@ import moe.fuqiuluo.xposed.utils.FakeLoc
 import moe.fuqiuluo.xposed.utils.Logger
 
 object BlindHookLocation: BaseLocationHook() {
-    operator fun invoke(clazz: Class<*>): Int {
-        return BlindHook(clazz) { method, location: Location? ->
+    operator fun invoke(clazz: Class<*>, classLoader: ClassLoader): Int {
+        return BlindHook(clazz, classLoader) { method, location: Location? ->
             if (location == null || !FakeLoc.enable) return@BlindHook location
 
             val newLoc = injectLocation(location)

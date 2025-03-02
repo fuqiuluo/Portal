@@ -15,7 +15,7 @@ import de.robv.android.xposed.XposedBridge
 import de.robv.android.xposed.XposedHelpers
 import moe.fuqiuluo.xposed.BaseLocationHook
 import moe.fuqiuluo.xposed.RemoteCommandHandler
-import moe.fuqiuluo.xposed.hooks.gnss.GnssManagerServiceHook
+import moe.fuqiuluo.xposed.hooks.gnss.GnssHook
 import moe.fuqiuluo.xposed.hooks.miui.MiuiBlurLocationProviderHook
 import moe.fuqiuluo.xposed.hooks.miui.MiuiLocationManagerHook
 import moe.fuqiuluo.xposed.hooks.telephony.miui.MiuiTelephonyManagerHook
@@ -179,7 +179,7 @@ internal object LocationServiceHook: BaseLocationHook() {
 
         cILocationManager.classLoader!!.let {
             BasicLocationHook(it)
-            GnssManagerServiceHook(it)
+            GnssHook(it)
             LocationProviderManagerHook(it)
 
             MiuiBlurLocationProviderHook(it)

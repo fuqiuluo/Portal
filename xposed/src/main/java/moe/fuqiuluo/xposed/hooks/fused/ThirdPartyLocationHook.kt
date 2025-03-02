@@ -71,7 +71,7 @@ object ThirdPartyLocationHook: BaseLocationHook() {
             this.result = Unit
         }
 
-        BlindHookLocation(cNetworkLocationManager)
+        BlindHookLocation(cNetworkLocationManager, classLoader)
     }
 
     private fun hookBDMap(classLoader: ClassLoader) {
@@ -94,7 +94,7 @@ object ThirdPartyLocationHook: BaseLocationHook() {
                 }
             }
 
-            BlindHookLocation(bdLocationClient)
+            BlindHookLocation(bdLocationClient, classLoader)
         }
 
 
@@ -108,7 +108,7 @@ object ThirdPartyLocationHook: BaseLocationHook() {
                 return@run
             }
 
-            BlindHookLocation(cTencentNLPManager)
+            BlindHookLocation(cTencentNLPManager, classLoader)
         }
 
 //        run {

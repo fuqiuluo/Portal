@@ -2,14 +2,13 @@ package moe.fuqiuluo.xposed.hooks.blindhook
 
 import android.location.Location
 import de.robv.android.xposed.XC_MethodHook
-import de.robv.android.xposed.XposedBridge
 import moe.fuqiuluo.xposed.utils.FakeLoc
 import moe.fuqiuluo.xposed.utils.Logger
 import moe.fuqiuluo.xposed.utils.onceHook
 import java.lang.reflect.Member
 
 object BlindHook {
-    operator fun <T> invoke(clazz: Class<*>, handler: (Member, T?) -> T?): Int {
+    operator fun <T> invoke(clazz: Class<*>, classLoader: ClassLoader, handler: (Member, T?) -> T?): Int {
         var count = 0
         clazz.declaredMethods.forEach {
             if (it.returnType == Location::class.java) {
@@ -17,7 +16,7 @@ object BlindHook {
                     Logger.debug("BlindHookV2 ${it.name}: ${it.parameterTypes.joinToString()}")
                 }
 
-                it.onceHook(BlindHookForRETLocation(handler))
+                it.onceHook(BlindHookForRETLocation(false, false, handler))
                 count++
                 return@forEach
             }
@@ -28,7 +27,7 @@ object BlindHook {
                         Logger.debug("BlindHookV2 ${it.name}: ${it.parameterTypes.joinToString()}")
                     }
 
-                    it.onceHook(BlindHookForLocation(index, handler))
+                    it.onceHook(BlindHookForLocation(index, false, false, handler))
                     count++
                     return@forEach
                 }
@@ -39,8 +38,10 @@ object BlindHook {
 
     @Suppress("UNCHECKED_CAST")
     private class BlindHookForLocation<T>(
-        private val index: Int,
-        private val handler: (Member, T?) -> T?
+        val index: Int,
+        val isList: Boolean,
+        val isArray: Boolean,
+        val handler: (Member, T?) -> T?
     ): XC_MethodHook() {
         override fun beforeHookedMethod(param: MethodHookParam) {
             val data = param.args[index] as? T ?: return
@@ -51,7 +52,9 @@ object BlindHook {
 
     @Suppress("UNCHECKED_CAST")
     private class BlindHookForRETLocation<T>(
-        private val handler: (Member, T?) -> T?
+        val isList: Boolean,
+        val isArray: Boolean,
+        val handler: (Member, T?) -> T?
     ): XC_MethodHook() {
         override fun afterHookedMethod(param: MethodHookParam) {
             val data = param.result as? T ?: return

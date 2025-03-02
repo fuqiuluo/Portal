@@ -34,7 +34,11 @@ abstract class BaseLocationHook: BaseDivineService() {
             return originLocation
         }
 
-        val location = Location(originLocation.provider)
+        if (originLocation.provider == LocationManager.NETWORK_PROVIDER) {
+            originLocation.provider = LocationManager.GPS_PROVIDER
+        }
+
+        val location = Location(originLocation.provider ?: LocationManager.GPS_PROVIDER)
         location.accuracy = if (FakeLoc.accuracy != 0.0f) FakeLoc.accuracy else originLocation.accuracy
         val jitterLat = FakeLoc.jitterLocation()
         location.latitude = jitterLat.first
@@ -114,6 +118,10 @@ abstract class BaseLocationHook: BaseDivineService() {
             XposedHelpers.callMethod(location, "makeComplete")
         }.onFailure {
             Logger.error("makeComplete failed", it)
+        }
+
+        if (FakeLoc.enableDebugLog) {
+            Logger.debug("injectLocation success! $location")
         }
 
         return location

@@ -37,7 +37,7 @@ object BasicLocationHook: BaseLocationHook() {
 
         kotlin.runCatching {
             val cLocationResult = "android.location.LocationResult".toClassOrThrow(classLoader)
-            BlindHookLocation(cLocationResult)
+            BlindHookLocation(cLocationResult, classLoader)
 
             cLocationResult.hookAllMethodsAfter("asList") {
                 if (!FakeLoc.enable) return@hookAllMethodsAfter

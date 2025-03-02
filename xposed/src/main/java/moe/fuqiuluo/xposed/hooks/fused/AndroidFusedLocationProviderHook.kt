@@ -39,6 +39,6 @@ object AndroidFusedLocationProviderHook: BaseLocationHook() {
             return
         }
 
-        BlindHookLocation(cChildLocationListener)
+        BlindHookLocation(cChildLocationListener, classLoader)
     }
 }

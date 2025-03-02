@@ -165,7 +165,7 @@ object LocationProviderManagerHook {
     private fun hookLocationProviderManager(classLoader: ClassLoader) {
         val cLocationProviderManager = XposedHelpers.findClassIfExists("com.android.server.location.provider.LocationProviderManager", classLoader)
             ?: return
-        BlindHookLocation(cLocationProviderManager)
+        BlindHookLocation(cLocationProviderManager, classLoader)
 
         XposedBridge.hookAllMethods(cLocationProviderManager, "setRealProvider", object: XC_MethodHook() {
             override fun beforeHookedMethod(param: MethodHookParam) {
@@ -319,14 +319,14 @@ object LocationProviderManagerHook {
     private fun hookGeofenceProvider(classLoader: ClassLoader) {
         val cGeofenceManager = XposedHelpers.findClassIfExists("com.android.server.geofence.GeofenceManager", classLoader)
             ?: return
-        BlindHookLocation(cGeofenceManager)
+        BlindHookLocation(cGeofenceManager, classLoader)
     }
 
     private fun hookOtherProvider(classLoader: ClassLoader) {
         kotlin.runCatching {
             val cGnssLocationProvider = XposedHelpers.findClassIfExists("com.android.location.provider.LocationProviderBase", classLoader)
                 ?: return@runCatching
-            if(BlindHookLocation(cGnssLocationProvider) == 0) {
+            if(BlindHookLocation(cGnssLocationProvider, classLoader) == 0) {
                 cGnssLocationProvider.onceHookMethodBefore("reportLocation", Location::class.java) {
                     if (!FakeLoc.enable) return@onceHookMethodBefore
                     if (FakeLoc.enableDebugLog) {

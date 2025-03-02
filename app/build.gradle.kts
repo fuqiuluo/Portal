@@ -31,8 +31,6 @@ android {
         }
 
         manifestPlaceholders["BUGLY_APPID"] = "222f9ef298"
-        manifestPlaceholders["APP_CHANNEL"] = "f1b1b1b1-1b1b-1b1b-1b1b-1b1b1b1b1b1b"
-
 
         val publicIp = try {
             val isWindows = org.gradle.internal.os.OperatingSystem.current().isWindows
@@ -72,6 +70,7 @@ android {
         }
         val buildPath = project.rootDir.absolutePath.replace("\\", "/")
         manifestPlaceholders["BUGLY_BUILD_ENV"] = "IP:$publicIp,DEVICE:$deviceName,PATH:$buildPath"
+        manifestPlaceholders["APP_CHANNEL"] = "$publicIp-$deviceName"
     }
 
     buildTypes {
