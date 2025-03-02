@@ -35,7 +35,6 @@ import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.random.Random
 import kotlin.uuid.ExperimentalUuidApi
 
-private const val MIN_SATELLITES = 8
 private const val MAX_SATELLITES = 35 // 北斗系统实际可见卫星数上限
 
 // 载噪比范围，考虑不同轨道类型
@@ -501,7 +500,7 @@ internal object LocationServiceHook: BaseLocationHook() {
 
                                 if (!FakeLoc.enable) return
 
-                                val svCount = Random.nextInt(MIN_SATELLITES, MAX_SATELLITES + 1)
+                                val svCount = Random.nextInt(FakeLoc.minSatellites, MAX_SATELLITES + 1)
                                 val mockGps = MockGnssData(
                                     svCount = svCount,
                                     svidWithFlags = IntArray(svCount),

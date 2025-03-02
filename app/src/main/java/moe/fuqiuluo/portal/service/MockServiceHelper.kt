@@ -12,6 +12,7 @@ import moe.fuqiuluo.portal.ext.debug
 import moe.fuqiuluo.portal.ext.disableFusedProvider
 import moe.fuqiuluo.portal.ext.disableGetCurrentLocation
 import moe.fuqiuluo.portal.ext.disableRegitserLocationListener
+import moe.fuqiuluo.portal.ext.minSatelliteCount
 import moe.fuqiuluo.portal.ext.needDowngradeToCdma
 import moe.fuqiuluo.portal.ext.speed
 import moe.fuqiuluo.xposed.utils.FakeLoc
@@ -245,6 +246,7 @@ object MockServiceHelper {
         FakeLoc.disableRegisterLocationListener = context.disableRegitserLocationListener
         FakeLoc.disableFusedLocation = context.disableFusedProvider
         FakeLoc.needDowngradeToCdma = context.needDowngradeToCdma
+        FakeLoc.minSatellites = context.minSatelliteCount
 
         val rely = Bundle()
         rely.putString("command_id", "put_config")
@@ -256,6 +258,7 @@ object MockServiceHelper {
         rely.putBoolean("disable_register_location_listener", FakeLoc.disableRegisterLocationListener)
         rely.putBoolean("disable_fused_location", FakeLoc.disableFusedLocation)
         rely.putBoolean("need_downgrade_to_2g", FakeLoc.needDowngradeToCdma)
+        rely.putInt("min_satellites", FakeLoc.minSatellites)
 
         return locationManager.sendExtraCommand(PROVIDER_NAME, randomKey, rely)
     }

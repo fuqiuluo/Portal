@@ -376,7 +376,7 @@
                     android:id="@+id/report_duration_title"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="位置上报间隔"
+                    android:text="@string/item_report_duration_title"
                     android:textColor="@color/portal_mini_title_color"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"/>
@@ -385,7 +385,7 @@
                     android:id="@+id/report_duration_desc"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="上报位置的频率单位毫秒(ms)"
+                    android:text="@string/item_report_duration_desc"
                     android:textSize="11sp"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/report_duration_title"/>
@@ -394,13 +394,50 @@
                     android:id="@+id/report_duration_value"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="100ms"
+                    android:text="@string/item_report_duration_value"
                     android:textSize="11sp"
                     app:layout_constraintTop_toBottomOf="@id/report_duration_title"
                     app:layout_constraintEnd_toEndOf="parent" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/satellite_count_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:padding="5dp"
+                android:layout_marginTop="4dp"
+                android:layout_marginBottom="4dp">
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/satellite_count_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="模拟最少卫星数量"
+                    android:textColor="@color/portal_mini_title_color"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"/>
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/satellite_count_desc"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="最少模拟的卫星数量（只支持北斗）"
+                    android:textSize="11sp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/satellite_count_title"/>
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/satellite_count_value"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="12颗"
+                    android:textSize="11sp"
+                    app:layout_constraintTop_toBottomOf="@id/satellite_count_title"
+                    app:layout_constraintEnd_toEndOf="parent" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
         </LinearLayout>
 
     </ScrollView>

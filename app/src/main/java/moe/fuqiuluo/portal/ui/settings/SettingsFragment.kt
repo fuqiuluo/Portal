@@ -1,7 +1,6 @@
 package moe.fuqiuluo.portal.ui.settings
 
 import android.annotation.SuppressLint
-import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -9,7 +8,6 @@ import android.view.ViewGroup
 import android.widget.CompoundButton
 import android.widget.TextView
 import android.widget.Toast
-import androidx.constraintlayout.helper.widget.Carousel
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModelProvider
@@ -27,15 +25,14 @@ import moe.fuqiuluo.portal.ext.disableFusedProvider
 import moe.fuqiuluo.portal.ext.disableGetCurrentLocation
 import moe.fuqiuluo.portal.ext.disableRegitserLocationListener
 import moe.fuqiuluo.portal.ext.hookSensor
+import moe.fuqiuluo.portal.ext.minSatelliteCount
 import moe.fuqiuluo.portal.ext.needDowngradeToCdma
 import moe.fuqiuluo.portal.ext.needOpenSELinux
-import moe.fuqiuluo.portal.ext.rawHistoricalLocations
 import moe.fuqiuluo.portal.ext.reportDuration
 import moe.fuqiuluo.portal.ext.speed
 import moe.fuqiuluo.portal.service.MockServiceHelper
 import moe.fuqiuluo.portal.ui.viewmodel.MockServiceViewModel
 import moe.fuqiuluo.portal.ui.viewmodel.SettingsViewModel
-import java.math.BigDecimal
 import kotlin.getValue
 
 class SettingsFragment : Fragment() {
@@ -204,6 +201,25 @@ class SettingsFragment : Fragment() {
                 context.reportDuration = value
                 binding.reportDurationValue.text = "%dms".format(value)
                 showToast("重新启动APP生效")
+            }
+        }
+
+        binding.satelliteCountLayout.setOnClickListener {
+            showDialog("设置最小模拟卫星数量", binding.satelliteCountValue.text.toString().let {
+                it.substring(0, it.length - 1)
+            }) {
+                val value = it.toIntOrNull()
+                if (value == null || value < 0) {
+                    Toast.makeText(context, "数量不合法", Toast.LENGTH_SHORT).show()
+                    return@showDialog
+                } else if (value > 35) {
+                    Toast.makeText(context, "卫星数量不能超过35", Toast.LENGTH_SHORT).show()
+                    return@showDialog
+                }
+                context.minSatelliteCount = value
+                binding.satelliteCountValue.text = "%d颗".format(value)
+                showToast("重新启动模拟生效")
+                updateRemoteConfig()
             }
         }
 

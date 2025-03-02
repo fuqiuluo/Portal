@@ -68,6 +68,11 @@ object FakeLoc {
     var isSystemServerProcess = false
 
     /**
+     * 模拟最小卫星数量
+     */
+    var minSatellites = 12
+
+    /**
      * 反定位复原加强（启用后将导致部分应用在关闭Portal后需要重新启动才能重新获取定位）
      */
     //var enableEnhancedAntiLocRestoration = true

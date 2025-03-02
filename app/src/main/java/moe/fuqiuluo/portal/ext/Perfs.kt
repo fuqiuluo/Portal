@@ -72,6 +72,12 @@ var Context.reportDuration: Int
         putInt("reportDuration", value)
     }
 
+var Context.minSatelliteCount: Int
+    get() = sharedPrefs.getInt("maxSatelliteCount", 12)
+    set(value) = sharedPrefs.edit {
+        putInt("maxSatelliteCount", value)
+    }
+
 var Context.mapType: Int
     get() = sharedPrefs.getInt("mapType", BaiduMap.MAP_TYPE_NORMAL)
     set(value) = sharedPrefs.edit {

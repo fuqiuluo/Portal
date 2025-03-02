@@ -195,6 +195,10 @@ object RemoteCommandHandler {
                 val disableRegisterLocationListener = rely.getBoolean("disable_register_location_listener", FakeLoc.disableRegisterLocationListener)
                 val disableFusedLocation = rely.getBoolean("disable_fused_location", FakeLoc.disableFusedLocation)
                 val needDowngradeToCdma = rely.getBoolean("need_downgrade_to_2g", FakeLoc.needDowngradeToCdma)
+                var minSatellites = rely.getInt("min_satellites", 12)
+                if (minSatellites < 0) {
+                    minSatellites = 12
+                }
 
                 FakeLoc.enable = enable
                 FakeLoc.speed = speed
@@ -205,6 +209,7 @@ object RemoteCommandHandler {
                 FakeLoc.disableRegisterLocationListener = disableRegisterLocationListener
                 FakeLoc.disableFusedLocation = disableFusedLocation
                 FakeLoc.needDowngradeToCdma = needDowngradeToCdma
+                FakeLoc.minSatellites = minSatellites
                 return true
             }
             "sync_config" -> {
