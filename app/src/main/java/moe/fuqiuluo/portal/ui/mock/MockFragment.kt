@@ -250,17 +250,24 @@ class MockFragment : Fragment() {
             button.isClickable = false
             try {
                 withContext(Dispatchers.IO) {
-                    if (MockServiceHelper.tryOpenMock(mockServiceViewModel.locationManager!!, speed, altitude, accuracy)) {
-                        updateMockButtonState(button, "停止模拟", R.drawable.rounded_play_disabled_24)
-                    } else {
-                        showToast("模拟服务启动失败")
-                        return@withContext
-                    }
+                    mockServiceViewModel.locationManager!!.let {
+                        if (MockServiceHelper.tryOpenMock(it, speed, altitude, accuracy)) {
+                            updateMockButtonState(button, "停止模拟", R.drawable.rounded_play_disabled_24)
+                        } else {
+                            showToast("模拟服务启动失败")
+                            return@withContext
+                        }
 
-                    if (MockServiceHelper.setLocation(mockServiceViewModel.locationManager!!, selectedLocation.lat, selectedLocation.lon)) {
-                        showToast("更新位置成功")
-                    } else {
-                        showToast("更新位置失败")
+                        if (!MockServiceHelper.setLocation(it, selectedLocation.lat, selectedLocation.lon)) {
+                            showToast("更新位置失败")
+                            return@let
+                        }
+
+                        if (MockServiceHelper.broadcastLocation(it)) {
+                            showToast("更新位置成功")
+                        } else {
+                            showToast("更新位置失败")
+                        }
                     }
                 }
             } finally {
