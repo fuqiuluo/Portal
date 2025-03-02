@@ -73,9 +73,9 @@ var Context.reportDuration: Int
     }
 
 var Context.minSatelliteCount: Int
-    get() = sharedPrefs.getInt("maxSatelliteCount", 12)
+    get() = sharedPrefs.getInt("minSatelliteCount", 12)
     set(value) = sharedPrefs.edit {
-        putInt("maxSatelliteCount", value)
+        putInt("minSatelliteCount", value)
     }
 
 var Context.mapType: Int
