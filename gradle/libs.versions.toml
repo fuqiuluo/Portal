@@ -1,26 +1,26 @@
 [versions]
-agp = "8.7.1"
+agp = "8.8.2"
 circularProgressButtonVersion = "1.4"
-firebaseBom = "33.9.0"
+firebaseBom = "33.10.0"
 systemRefine = "4.4.0"
 xposed = "82"
 hiddenapibypass = "4.3"
-kotlin = "2.0.21"
+kotlin = "2.1.10"
 coreKtx = "1.15.0"
 junit = "4.13.2"
 junitVersion = "1.2.1"
 espressoCore = "3.6.1"
 appcompat = "1.7.0"
 material = "1.12.0"
-constraintlayout = "2.2.0"
+constraintlayout = "2.2.1"
 lifecycleLivedataKtx = "2.8.7"
 lifecycleViewmodelKtx = "2.8.7"
-navigationFragmentKtx = "2.8.3"
-navigationUiKtx = "2.8.3"
+navigationFragmentKtx = "2.8.8"
+navigationUiKtx = "2.8.8"
 playServicesLocation = "21.3.0"
 lifecycleProcess = "2.8.7"
 androidbrowserhelper = "2.5.0"
-jetbrainsKotlinJvm = "2.0.21"
+jetbrainsKotlinJvm = "2.1.10"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -47,8 +47,8 @@ androidx-lifecycle-process = { group = "androidx.lifecycle", name = "lifecycle-p
 androidbrowserhelper = { group = "com.google.androidbrowserhelper", name = "androidbrowserhelper", version.ref = "androidbrowserhelper" }
 okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version = "4.12.0" }
 fastjson = { module = "com.alibaba.fastjson2:fastjson2-kotlin", version = "2.0.56" }
-kotlin-reflect = {module = "org.jetbrains.kotlin:kotlin-reflect", version = "1.9.23"}
-kotlinx-serialization = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version = "1.6.2" }
+kotlin-reflect = {module = "org.jetbrains.kotlin:kotlin-reflect", version = "2.1.10"}
+kotlinx-serialization = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version = "1.8.0" }
 bugly = { module = "com.tencent.bugly:crashreport", version = "4.1.9.3" }
 
 
@@ -57,4 +57,4 @@ android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 android-library = { id = "com.android.library", version.ref = "agp" }
 jetbrains-kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "jetbrainsKotlinJvm" }
-kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version = "1.4.30" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version = "2.1.10" }
