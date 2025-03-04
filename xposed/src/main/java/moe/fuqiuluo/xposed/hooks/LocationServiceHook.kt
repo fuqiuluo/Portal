@@ -479,149 +479,132 @@ internal object LocationServiceHook: BaseLocationHook() {
                     }
 
                     //val cGnssStatus by lazy { XposedHelpers.findClass("android.location.GnssStatus", cIGnssStatusListener.classLoader) }
-                    if(XposedBridge.hookAllMethods(cIGnssStatusListener, "onSvStatusChanged", object: XC_MethodHook() {
-                            override fun beforeHookedMethod(param: MethodHookParam?) {
-                                if (param == null) return
-                                // android 7.0.0
-                                // void onSvStatusChanged(int svCount, in int[] svidWithFlags, in float[] cn0s,
-                                //            in float[] elevations, in float[] azimuths);
-                                // android 8.0.0
-                                // void onSvStatusChanged(int svCount, in int[] svidWithFlags, in float[] cn0s,
-                                //            in float[] elevations, in float[] azimuths,
-                                //            in float[] carrierFreqs);
-                                // android 11
-                                //  void onSvStatusChanged(int svCount, in int[] svidWithFlags, in float[] cn0s,
-                                //            in float[] elevations, in float[] azimuths,
-                                //            in float[] carrierFreqs, in float[] basebandCn0s);
-                                // android 12 ~ 15
-                                // void onSvStatusChanged(in GnssStatus gnssStatus);
+                    if (cIGnssStatusListener.onceHookAllMethod("onSvStatusChanged", beforeHook {
+                        // android 7.0.0
+                        // void onSvStatusChanged(int svCount, in int[] svidWithFlags, in float[] cn0s,
+                        //            in float[] elevations, in float[] azimuths);
+                        // android 8.0.0
+                        // void onSvStatusChanged(int svCount, in int[] svidWithFlags, in float[] cn0s,
+                        //            in float[] elevations, in float[] azimuths,
+                        //            in float[] carrierFreqs);
+                        // android 11
+                        //  void onSvStatusChanged(int svCount, in int[] svidWithFlags, in float[] cn0s,
+                        //            in float[] elevations, in float[] azimuths,
+                        //            in float[] carrierFreqs, in float[] basebandCn0s);
+                        // android 12 ~ 15
+                        // void onSvStatusChanged(in GnssStatus gnssStatus);
 
-                                // https://www.csno-tarc.cn/system/constellation
+                        // https://www.csno-tarc.cn/system/constellation
 
-                                if (!FakeLoc.enableMockGnss) return
+                        if (!FakeLoc.enableMockGnss) return@beforeHook
 
-                                val svCount = Random.nextInt(FakeLoc.minSatellites, MAX_SATELLITES + 1)
-                                val mockGps = MockGnssData(
-                                    svCount = svCount,
-                                    svidWithFlags = IntArray(svCount),
-                                    cn0s = FloatArray(svCount),
-                                    elevations = FloatArray(svCount),
-                                    azimuths = FloatArray(svCount),
-                                    carrierFreqs = FloatArray(svCount)
-                                ).apply {
-                                    val selectedSatellites = satelliteList.shuffled().take(svCount)
+                        val svCount = Random.nextInt(FakeLoc.minSatellites, MAX_SATELLITES + 1)
+                        val mockGps = MockGnssData(
+                            svCount = svCount,
+                            svidWithFlags = IntArray(svCount),
+                            cn0s = FloatArray(svCount),
+                            elevations = FloatArray(svCount),
+                            azimuths = FloatArray(svCount),
+                            carrierFreqs = FloatArray(svCount)
+                        ).apply {
+                            val selectedSatellites = satelliteList.shuffled().take(svCount)
 
-                                    selectedSatellites.forEachIndexed { index, sat ->
-                                        svidWithFlags[index] = 0
+                            selectedSatellites.forEachIndexed { index, sat ->
+                                svidWithFlags[index] = 0
 
-                                        val hasEphemeris = Random.nextFloat() > 0.1f    // 90%概率有星历
-                                        val hasAlmanac = Random.nextFloat() > 0.05f     // 95%概率有年历
-                                        val usedInFix = Random.nextFloat() > 0.3f       // 70%概率用于定位
-                                        val hasCarrierFreq = true                       // 总是有载波频率
-                                        val hasBasebandCn0 = true                       // 总是有基带载噪比
+                                val hasEphemeris = Random.nextFloat() > 0.1f    // 90%概率有星历
+                                val hasAlmanac = Random.nextFloat() > 0.05f     // 95%概率有年历
+                                val usedInFix = Random.nextFloat() > 0.3f       // 70%概率用于定位
+                                val hasCarrierFreq = true                       // 总是有载波频率
+                                val hasBasebandCn0 = true                       // 总是有基带载噪比
 
-                                        var flags = GnssFlags.SVID_FLAGS_NONE
+                                var flags = GnssFlags.SVID_FLAGS_NONE
 
-                                        // 设置基本标志位
-                                        if (hasEphemeris) flags = flags or GnssFlags.SVID_FLAGS_HAS_EPHEMERIS_DATA
-                                        if (hasAlmanac) flags = flags or GnssFlags.SVID_FLAGS_HAS_ALMANAC_DATA
-                                        if (usedInFix) flags = flags or GnssFlags.SVID_FLAGS_USED_IN_FIX
-                                        if (hasCarrierFreq) flags = flags or GnssFlags.SVID_FLAGS_HAS_CARRIER_FREQUENCY
-                                        if (hasBasebandCn0) flags = flags or GnssFlags.SVID_FLAGS_HAS_BASEBAND_CN0
+                                // 设置基本标志位
+                                if (hasEphemeris) flags = flags or GnssFlags.SVID_FLAGS_HAS_EPHEMERIS_DATA
+                                if (hasAlmanac) flags = flags or GnssFlags.SVID_FLAGS_HAS_ALMANAC_DATA
+                                if (usedInFix) flags = flags or GnssFlags.SVID_FLAGS_USED_IN_FIX
+                                if (hasCarrierFreq) flags = flags or GnssFlags.SVID_FLAGS_HAS_CARRIER_FREQUENCY
+                                if (hasBasebandCn0) flags = flags or GnssFlags.SVID_FLAGS_HAS_BASEBAND_CN0
 
-                                        // 组合SVID、星座类型和标志位
-                                        svidWithFlags[index] = (sat.prn shl GnssFlags.SVID_SHIFT_WIDTH) or
-                                                ((GnssFlags.CONSTELLATION_BEIDOU and GnssFlags.CONSTELLATION_TYPE_MASK) shl GnssFlags.CONSTELLATION_TYPE_SHIFT_WIDTH) or
-                                                flags
+                                // 组合SVID、星座类型和标志位
+                                svidWithFlags[index] = (sat.prn shl GnssFlags.SVID_SHIFT_WIDTH) or
+                                        ((GnssFlags.CONSTELLATION_BEIDOU and GnssFlags.CONSTELLATION_TYPE_MASK) shl GnssFlags.CONSTELLATION_TYPE_SHIFT_WIDTH) or
+                                        flags
 
-                                        cn0s[index] = when (sat.type) {
-                                            is OrbitType.GEO -> Random.nextFloat(GEO_MIN_CN0, GEO_MAX_CN0)
-                                            is OrbitType.IGSO -> Random.nextFloat(IGSO_MIN_CN0, IGSO_MAX_CN0)
-                                            is OrbitType.MEO -> Random.nextFloat(MEO_MIN_CN0, MEO_MAX_CN0)
-                                        }
-                                        elevations[index] = Random.nextFloat(sat.type.elevationRange.start, sat.type.elevationRange.endInclusive)
-                                        azimuths[index] = Random.nextFloat(0f, 360f)
-                                        carrierFreqs[index] = when (Random.nextInt(3)) {
-                                            0 -> BDS_B1I_FREQ
-                                            1 -> BDS_B2I_FREQ
-                                            else -> BDS_B3I_FREQ
-                                        }
-                                    }
+                                cn0s[index] = when (sat.type) {
+                                    is OrbitType.GEO -> Random.nextFloat(GEO_MIN_CN0, GEO_MAX_CN0)
+                                    is OrbitType.IGSO -> Random.nextFloat(IGSO_MIN_CN0, IGSO_MAX_CN0)
+                                    is OrbitType.MEO -> Random.nextFloat(MEO_MIN_CN0, MEO_MAX_CN0)
+                                }
+                                elevations[index] = Random.nextFloat(sat.type.elevationRange.start, sat.type.elevationRange.endInclusive)
+                                azimuths[index] = Random.nextFloat(0f, 360f)
+                                carrierFreqs[index] = when (Random.nextInt(3)) {
+                                    0 -> BDS_B1I_FREQ
+                                    1 -> BDS_B2I_FREQ
+                                    else -> BDS_B3I_FREQ
+                                }
+                            }
+                        }
+
+                        if (args[0] is Int) {
+                            args[0] = svCount
+                            args[1] = mockGps.svidWithFlags
+                            args[2] = mockGps.cn0s
+                            args[3] = mockGps.elevations
+                            args[4] = mockGps.azimuths
+                            if (args.size > 5) {
+                                args[5] = mockGps.carrierFreqs
+                            }
+
+                            if (args.size > 6) {
+                                args[6] = FloatArray(svCount) {
+                                    mockGps.cn0s[it] - Random.nextFloat(2f, 5f)
+                                }
+                            }
+                            return@beforeHook
+                        }
+
+                        if (args[0] != null && args[0].javaClass.name == "android.location.GnssStatus") {
+                            runCatching {
+                                val mConstructor = args[0].javaClass.declaredConstructors.firstOrNull {
+                                    it.parameterTypes.size == 7
+                                }.also {
+                                    it?.isAccessible = true
                                 }
 
-                                if (param.args[0] is Int) {
-//                                var svCount = param.args[0] as Int
-//                                val svidWithFlags = param.args[1] as IntArray
-//                                val cn0s = param.args[2] as FloatArray
-//                                val elevations = param.args[3] as FloatArray
-//                                val azimuths = param.args[4] as FloatArray
-//                                val carrierFreqs = if (param.args.size > 5) param.args[5] as FloatArray else null
-
-                                    param.args[0] = svCount
-                                    param.args[1] = mockGps.svidWithFlags
-                                    param.args[2] = mockGps.cn0s
-                                    param.args[3] = mockGps.elevations
-                                    param.args[4] = mockGps.azimuths
-                                    if (param.args.size > 5) {
-                                        param.args[5] = mockGps.carrierFreqs
-                                    }
-
-                                    if (param.args.size > 6) {
-                                        param.args[6] = FloatArray(svCount) {
+                                if (mConstructor != null) {
+                                    args[0] = mConstructor.newInstance(
+                                        svCount,
+                                        mockGps.svidWithFlags,
+                                        mockGps.cn0s,
+                                        mockGps.elevations,
+                                        mockGps.azimuths,
+                                        mockGps.carrierFreqs,
+                                        FloatArray(svCount) {
                                             mockGps.cn0s[it] - Random.nextFloat(2f, 5f)
                                         }
-                                    }
-                                    return
+                                    )
+                                } else {
+                                    Logger.error("onSvStatusChanged: unsupported version: ${method}, constructor not found")
                                 }
-
-                                if (param.args[0] != null && param.args[0].javaClass.name == "android.location.GnssStatus") {
-                                    runCatching {
-                                        val mConstructor = param.args[0].javaClass.declaredConstructors.firstOrNull {
-                                            it.parameterTypes.size == 7
-                                        }.also {
-                                            it?.isAccessible = true
-                                        }
-
-                                        if (mConstructor != null) {
-                                            param.args[0] = mConstructor.newInstance(
-                                                svCount,
-                                                mockGps.svidWithFlags,
-                                                mockGps.cn0s,
-                                                mockGps.elevations,
-                                                mockGps.azimuths,
-                                                mockGps.carrierFreqs,
-                                                FloatArray(svCount) {
-                                                    mockGps.cn0s[it] - Random.nextFloat(2f, 5f)
-                                                }
-                                            )
-                                        } else {
-                                            Logger.error("onSvStatusChanged: unsupported version: ${param.method}, constructor not found")
-                                        }
-                                    }.onFailure {
-                                        XposedBridge.log(it)
-                                    }
-                                    return
-                                }
-
-                                Logger.error("onSvStatusChanged: unsupported version: ${param.method}")
+                            }.onFailure {
+                                XposedBridge.log(it)
                             }
-                        }).isEmpty()) {
-                        XposedBridge.log("[Portal] hook onSvStatusChanged failed")
+                            return@beforeHook
+                        }
+
+                        Logger.error("onSvStatusChanged: unsupported version: $method")
+                    }).isEmpty()) {
+                        Logger.error("find onSvStatusChanged failed!")
                     }
 
-                    if(Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
-                        if(XposedBridge.hookAllMethods(cIGnssStatusListener, "onNmeaReceived", object: XC_MethodHook() {
-                                override fun beforeHookedMethod(param: MethodHookParam?) {
-                                    if (param == null) return
-                                    if (FakeLoc.enableDebugLog) {
-                                        Logger.info("onNmeaReceived")
-                                    }
-                                    if (FakeLoc.enableMockGnss) param.result = null
-                                }
-                            }).isEmpty()) {
-                            XposedBridge.log("[Portal] hook onNmeaReceived failed")
+                    cIGnssStatusListener.onceHookAllMethod("onNmeaReceived", beforeHook {
+                        if (FakeLoc.enableDebugLog) {
+                            Logger.info("onNmeaReceived")
                         }
-                    }
+                        if (FakeLoc.enableMockGnss) result = null
+                    })
                 }
             }).isEmpty()) {
             XposedBridge.log("[Portal] hook registerGnssStatusCallback failed")
