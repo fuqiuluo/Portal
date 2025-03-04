@@ -18,6 +18,12 @@
         tools:layout="@layout/fragment_mock" />
 
     <fragment
+        android:id="@+id/nav_gnss_mock"
+        android:name="moe.fuqiuluo.portal.ui.gnss.GnssMockFragment"
+        android:label="@string/menu_gnss_mock"
+        tools:layout="@layout/fragment_gnss_mock" />
+
+    <fragment
         android:id="@+id/nav_route_gallery"
         android:name="moe.fuqiuluo.portal.ui.mock.RouteMockFragment"
         android:label="@string/menu_route_mock"

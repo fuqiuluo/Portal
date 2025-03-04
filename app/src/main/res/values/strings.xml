@@ -10,8 +10,9 @@
     <string name="action_info">信息</string>
 
     <string name="menu_home">Home</string>
-    <string name="menu_mock">Mock</string>
+    <string name="menu_mock">Location Mock</string>
     <string name="menu_route_mock">Route Mock</string>
+    <string name="menu_gnss_mock">Gnss Mock</string>
     <string name="menu_route_mock_edit">Route Mock Edit</string>
     <string name="menu_setting">Setting</string>
     <string name="request_permission">能否给我一个权限呢？</string>
@@ -66,4 +67,9 @@
     <string name="item_report_duration_title">位置上报间隔</string>
     <string name="item_report_duration_desc">上报位置的频率单位毫秒(ms)</string>
     <string name="item_report_duration_value">100ms</string>
+    <string name="gnss_mock">Gnss Mock</string>
+    <string name="satellites_info">星图信息</string>
+    <string name="zero">0 G</string>
+    <string name="in_view_left_item">可用卫星数量</string>
+    <string name="in_use_satellite">在用卫星数量</string>
 </resources>

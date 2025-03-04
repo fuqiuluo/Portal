@@ -294,7 +294,9 @@ object TelephonyHook: BaseTelephonyHook() {
                     if (!hasHookOnCellLocationChanged) {
                         Logger.error("Hook onCellLocationChanged failed")
                     }
-                    listener.javaClass.onceHookDoNothingMethod("onSignalStrengthChanged", Int::class.java) { FakeLoc.enable }
+                    listener.javaClass.onceHookDoNothingMethod("onSignalStrengthChanged", Int::class.java) {
+                        FakeLoc.enable
+                    }
                     listener.javaClass.onceHookDoNothingMethod("onSignalStrengthsChanged", SignalStrength::class.java) { FakeLoc.enable }
                 }
             }

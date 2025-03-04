@@ -20,6 +20,7 @@
 
             <LinearLayout
                 android:id="@+id/selinux_layout"
+                android:visibility="gone"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center_vertical"
@@ -334,6 +335,7 @@
                 android:id="@+id/sensor_hook_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:visibility="gone"
                 android:gravity="center_vertical"
                 android:padding="5dp"
                 android:orientation="horizontal">

@@ -82,9 +82,9 @@ object WlanHook {
             }
 
             if (FakeLoc.enableDebugLog)
-                Logger.debug("In getScanResults with caller: $packageName, state: ${FakeLoc.enable}")
+                Logger.debug("In getScanResults with caller: $packageName, state: ${FakeLoc.enableMockWifi}")
 
-            if(FakeLoc.enable) {
+            if(FakeLoc.enableMockWifi) {
                 if (result is List<*>) {
                     result = arrayListOf<Any>()
                     return@afterHook
@@ -95,11 +95,9 @@ object WlanHook {
                     return@afterHook
                 } // 针对一加系列机型的wifi扫描返回
 
-
                 // 在高于安卓10的版本，Google 引入了 APEX（Android Pony EXpress）文件格式来封装系统组件，包括系统服务~！
                 // 上面的代码在高版本将无效导致应用可以通过网络AGPS到正常的位置（现象就是位置拉回）
                 // 这里针对一个普通的版本进行一个修复
-
                 val resultClass = result.javaClass
                 if (resultClass.name.contains("ParceledListSlice")) runCatching {
                     val constructor = resultClass.getConstructor(List::class.java)

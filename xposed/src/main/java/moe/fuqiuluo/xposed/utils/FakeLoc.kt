@@ -27,6 +27,18 @@ object FakeLoc {
     var enable = false
 
     /**
+     * 模拟Gnss卫星数据开关
+     */
+    @Volatile
+    var enableMockGnss = false
+
+    /**
+     * 模拟WLAN数据
+     */
+    @Volatile
+    var enableMockWifi = false
+
+    /**
      * 是否禁用GetCurrentLocation方法（在部分系统不禁用可能导致hook失效）
      */
     var disableGetCurrentLocation = true
@@ -40,6 +52,7 @@ object FakeLoc {
      * 如果TelephonyHook失效，可能需要打开此开关
      */
     var disableFusedLocation = true
+    var disableNetworkLocation = true
 
     /**
      * 是否允许AGPS模块（当前没什么鸟用）

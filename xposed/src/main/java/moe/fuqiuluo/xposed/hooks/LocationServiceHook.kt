@@ -472,7 +472,7 @@ internal object LocationServiceHook: BaseLocationHook() {
                     val callback = param.args[0] ?: return
                     val cIGnssStatusListener = callback.javaClass
 
-                    if (!FakeLoc.enable) {
+                    if (!FakeLoc.enableMockGnss) {
                         return
                     } else if(FakeLoc.enableDebugLog) {
                         Logger.debug("registerGnssStatusCallback: injected!")
@@ -498,7 +498,7 @@ internal object LocationServiceHook: BaseLocationHook() {
 
                                 // https://www.csno-tarc.cn/system/constellation
 
-                                if (!FakeLoc.enable) return
+                                if (!FakeLoc.enableMockGnss) return
 
                                 val svCount = Random.nextInt(FakeLoc.minSatellites, MAX_SATELLITES + 1)
                                 val mockGps = MockGnssData(
@@ -616,7 +616,7 @@ internal object LocationServiceHook: BaseLocationHook() {
                                     if (FakeLoc.enableDebugLog) {
                                         Logger.info("onNmeaReceived")
                                     }
-                                    param.result = null
+                                    if (FakeLoc.enableMockGnss) param.result = null
                                 }
                             }).isEmpty()) {
                             XposedBridge.log("[Portal] hook onNmeaReceived failed")
@@ -645,7 +645,7 @@ internal object LocationServiceHook: BaseLocationHook() {
 
                 addLocationListenerInner("GnssBatch", listener)
 
-                if (FakeLoc.disableRegisterLocationListener || FakeLoc.enable) {
+                if (FakeLoc.disableRegisterLocationListener || FakeLoc.enableMockGnss) {
                     result = null
                 }
 
@@ -653,13 +653,12 @@ internal object LocationServiceHook: BaseLocationHook() {
             }
         })
         cILocationManager.hookAllMethods("stopGnssBatch", beforeHook {
-            if (FakeLoc.enable && !FakeLoc.enableAGPS && args.size >= 2) {
+            if (FakeLoc.enableMockGnss && !FakeLoc.enableAGPS && args.size >= 2) {
                 if(FakeLoc.enableDebugLog) {
                     Logger.debug("stopGnssBatch: injected!")
                 }
             }
-
-            locationListeners.removeIf { it.first == "GnssBatch" }
+            //locationListeners.removeIf { it.first == "GnssBatch" }
         })
 
         //  void requestListenerFlush(String provider, in ILocationListener listener, int requestCode);
@@ -684,53 +683,53 @@ internal object LocationServiceHook: BaseLocationHook() {
             }
         })
 
-        cILocationManager.hookAllMethods("getBestProvider", beforeHook {
-            if (FakeLoc.enable) {
-                result = "gps"
-            }
-        })
-
-        cILocationManager.hookAllMethods("getAllProviders", afterHook {
-            if(FakeLoc.enable) {
-                result = if (result is List<*>) {
-                    listOf("gps", "passive")
-                } else if (result is Array<*>) {
-                    arrayOf("gps", "passive")
-                } else {
-                    Logger.error("getAllProviders: result is not List or Array")
-                    return@afterHook
-                }
-            }
-        })
-
-        cILocationManager.hookAllMethods("getProviders", afterHook {
-            if(FakeLoc.enable) {
-                result = if (result is List<*>) {
-                    listOf("gps", "passive")
-                } else if (result is Array<*>) {
-                    arrayOf("gps", "passive")
-                } else {
-                    Logger.error("getProviders: result is not List or Array")
-                    return@afterHook
-                }
-            }
-        })
-
-        cILocationManager.hookAllMethods("hasProvider", beforeHook {
-            if (FakeLoc.enableDebugLog) {
-                Logger.debug("hasProvider: ${args[0]}")
-            }
-
-            if(FakeLoc.enable) {
-                if (args[0] == "gps") {
-                    result = true
-                } else if (args[0] == "network") {
-                    result = false
-                } else if (args[0] == "fused" && FakeLoc.disableFusedLocation) {
-                    result = false
-                }
-            }
-        })
+//        cILocationManager.hookAllMethods("getBestProvider", beforeHook {
+//            if (FakeLoc.enable) {
+//                result = "gps"
+//            }
+//        })
+//
+//        cILocationManager.hookAllMethods("getAllProviders", afterHook {
+//            if(FakeLoc.enable) {
+//                result = if (result is List<*>) {
+//                    listOf("gps", "passive")
+//                } else if (result is Array<*>) {
+//                    arrayOf("gps", "passive")
+//                } else {
+//                    Logger.error("getAllProviders: result is not List or Array")
+//                    return@afterHook
+//                }
+//            }
+//        })
+//
+//        cILocationManager.hookAllMethods("getProviders", afterHook {
+//            if(FakeLoc.enable) {
+//                result = if (result is List<*>) {
+//                    listOf("gps", "passive")
+//                } else if (result is Array<*>) {
+//                    arrayOf("gps", "passive")
+//                } else {
+//                    Logger.error("getProviders: result is not List or Array")
+//                    return@afterHook
+//                }
+//            }
+//        })
+//
+//        cILocationManager.hookAllMethods("hasProvider", beforeHook {
+//            if (FakeLoc.enableDebugLog) {
+//                Logger.debug("hasProvider: ${args[0]}")
+//            }
+//
+//            if(FakeLoc.enable) {
+//                if (args[0] == "gps") {
+//                    result = true
+//                } else if (args[0] == "network") {
+//                    result = false
+//                } else if (args[0] == "fused" && FakeLoc.disableFusedLocation) {
+//                    result = false
+//                }
+//            }
+//        })
 
         cILocationManager.hookAllMethods("getCurrentLocation", beforeHook {
             val callback = args[2] ?: return@beforeHook
@@ -1023,32 +1022,6 @@ internal object LocationServiceHook: BaseLocationHook() {
 
                         if (!FakeLoc.enable) {
                             return
-                        }
-
-                        // TRANSACTION_isProviderEnabledForUser
-                        when (code) {
-                            47 -> {
-                                val provider = data.readString()
-                                val userId = data.readInt()
-                                if (provider == "portal") {
-                                    if (userId == 0) {
-                                        val uid = BinderUtils.getCallerUid()
-                                        reply.writeNoException()
-                                        reply.writeInt(if (BinderUtils.isLocationProviderEnabled(uid)) 1 else 0)
-                                    }
-                                } else if(provider == "gps") {
-                                    reply.writeNoException()
-                                    reply.writeInt(1)
-                                } else if (!FakeLoc.disableFusedLocation && provider == "fused") {
-                                    reply.writeNoException()
-                                    reply.writeInt(1)
-                                } else {
-                                    reply.writeNoException()
-                                    reply.writeInt(0)
-                                }
-                                param.result = true
-                            }
-
                         }
 
                         if (FakeLoc.enable && code == 43) {

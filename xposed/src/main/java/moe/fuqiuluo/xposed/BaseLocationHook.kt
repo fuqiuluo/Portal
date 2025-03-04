@@ -34,7 +34,7 @@ abstract class BaseLocationHook: BaseDivineService() {
             return originLocation
         }
 
-        if (originLocation.provider == LocationManager.NETWORK_PROVIDER) {
+        if (FakeLoc.disableNetworkLocation && originLocation.provider == LocationManager.NETWORK_PROVIDER) {
             originLocation.provider = LocationManager.GPS_PROVIDER
         }
 
