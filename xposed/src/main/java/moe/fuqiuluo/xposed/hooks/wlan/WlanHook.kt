@@ -65,9 +65,9 @@ object WlanHook {
         wifiClazz.hookAllMethods("getConnectionInfo", beforeHook {
             val packageName = args[0] as String
             if (FakeLoc.enableDebugLog)
-                Logger.debug("In getConnectionInfo with caller: $packageName, state: ${FakeLoc.enable}")
+                Logger.debug("In getConnectionInfo with caller: $packageName, state: ${FakeLoc.enableMockWifi}")
 
-            if (FakeLoc.enable && !BinderUtils.isSystemPackages(packageName)) {
+            if (FakeLoc.enableMockWifi && !BinderUtils.isSystemPackages(packageName)) {
                 val wifiInfo = WifiInfo::class.java.getConstructor().newInstance()
                 XposedHelpers.callMethod(wifiInfo, "setMacAddress", "02:00:00:00:00:00")
                 XposedHelpers.callMethod(wifiInfo, "setBSSID", "02:00:00:00:00:00")

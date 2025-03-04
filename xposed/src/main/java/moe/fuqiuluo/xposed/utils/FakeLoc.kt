@@ -54,6 +54,9 @@ object FakeLoc {
     var disableFusedLocation = true
     var disableNetworkLocation = true
 
+    var disableRequestGeofence = false
+    var disableGetFromLocation = false
+
     /**
      * 是否允许AGPS模块（当前没什么鸟用）
      */
