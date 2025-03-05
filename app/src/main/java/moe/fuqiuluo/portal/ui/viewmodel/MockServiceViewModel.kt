@@ -118,6 +118,15 @@ class MockServiceViewModel : ViewModel() {
                                 target.second
                             )
                             routeStage++
+                        } else if (inverse.s12 < FakeLoc.speed / (1000 / delayTime) / 0.85) {
+                            // 如果距离小于速度，直接移动到目标点
+                            MockServiceHelper.setLocation(
+                                locationManager!!,
+                                target.first,
+                                target.second
+                            )
+                            routeStage++
+
                         } else {
                             break
                         }
