@@ -81,53 +81,79 @@ class MockServiceViewModel : ViewModel() {
         if (!::routeMockJob.isInitialized || routeMockJob.isCancelled) {
             routeMockCoroutine.pause()
             val delayTime = activity.reportDuration.toLong()
-            // 如果是第0阶段，定位到第一个点
-            if (routeStage == 0) {
-                MockServiceHelper.setLocation(
-                    locationManager!!,
-                    selectedRoute!!.route[0].first,
-                    selectedRoute!!.route[0].second
-                )
-                routeStage++
-            }
             routeMockJob = GlobalScope.launch {
                 do {
                     routeMockCoroutine.routeMockCoroutine()
                     delay(delayTime)
+                    // 如果是第0阶段，定位到第一个点
+                    if (routeStage == 0) {
+                        MockServiceHelper.setLocation(
+                            locationManager!!,
+                            selectedRoute!!.route[0].first,
+                            selectedRoute!!.route[0].second
+                        )
+                        routeStage++
+                    }
                     val route = selectedRoute!!.route
 
-                    // 路线是线段，每个线段的终点记作一个阶段
-                    // 获取当前路径所属阶段，路径数等于阶段数
-                    // 先检查是否已完成所有阶段
-                    if (routeStage >= route.size) {
-                        routeMockCoroutine.pause()
-
-                    }
-
-                    route[routeStage].let {
-                        // 根据当前经纬度和目标经纬度计算方向，不调用move，而是控制摇杆
+                    // 处理所有已到达的阶段
+                    while (routeStage < route.size) {
+                        val target = route[routeStage]
                         val location = MockServiceHelper.getLocation(locationManager!!)
-                        var currentLatitude = location!!.first
-                        var currentLongitude = location.second
-                        var targetLatitude = it.first
-                        var targetLongitude = it.second
+                        val currentLat = location!!.first
+                        val currentLon = location.second
 
                         val inverse = Geodesic.WGS84.Inverse(
-                            currentLatitude,
-                            currentLongitude,
-                            targetLatitude,
-                            targetLongitude
+                            currentLat,
+                            currentLon,
+                            target.first,
+                            target.second
                         )
-                        var azimuth = inverse.azi1
-                        if (azimuth < 0) {
-                            azimuth += 360
+                        // 判断距离是否小于1米（可根据需要调整阈值）
+                        if (inverse.s12 < 1.0) {
+                            // 精确设置位置到目标点并进入下一阶段
+                            MockServiceHelper.setLocation(
+                                locationManager!!,
+                                target.first,
+                                target.second
+                            )
+                            routeStage++
+                        } else {
+                            break
                         }
+                    }
 
-                        // 计算方向角（bearing）
-                        Log.d("MockServiceViewModel", "azimuth form $currentLatitude, $currentLongitude to $targetLatitude, $targetLongitude, bearing: $azimuth")
-                        if(!MockServiceHelper.move(locationManager!!, FakeLoc.speed / (1000 / delayTime) / 0.85, azimuth)) {
-                            Log.e("MockServiceViewModel", "Failed to move")
-                        }
+                    // 检查是否已完成所有阶段
+                    if (routeStage >= route.size) {
+                        routeMockCoroutine.pause()
+                        break // 退出循环
+                    }
+
+                    // 处理当前目标点的移动
+                    val target = route[routeStage]
+                    val location = MockServiceHelper.getLocation(locationManager!!)
+                    val currentLat = location!!.first
+                    val currentLon = location.second
+
+                    val inverse = Geodesic.WGS84.Inverse(
+                        currentLat,
+                        currentLon,
+                        target.first,
+                        target.second
+                    )
+                    var azimuth = inverse.azi1
+                    if (azimuth < 0) {
+                        azimuth += 360
+                    }
+
+                    Log.d("MockServiceViewModel", "从 $currentLat, $currentLon 移动到 ${target.first}, ${target.second}, 方位角: $azimuth")
+                    if (!MockServiceHelper.move(
+                            locationManager!!,
+                            FakeLoc.speed / (1000 / delayTime) / 0.85,
+                            azimuth
+                        )
+                    ) {
+                        Log.e("MockServiceViewModel", "移动失败")
                     }
                 } while (isActive)
             }
