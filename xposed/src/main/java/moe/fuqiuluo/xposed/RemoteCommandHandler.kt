@@ -89,6 +89,18 @@ object RemoteCommandHandler {
                 rely.putBoolean("is_start", FakeLoc.enable)
                 return true
             }
+            "start_gnss_mock" -> {
+                FakeLoc.enableMockGnss = true
+                return true
+            }
+            "stop_gnss_mock" -> {
+                FakeLoc.enableMockGnss = false
+                return true
+            }
+            "is_gnss_start" -> {
+                rely.putBoolean("is_gnss_start", FakeLoc.enableMockGnss)
+                return true
+            }
             "get_location" -> {
                 rely.putDouble("lat", FakeLoc.latitude)
                 rely.putDouble("lon", FakeLoc.longitude)
@@ -200,6 +212,11 @@ object RemoteCommandHandler {
                     minSatellites = 12
                 }
 
+                val enableAGPS = rely.getBoolean("enable_agps", FakeLoc.enableAGPS)
+                val enableNMEA = rely.getBoolean("enable_nmea", FakeLoc.enableNMEA)
+                val disableRequestGeofence = rely.getBoolean("disable_request_geofence", FakeLoc.disableRequestGeofence)
+                val disableGetFromLocation = rely.getBoolean("disable_get_from_location", FakeLoc.disableGetFromLocation)
+
                 FakeLoc.enable = enable
                 FakeLoc.speed = speed
                 FakeLoc.altitude = altitude
@@ -210,6 +227,10 @@ object RemoteCommandHandler {
                 FakeLoc.disableFusedLocation = disableFusedLocation
                 FakeLoc.needDowngradeToCdma = needDowngradeToCdma
                 FakeLoc.minSatellites = minSatellites
+                FakeLoc.enableAGPS = enableAGPS
+                FakeLoc.enableNMEA = enableNMEA
+                FakeLoc.disableRequestGeofence = disableRequestGeofence
+                FakeLoc.disableGetFromLocation = disableGetFromLocation
                 return true
             }
             "sync_config" -> {

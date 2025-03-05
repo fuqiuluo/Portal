@@ -12,6 +12,10 @@ import moe.fuqiuluo.portal.ext.debug
 import moe.fuqiuluo.portal.ext.disableFusedProvider
 import moe.fuqiuluo.portal.ext.disableGetCurrentLocation
 import moe.fuqiuluo.portal.ext.disableRegitserLocationListener
+import moe.fuqiuluo.portal.ext.enableAGPS
+import moe.fuqiuluo.portal.ext.enableGetFromLocation
+import moe.fuqiuluo.portal.ext.enableNMEA
+import moe.fuqiuluo.portal.ext.enableRequestGeofence
 import moe.fuqiuluo.portal.ext.minSatelliteCount
 import moe.fuqiuluo.portal.ext.needDowngradeToCdma
 import moe.fuqiuluo.portal.ext.speed
@@ -45,6 +49,36 @@ object MockServiceHelper {
             return rely.getBoolean("is_start")
         }
         return false
+    }
+
+    fun isGnssMockStart(locationManager: LocationManager): Boolean {
+        if (!::randomKey.isInitialized) {
+            return false
+        }
+        val rely = Bundle()
+        rely.putString("command_id", "is_gnss_start")
+        if(locationManager.sendExtraCommand(PROVIDER_NAME, randomKey, rely)) {
+            return rely.getBoolean("is_gnss_start")
+        }
+        return false
+    }
+
+    fun startGnssMock(locationManager: LocationManager): Boolean {
+        if (!::randomKey.isInitialized) {
+            return false
+        }
+        val rely = Bundle()
+        rely.putString("command_id", "start_gnss_mock")
+        return locationManager.sendExtraCommand(PROVIDER_NAME, randomKey, rely)
+    }
+
+    fun stopGnssMock(locationManager: LocationManager): Boolean {
+        if (!::randomKey.isInitialized) {
+            return false
+        }
+        val rely = Bundle()
+        rely.putString("command_id", "stop_gnss_mock")
+        return locationManager.sendExtraCommand(PROVIDER_NAME, randomKey, rely)
     }
 
     fun tryOpenMock(
@@ -247,6 +281,10 @@ object MockServiceHelper {
         FakeLoc.disableFusedLocation = context.disableFusedProvider
         FakeLoc.needDowngradeToCdma = context.needDowngradeToCdma
         FakeLoc.minSatellites = context.minSatelliteCount
+        FakeLoc.enableAGPS = context.enableAGPS
+        FakeLoc.enableNMEA = context.enableNMEA
+        FakeLoc.disableRequestGeofence = !context.enableRequestGeofence
+        FakeLoc.disableGetFromLocation = !context.enableGetFromLocation
 
         val rely = Bundle()
         rely.putString("command_id", "put_config")
@@ -259,6 +297,10 @@ object MockServiceHelper {
         rely.putBoolean("disable_fused_location", FakeLoc.disableFusedLocation)
         rely.putBoolean("need_downgrade_to_2g", FakeLoc.needDowngradeToCdma)
         rely.putInt("min_satellites", FakeLoc.minSatellites)
+        rely.putBoolean("enable_agps", FakeLoc.enableAGPS)
+        rely.putBoolean("enable_nmea", FakeLoc.enableNMEA)
+        rely.putBoolean("disable_request_geofence", FakeLoc.disableRequestGeofence)
+        rely.putBoolean("disable_get_from_location", FakeLoc.disableGetFromLocation)
 
         return locationManager.sendExtraCommand(PROVIDER_NAME, randomKey, rely)
     }

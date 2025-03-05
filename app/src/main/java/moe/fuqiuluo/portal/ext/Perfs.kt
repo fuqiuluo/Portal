@@ -172,5 +172,45 @@ var Context.disableFusedProvider: Boolean
         putBoolean("disableFusedProvider", value)
     }
 
+/**
+ * 是否允许地理围栏请求
+ */
+var Context.enableRequestGeofence: Boolean
+    get() = sharedPrefs.getBoolean("enableRequestGeofence", !FakeLoc.disableRequestGeofence)
+    set(value) = sharedPrefs.edit {
+        putBoolean("enableRequestGeofence", value)
+        FakeLoc.disableRequestGeofence = !value
+    }
+
+/**
+ * 是否允许位置获取
+ */
+var Context.enableGetFromLocation: Boolean
+    get() = sharedPrefs.getBoolean("enableGetFromLocation", !FakeLoc.disableGetFromLocation)
+    set(value) = sharedPrefs.edit {
+        putBoolean("enableGetFromLocation", value)
+        FakeLoc.disableGetFromLocation = !value
+    }
+
+/**
+ * 是否允许AGPS模块
+ */
+var Context.enableAGPS: Boolean
+    get() = sharedPrefs.getBoolean("enableAGPS", FakeLoc.enableAGPS)
+    set(value) = sharedPrefs.edit {
+        putBoolean("enableAGPS", value)
+        FakeLoc.enableAGPS = value
+    }
+
+/**
+ * 是否允许NMEA模块
+ */
+var Context.enableNMEA: Boolean
+    get() = sharedPrefs.getBoolean("enableNMEA", FakeLoc.enableNMEA)
+    set(value) = sharedPrefs.edit {
+        putBoolean("enableNMEA", value)
+        FakeLoc.enableNMEA = value
+    }
+
 
 

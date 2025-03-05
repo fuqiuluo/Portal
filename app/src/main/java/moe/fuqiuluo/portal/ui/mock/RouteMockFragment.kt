@@ -329,21 +329,6 @@ class RouteMockFragment : Fragment() {
             return
         }
 
-        if (ShellUtils.hasRoot()) {
-            if (requireContext().hookSensor) {
-                ShellUtils.setEnforceMode(false) // 关闭SELinux
-                if (MockServiceHelper.loadPortalLibrary(requireContext())) {
-                    showToast("传感器劫持成功")
-                } else {
-                    showToast("无法劫持传感器")
-                }
-
-                if (requireContext().needOpenSELinux) {
-                    ShellUtils.setEnforceMode(true)
-                }
-            }
-        }
-
         lifecycleScope.launch {
             val context = requireContext()
             val speed = context.speed
