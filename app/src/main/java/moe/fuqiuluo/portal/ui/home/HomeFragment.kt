@@ -297,6 +297,10 @@ class HomeFragment : Fragment() {
             if (isChecked) {
                 requireContext().selectRoute?.route?.let {
                     previewRoute(it)
+                    // 选中路线后，将视角移动到起点
+                    baiduMapViewModel.baiduMap.setMapStatus(
+                        MapStatusUpdateFactory.newLatLng(it.first().gcj02)
+                    )
                 }
             } else {
                 baiduMapViewModel.baiduMap.clear()
