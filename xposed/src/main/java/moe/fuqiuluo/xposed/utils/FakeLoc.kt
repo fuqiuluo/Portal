@@ -36,7 +36,7 @@ object FakeLoc {
      * 模拟WLAN数据
      */
     @Volatile
-    var enableMockWifi = false
+    var enableMockWifi = true
 
     /**
      * 是否禁用GetCurrentLocation方法（在部分系统不禁用可能导致hook失效）

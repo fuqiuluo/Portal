@@ -306,7 +306,7 @@ class HomeFragment : Fragment() {
         return root
     }
 
-    private fun previewRoute(points: kotlin.collections.List<LatLng>) {
+    private fun previewRoute(points: kotlin.collections.List<Pair<Double, Double>>) {
         baiduMapViewModel.baiduMap.clear() // 清除之前的所有覆盖物
 
         // 绘制之前记录的点到点的线
@@ -315,7 +315,7 @@ class HomeFragment : Fragment() {
                 PolylineOptions()
                     .color(Color.argb(178, 0, 78, 255))
                     .width(10)
-                    .points(List.of<LatLng>(points[i], points[i + 1]))
+                    .points(List.of<LatLng>(points[i].gcj02, points[i + 1].gcj02))
             )
         }
     }

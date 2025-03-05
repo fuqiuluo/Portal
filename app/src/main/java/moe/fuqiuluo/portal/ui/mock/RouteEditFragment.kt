@@ -64,9 +64,9 @@ class RouteEditFragment : Fragment() {
     private lateinit var mLocationClient: LocationClient
     private val baiduMapViewModel by activityViewModels<BaiduMapViewModel>()
 
-    private var mPoints: ArrayList<LatLng> = arrayListOf()
+    private var mPoints: ArrayList<Pair<Double, Double>> = arrayListOf()
     private var isDrawing = false
-    private var lastPoint: LatLng? = null
+    private var lastPoint: Pair<Double, Double>? = null
 
 
     override fun onCreateView(
@@ -283,7 +283,7 @@ class RouteEditFragment : Fragment() {
 
         baiduMapViewModel.baiduMap.setOnMapTouchListener {
             if (isDrawing) {
-                val currentPoint = baiduMapViewModel.baiduMap.mapStatus.target
+                val currentPoint = baiduMapViewModel.baiduMap.mapStatus.target.wgs84
 
                 when (it.action) {
                     MotionEvent.ACTION_DOWN -> { // 新增 DOWN 事件处理
@@ -345,12 +345,12 @@ class RouteEditFragment : Fragment() {
                 PolylineOptions()
                     .color(Color.argb(178, 0, 78, 255))
                     .width(10)
-                    .points(List.of<LatLng>(mPoints[i], mPoints[i + 1]))
+                    .points(List.of<LatLng>(mPoints[i].gcj02, mPoints[i + 1].gcj02))
             )
         }
     }
 
-    private fun drawLine(start: LatLng, end: LatLng) {
+    private fun drawLine(start: Pair<Double, Double>, end: Pair<Double, Double>) {
         baiduMapViewModel.baiduMap.clear() // 清除之前的所有覆盖物
 
         // 绘制之前记录的点到点的线
@@ -359,7 +359,7 @@ class RouteEditFragment : Fragment() {
                 PolylineOptions()
                     .color(Color.argb(178, 0, 78, 255))
                     .width(10)
-                    .points(List.of<LatLng>(mPoints[i], mPoints[i + 1]))
+                    .points(List.of<LatLng>(mPoints[i].gcj02, mPoints[i + 1].gcj02))
             )
         }
 
@@ -367,7 +367,7 @@ class RouteEditFragment : Fragment() {
             PolylineOptions()
                 .color(Color.argb(178, 0, 78, 255))
                 .width(10)
-                .points(List.of<LatLng>(start, end))
+                .points(List.of<LatLng>(start.gcj02, end.gcj02))
         )
     }
 
@@ -414,8 +414,8 @@ class RouteEditFragment : Fragment() {
                     // 循环检查每个点的经纬度是否合法
                     for (point in points) {
                         val jsonObject = point as JSONObject
-                        val latitude = jsonObject.getDouble("latitude")
-                        val longitude = jsonObject.getDouble("longitude")
+                        val latitude = jsonObject.getDouble("first")
+                        val longitude = jsonObject.getDouble("second")
                         if (!checkLatLon(latitude, longitude)) {
                             editRoute.error = "路线经纬度格式错误"
                             return@addTextChangedListener
@@ -452,8 +452,8 @@ class RouteEditFragment : Fragment() {
                 // 循环检查每个点的经纬度是否合法
                 for (point in points) {
                     val jsonObject = point as JSONObject
-                    val latitude = jsonObject.getDouble("latitude")
-                    val longitude = jsonObject.getDouble("longitude")
+                    val latitude = jsonObject.getDouble("first")
+                    val longitude = jsonObject.getDouble("second")
                     if (!checkLatLon(latitude, longitude)) {
                         Toast.makeText(requireContext(), "路线经纬度格式错误", Toast.LENGTH_SHORT)
                             .show()

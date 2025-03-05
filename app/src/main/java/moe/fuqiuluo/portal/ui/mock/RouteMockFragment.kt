@@ -242,8 +242,8 @@ class RouteMockFragment : Fragment() {
                     val first = route.route[0]
                     if (MockServiceHelper.setLocation(
                             mockServiceViewModel.locationManager!!,
-                            first.latitude,
-                            first.longitude
+                            first.first,
+                            first.second
                         )
                     ) {
                         Toast.makeText(requireContext(), "位置更新成功", Toast.LENGTH_SHORT).show()
@@ -363,8 +363,8 @@ class RouteMockFragment : Fragment() {
                     val first = selectedRoute.route[0]
                     if (MockServiceHelper.setLocation(
                             mockServiceViewModel.locationManager!!,
-                            first.latitude,
-                            first.longitude
+                            first.first,
+                            first.second
                         )
                     ) {
                         showToast("更新路线起点位置成功")

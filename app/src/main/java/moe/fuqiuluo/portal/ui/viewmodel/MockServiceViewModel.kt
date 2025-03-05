@@ -12,6 +12,7 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import moe.fuqiuluo.portal.android.coro.CoroutineController
 import moe.fuqiuluo.portal.android.coro.CoroutineRouteMock
+import moe.fuqiuluo.portal.ext.Loc4j
 import moe.fuqiuluo.portal.ext.accuracy
 import moe.fuqiuluo.portal.ext.altitude
 import moe.fuqiuluo.portal.ext.reportDuration
@@ -80,6 +81,15 @@ class MockServiceViewModel : ViewModel() {
         if (!::routeMockJob.isInitialized || routeMockJob.isCancelled) {
             routeMockCoroutine.pause()
             val delayTime = activity.reportDuration.toLong()
+            // 如果是第0阶段，定位到第一个点
+            if (routeStage == 0) {
+                MockServiceHelper.setLocation(
+                    locationManager!!,
+                    selectedRoute!!.route[0].first,
+                    selectedRoute!!.route[0].second
+                )
+                routeStage++
+            }
             routeMockJob = GlobalScope.launch {
                 do {
                     routeMockCoroutine.routeMockCoroutine()
@@ -97,11 +107,10 @@ class MockServiceViewModel : ViewModel() {
                     route[routeStage].let {
                         // 根据当前经纬度和目标经纬度计算方向，不调用move，而是控制摇杆
                         val location = MockServiceHelper.getLocation(locationManager!!)
-                        val currentLatitude = location!!.first
-                        val currentLongitude = location.second
-                        val targetLatitude = it.latitude
-                        val targetLongitude = it.longitude
-
+                        var currentLatitude = location!!.first
+                        var currentLongitude = location.second
+                        var targetLatitude = it.first
+                        var targetLongitude = it.second
 
                         val inverse = Geodesic.WGS84.Inverse(
                             currentLatitude,
@@ -109,7 +118,10 @@ class MockServiceViewModel : ViewModel() {
                             targetLatitude,
                             targetLongitude
                         )
-                        val azimuth = inverse.azi1
+                        var azimuth = inverse.azi1
+                        if (azimuth < 0) {
+                            azimuth += 360
+                        }
 
                         // 计算方向角（bearing）
                         Log.d("MockServiceViewModel", "azimuth form $currentLatitude, $currentLongitude to $targetLatitude, $targetLongitude, bearing: $azimuth")
