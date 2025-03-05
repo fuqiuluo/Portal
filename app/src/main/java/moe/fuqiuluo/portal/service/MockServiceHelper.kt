@@ -11,7 +11,7 @@ import moe.fuqiuluo.portal.ext.altitude
 import moe.fuqiuluo.portal.ext.debug
 import moe.fuqiuluo.portal.ext.disableFusedProvider
 import moe.fuqiuluo.portal.ext.disableGetCurrentLocation
-import moe.fuqiuluo.portal.ext.disableRegitserLocationListener
+import moe.fuqiuluo.portal.ext.disableRegisterLocationListener
 import moe.fuqiuluo.portal.ext.enableAGPS
 import moe.fuqiuluo.portal.ext.enableGetFromLocation
 import moe.fuqiuluo.portal.ext.enableNMEA
@@ -78,6 +78,36 @@ object MockServiceHelper {
         }
         val rely = Bundle()
         rely.putString("command_id", "stop_gnss_mock")
+        return locationManager.sendExtraCommand(PROVIDER_NAME, randomKey, rely)
+    }
+
+    fun isWifiMockStart(locationManager: LocationManager): Boolean {
+        if (!::randomKey.isInitialized) {
+            return false
+        }
+        val rely = Bundle()
+        rely.putString("command_id", "is_wifi_mock_start")
+        if(locationManager.sendExtraCommand(PROVIDER_NAME, randomKey, rely)) {
+            return rely.getBoolean("is_wifi_mock_start")
+        }
+        return false
+    }
+
+    fun startWifiMock(locationManager: LocationManager): Boolean {
+        if (!::randomKey.isInitialized) {
+            return false
+        }
+        val rely = Bundle()
+        rely.putString("command_id", "start_wifi_mock")
+        return locationManager.sendExtraCommand(PROVIDER_NAME, randomKey, rely)
+    }
+
+    fun stopWifiMock(locationManager: LocationManager): Boolean {
+        if (!::randomKey.isInitialized) {
+            return false
+        }
+        val rely = Bundle()
+        rely.putString("command_id", "stop_wifi_mock")
         return locationManager.sendExtraCommand(PROVIDER_NAME, randomKey, rely)
     }
 
@@ -277,7 +307,7 @@ object MockServiceHelper {
         FakeLoc.speed = context.speed
         FakeLoc.enableDebugLog = context.debug
         FakeLoc.disableGetCurrentLocation = context.disableGetCurrentLocation
-        FakeLoc.disableRegisterLocationListener = context.disableRegitserLocationListener
+        FakeLoc.disableRegisterLocationListener = context.disableRegisterLocationListener
         FakeLoc.disableFusedLocation = context.disableFusedProvider
         FakeLoc.needDowngradeToCdma = context.needDowngradeToCdma
         FakeLoc.minSatellites = context.minSatelliteCount

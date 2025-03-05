@@ -23,7 +23,8 @@ import moe.fuqiuluo.portal.ext.altitude
 import moe.fuqiuluo.portal.ext.debug
 import moe.fuqiuluo.portal.ext.disableFusedProvider
 import moe.fuqiuluo.portal.ext.disableGetCurrentLocation
-import moe.fuqiuluo.portal.ext.disableRegitserLocationListener
+import moe.fuqiuluo.portal.ext.disableRegisterLocationListener
+import moe.fuqiuluo.portal.ext.disableWifiScan
 import moe.fuqiuluo.portal.ext.hookSensor
 import moe.fuqiuluo.portal.ext.minSatelliteCount
 import moe.fuqiuluo.portal.ext.needDowngradeToCdma
@@ -140,13 +141,13 @@ class SettingsFragment : Fragment() {
             }
         })
 
-        binding.rllSwitch.isChecked = !context.disableRegitserLocationListener
+        binding.rllSwitch.isChecked = !context.disableRegisterLocationListener
         binding.rllSwitch.setOnCheckedChangeListener(object: CompoundButton.OnCheckedChangeListener {
             override fun onCheckedChanged(
                 buttonView: CompoundButton?,
                 isChecked: Boolean
             ) {
-                context.disableRegitserLocationListener = !isChecked
+                context.disableRegisterLocationListener = !isChecked
                 showToast(if (!isChecked) "禁止应用使用该方法" else "已允许应用使用该方法")
                 updateRemoteConfig()
             }
@@ -225,6 +226,21 @@ class SettingsFragment : Fragment() {
             }
         }
 
+        binding.disableWlanScanSwitch.isChecked = requireContext().disableWifiScan
+        binding.disableWlanScanSwitch.setOnCheckedChangeListener { _, isChecked ->
+            requireContext().disableWifiScan = isChecked
+            with(mockServiceViewModel) {
+                if (isChecked) {
+                    if(!MockServiceHelper.startWifiMock(locationManager!!)) {
+                        showToast("禁用WLAN扫描失败: 无法连接到系统服务")
+                    }
+                } else {
+                    if(!MockServiceHelper.stopWifiMock(locationManager!!)) {
+                        showToast("启用WLAN扫描失败: 无法连接到系统服务")
+                    }
+                }
+            }
+        }
 
         return root
     }

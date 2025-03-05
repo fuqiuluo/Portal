@@ -42,6 +42,7 @@ import moe.fuqiuluo.portal.service.MockServiceHelper
 import moe.fuqiuluo.portal.ui.viewmodel.HomeViewModel
 import moe.fuqiuluo.portal.ui.viewmodel.MockServiceViewModel
 import moe.fuqiuluo.xposed.utils.FakeLoc
+import androidx.navigation.findNavController
 
 class RouteMockFragment : Fragment() {
     private var _binding: FragmentRouteMockBinding? = null
@@ -216,12 +217,7 @@ class RouteMockFragment : Fragment() {
         }
 
         binding.fabAddRoute.setOnClickListener {
-            activity?.let { it1 ->
-                Navigation.findNavController(
-                    it1,
-                    R.id.nav_host_fragment_content_main
-                ).navigate(R.id.nav_route_edit)
-            }
+            activity?.findNavController(R.id.nav_host_fragment_content_main)?.navigate(R.id.nav_route_edit)
         }
 
         var locations = requireContext().jsonHistoricalRoutes

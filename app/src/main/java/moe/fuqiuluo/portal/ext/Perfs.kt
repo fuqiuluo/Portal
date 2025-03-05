@@ -157,7 +157,7 @@ var Context.disableGetCurrentLocation: Boolean
         putBoolean("disableGetCurrentLocation", value)
     }
 
-var Context.disableRegitserLocationListener: Boolean
+var Context.disableRegisterLocationListener: Boolean
     get() = sharedPrefs.getBoolean(
         "disableRegitserLocationListener",
         FakeLoc.disableRegisterLocationListener
@@ -170,6 +170,7 @@ var Context.disableFusedProvider: Boolean
     get() = sharedPrefs.getBoolean("disableFusedProvider", FakeLoc.disableFusedLocation)
     set(value) = sharedPrefs.edit {
         putBoolean("disableFusedProvider", value)
+        FakeLoc.disableFusedLocation = value
     }
 
 /**
@@ -212,5 +213,11 @@ var Context.enableNMEA: Boolean
         FakeLoc.enableNMEA = value
     }
 
+var Context.disableWifiScan: Boolean
+    get() = sharedPrefs.getBoolean("disableWifiScan", FakeLoc.enableNMEA)
+    set(value) = sharedPrefs.edit {
+        putBoolean("disableWifiScan", value)
+        FakeLoc.enableMockWifi = value
+    }
 
 

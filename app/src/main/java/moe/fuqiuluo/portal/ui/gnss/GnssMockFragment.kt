@@ -254,7 +254,7 @@ class GnssMockFragment : Fragment() {
                 }
 
                 val avgSignalStrength = signalStrength.average().toFloat()
-                binding.signalStrengthRightItem.text = "$avgSignalStrength dB-Hz"
+                binding.signalStrengthRightItem.text = "${avgSignalStrength.toString().take(6)} dB-Hz"
                 binding.inViewRightItem.text = "$inViewSatelliteCount"
                 binding.inUseRightItem.text = "$inUseSatelliteCount"
 

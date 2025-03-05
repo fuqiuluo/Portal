@@ -101,6 +101,18 @@ object RemoteCommandHandler {
                 rely.putBoolean("is_gnss_start", FakeLoc.enableMockGnss)
                 return true
             }
+            "is_wifi_mock_start" -> {
+                rely.putBoolean("is_wifi_mock_start", FakeLoc.enableMockWifi)
+                return true
+            }
+            "start_wifi_mock" -> {
+                FakeLoc.enableMockWifi = true
+                return true
+            }
+            "stop_wifi_mock" -> {
+                FakeLoc.enableMockWifi = false
+                return true
+            }
             "get_location" -> {
                 rely.putDouble("lat", FakeLoc.latitude)
                 rely.putDouble("lon", FakeLoc.longitude)
