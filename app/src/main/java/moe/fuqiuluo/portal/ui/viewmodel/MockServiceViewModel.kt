@@ -136,6 +136,8 @@ class MockServiceViewModel : ViewModel() {
                     if (routeStage >= route.size) {
                         routeMockCoroutine.pause()
                         rocker.autoStatus = false
+                        // 重设阶段
+                        routeStage = 0
                         break // 退出循环
                     }
 

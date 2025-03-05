@@ -123,7 +123,7 @@ class RouteMockFragment : Fragment() {
                     rockerCoroutineController.resume()
                 }
             })
-            rocker.setRockerAutoListener(object: Rocker.Companion.OnAutoListener {
+            rocker.setRockerAutoListener(object : Rocker.Companion.OnAutoListener {
                 override fun onAutoPlay(isPlay: Boolean) {
                     if (isPlay) {
                         routeMockCoroutine.resume()
@@ -224,8 +224,18 @@ class RouteMockFragment : Fragment() {
             }
         }
 
-        val locations = requireContext().jsonHistoricalRoutes
+        var locations = requireContext().jsonHistoricalRoutes
 //        val routes = Json.decodeFromString<List<HistoricalRoute>>(locations)
+        // 如果locations是空字符串，则创建默认
+        if (locations.isEmpty()) {
+            val defaultRoute = HistoricalRoute(
+                "默认路线",
+                mutableListOf(Pair(39.908822, 116.397465), Pair(39.907951, 116.397500))
+            )
+            val defaultRoutes = mutableListOf(defaultRoute)
+            requireContext().jsonHistoricalRoutes = JSON.toJSONString(defaultRoutes)
+            locations = requireContext().jsonHistoricalRoutes
+        }
         val routes = JSON.parseArray(locations, HistoricalRoute::class.java)
 
         val historicalRouteAdapter = HistoricalRouteAdapter(routes.sortedBy { it.name }
