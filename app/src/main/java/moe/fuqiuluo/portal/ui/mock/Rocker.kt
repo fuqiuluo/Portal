@@ -35,6 +35,11 @@ class Rocker(private val activity: Activity) : View.OnTouchListener {
     var isStart = false
     private var autoCardVisible = false
     var autoStatus = false
+        get() = field
+        set(value) {
+            field = value
+            playAuto(root.findViewById(R.id.rocker))
+        }
     var autoLockStatus = false
     var autoListener: OnAutoListener? = null
 
@@ -76,14 +81,7 @@ class Rocker(private val activity: Activity) : View.OnTouchListener {
 
         root.findViewById<View>(R.id.auto_play).setOnClickListener {
             autoStatus = !autoStatus
-            if (autoStatus) {
-                root.findViewById<View>(R.id.auto_play).setBackgroundResource(R.drawable.baseline_stop_24)
-            } else {
-                root.findViewById<View>(R.id.auto_play).setBackgroundResource(R.drawable.baseline_play_24)
-                upController()
-            }
-            autoListener?.onAutoPlay(autoStatus)
-            rockerView.auto(autoStatus)
+            playAuto(rockerView)
         }
         root.findViewById<View>(R.id.auto_status).setOnClickListener {
 
@@ -97,6 +95,19 @@ class Rocker(private val activity: Activity) : View.OnTouchListener {
             }
             autoListener?.onAutoLock(autoLockStatus)
         }
+    }
+
+    private fun playAuto(rockerView: RockerView) {
+        if (autoStatus) {
+            root.findViewById<View>(R.id.auto_play)
+                .setBackgroundResource(R.drawable.baseline_stop_24)
+        } else {
+            root.findViewById<View>(R.id.auto_play)
+                .setBackgroundResource(R.drawable.baseline_play_24)
+            upController()
+        }
+        autoListener?.onAutoPlay(autoStatus)
+        rockerView.auto(autoStatus)
     }
 
     fun show() {
