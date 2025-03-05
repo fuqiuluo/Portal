@@ -5,7 +5,6 @@ import android.app.Activity
 import android.content.Context
 import android.graphics.PixelFormat
 import android.os.Build
-import android.util.DisplayMetrics
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.MotionEvent
@@ -37,6 +36,7 @@ class Rocker(private val activity: Activity) : View.OnTouchListener {
     private var autoCardVisible = false
     var autoStatus = false
     var autoLockStatus = false
+    var autoListener: OnAutoListener? = null
 
     init {
         layoutParams.flags = (WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
@@ -72,13 +72,18 @@ class Rocker(private val activity: Activity) : View.OnTouchListener {
                 autoCard.visibility = View.VISIBLE
             }
         }
+        val rockerView = root.findViewById<RockerView>(R.id.rocker)
+
         root.findViewById<View>(R.id.auto_play).setOnClickListener {
             autoStatus = !autoStatus
             if (autoStatus) {
                 root.findViewById<View>(R.id.auto_play).setBackgroundResource(R.drawable.baseline_stop_24)
             } else {
                 root.findViewById<View>(R.id.auto_play).setBackgroundResource(R.drawable.baseline_play_24)
+                upController()
             }
+            autoListener?.onAutoPlay(autoStatus)
+            rockerView.auto(autoStatus)
         }
         root.findViewById<View>(R.id.auto_status).setOnClickListener {
 
@@ -90,6 +95,7 @@ class Rocker(private val activity: Activity) : View.OnTouchListener {
             } else {
                 root.findViewById<View>(R.id.auto_lock).setBackgroundResource(R.drawable.baseline_manual_24)
             }
+            autoListener?.onAutoLock(autoLockStatus)
         }
     }
 
@@ -116,6 +122,25 @@ class Rocker(private val activity: Activity) : View.OnTouchListener {
     fun setRockerListener(listener: RockerView.Companion.OnMoveListener) {
         val rockerView = root.findViewById<RockerView>(R.id.rocker)
         rockerView.listener = listener
+    }
+
+    fun setRockerAutoListener(listener: OnAutoListener) {
+        autoListener = listener
+    }
+
+    fun invokeOnTouchEvent(joystickX: Float, joystickY: Float) {
+        val rockerView = root.findViewById<RockerView>(R.id.rocker)
+        // 模拟摇杆移动 调用onTouchEvent
+        rockerView.onTouchEvent(MotionEvent.obtain(1000, 1000, MotionEvent.ACTION_DOWN, joystickX, joystickY, 0))
+        rockerView.onTouchEvent(MotionEvent.obtain(1000, 1000, MotionEvent.ACTION_MOVE, joystickX, joystickY, 0))
+        rockerView.auto(true)
+    }
+
+    fun upController() {
+        val rockerView = root.findViewById<RockerView>(R.id.rocker)
+        // 模拟摇杆移动 调用onTouchEvent
+        rockerView.onTouchEvent(MotionEvent.obtain(1000, 1000, MotionEvent.ACTION_UP, 0f, 0f, 0))
+        rockerView.auto(true)
     }
 
     override fun onTouch(v: View?, event: MotionEvent?): Boolean {
@@ -145,5 +170,13 @@ class Rocker(private val activity: Activity) : View.OnTouchListener {
             else -> {}
         }
         return false
+    }
+
+
+    companion object {
+        interface OnAutoListener {
+            fun onAutoPlay(isPlay: Boolean)
+            fun onAutoLock(isLock: Boolean)
+        }
     }
 }

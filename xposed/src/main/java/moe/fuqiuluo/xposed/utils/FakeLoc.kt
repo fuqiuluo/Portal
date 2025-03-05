@@ -159,4 +159,23 @@ object FakeLoc {
         val newLon = lon + radiusInDegrees * sin(Math.toRadians(angle)) / cos(Math.toRadians(lat))
         return Pair(newLat, newLon)
     }
+
+
+
+    fun calculateBearing(latA: Double, lonA: Double, latB: Double, lonB: Double): Double {
+        val lat1 = Math.toRadians(latA)
+        val lon1 = Math.toRadians(lonA)
+        val lat2 = Math.toRadians(latB)
+        val lon2 = Math.toRadians(lonB)
+
+        val deltaLon = lon2 - lon1
+
+        val y = sin(deltaLon) * cos(lat2)
+        val x = cos(lat1) * sin(lat2) - sin(lat1) * cos(lat2) * cos(deltaLon)
+
+        var bearing = Math.toDegrees(atan2(y, x))
+        bearing = (bearing + 360) % 360  // 标准化到0-360度
+
+        return bearing
+    }
 }

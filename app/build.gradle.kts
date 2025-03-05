@@ -226,6 +226,7 @@ dependencies {
 
     implementation(libs.bugly)
 
+    implementation(libs.geotools)
     implementation(fileTree(mapOf(
         "dir" to "libs",
         "include" to listOf("*.jar")

@@ -36,7 +36,6 @@ import moe.fuqiuluo.portal.ext.drawOverOtherAppsEnabled
 import moe.fuqiuluo.portal.ext.hookSensor
 import moe.fuqiuluo.portal.ext.jsonHistoricalRoutes
 import moe.fuqiuluo.portal.ext.needOpenSELinux
-import moe.fuqiuluo.portal.ext.rawHistoricalLocations
 import moe.fuqiuluo.portal.ext.selectRoute
 import moe.fuqiuluo.portal.ext.speed
 import moe.fuqiuluo.portal.service.MockServiceHelper
@@ -122,6 +121,19 @@ class RouteMockFragment : Fragment() {
 
                 override fun onStarted() {
                     rockerCoroutineController.resume()
+                }
+            })
+            rocker.setRockerAutoListener(object: Rocker.Companion.OnAutoListener {
+                override fun onAutoPlay(isPlay: Boolean) {
+                    if (isPlay) {
+                        routeMockCoroutine.resume()
+                    } else {
+                        routeMockCoroutine.pause()
+                    }
+                }
+
+                override fun onAutoLock(isLock: Boolean) {
+
                 }
             })
         }

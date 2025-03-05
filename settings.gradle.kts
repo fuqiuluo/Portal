@@ -15,6 +15,9 @@ pluginManagement {
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)
     repositories {
+        maven ( url = "https://maven.aliyun.com/nexus/content/repositories/google")
+        maven ( url = "https://maven.aliyun.com/nexus/content/groups/public/" )
+        maven ( url = "https://maven.aliyun.com/nexus/content/repositories/jcenter")
         google()
         mavenCentral()
         maven (url = "https://maven.pkg.jetbrains.space/public/p/ktor/eap")

@@ -226,7 +226,8 @@ class RockerView(context: Context, attributeSet: AttributeSet): View(context, at
                     this.mRockerPosition = mRockerPosition
                     moveRocker(mRockerPosition.x, mRockerPosition.y)
 
-                    if (w.first && lockRunnable == null) {
+                    // 自动时不锁定
+                    if (w.first && lockRunnable == null && !isAuto.get()) {
                         lockRunnable = Runnable {
                             isLocked.set(true)
                             listener?.onLockChanged(true)
@@ -326,8 +327,8 @@ class RockerView(context: Context, attributeSet: AttributeSet): View(context, at
         invalidate()
     }
 
-    fun autoing() {
-        isAuto.set(true)
+    fun auto(enable: Boolean) {
+        isAuto.set(enable)
         invalidate()
     }
 
