@@ -29,7 +29,7 @@ abstract class BaseLocationHook: BaseDivineService() {
         if (!FakeLoc.enable)
             return originLocation
 
-        if (originLocation.extras?.getBoolean(RemoteCommandHandler.randomKey, false) == true) {
+        if (originLocation.latitude + originLocation.longitude == FakeLoc.latitude + FakeLoc.longitude) {
             // Already processed
             return originLocation
         }
@@ -89,7 +89,7 @@ abstract class BaseLocationHook: BaseDivineService() {
         if (location.extras == null) {
             location.extras = Bundle()
         }
-        location.extras?.putBoolean(RemoteCommandHandler.randomKey, true)
+        location.extras?.putDouble("latlon", location.latitude + location.longitude)
         location.extras?.putInt("satellites", Random.nextInt(8, 45))
         location.extras?.putInt("maxCn0", Random.nextInt(30, 50))
         location.extras?.putInt("meanCn0", Random.nextInt(20, 30))
