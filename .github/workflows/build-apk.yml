@@ -91,18 +91,15 @@ jobs:
         with:
           name: "${{ env.PORTAL_VERSION_ALL }}"
           path: "${{ env.APK_FILE_ALL }}"
-          retention-days: 1
 
       - name: Upload ARM64 APK RELEASE
         uses: actions/upload-artifact@v4
         with:
           name: "${{ env.PORTAL_VERSION_ARM64 }}"
           path: "${{ env.APK_FILE_ARM64 }}"
-          retention-days: 1
 
       - name: Upload X86_64 APK RELEASE
         uses: actions/upload-artifact@v4
         with:
           name: "${{ env.PORTAL_VERSION_x86_64 }}"
           path: "${{ env.APK_FILE_X86_64 }}"
-          retention-days: 1
