@@ -5,6 +5,7 @@
 秋夜长，殊未央，月明白露澄清光，层城绮阁遥相望。
 
 QQ交流群：599533037（搜索不到请扫描下方二维码）
+Telegram: https://t.me/portal_fuqiuluo
 
 ![QRCODE](img/qrcodemini.png)
 
