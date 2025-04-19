@@ -3,6 +3,7 @@ package moe.fuqiuluo.portal.ext
 import android.content.Context
 import androidx.core.content.edit
 import com.alibaba.fastjson2.JSON
+import com.alibaba.fastjson2.JSONArray
 import com.baidu.mapapi.map.BaiduMap
 import moe.fuqiuluo.portal.service.MockServiceHelper
 import moe.fuqiuluo.portal.ui.mock.HistoricalLocation
@@ -39,13 +40,51 @@ var Context.selectRoute: HistoricalRoute?
         putString("selectedRoute", JSON.toJSONString(value))
     }
 
+// Get historical locations with JSON format migration
 val Context.historicalLocations: List<HistoricalLocation>
     get() {
-        return sharedPrefs.getStringSet("locations", emptySet())?.map {
-            HistoricalLocation.fromString(it)
-        } ?: emptyList()
+        // Check if JSON format is already in use
+        val jsonLocations = sharedPrefs.getString("jsonLocations", null)
+        
+        if (jsonLocations != null) {
+            try {
+                return JSON.parseArray(jsonLocations, HistoricalLocation::class.java)
+            } catch (e: Exception) {
+                return emptyList()
+            }
+        }
+        
+        // If no JSON data, try to migrate from old StringSet format
+        val oldLocations = rawHistoricalLocations
+        if (oldLocations.isNotEmpty()) {
+            val locations = oldLocations.mapNotNull {
+                try {
+                    HistoricalLocation.fromString(it)
+                } catch (e: Exception) {
+                    null
+                }
+            }
+            
+            // Save migrated data to JSON format
+            if (locations.isNotEmpty()) {
+                jsonHistoricalLocations = locations
+            }
+            
+            return locations
+        }
+        
+        return emptyList()
     }
 
+// New setter using JSON array format
+var Context.jsonHistoricalLocations: List<HistoricalLocation>
+    get() = historicalLocations
+    set(value) = sharedPrefs.edit {
+        putString("jsonLocations", JSON.toJSONString(value))
+        remove("locations")
+    }
+
+// Legacy storage format for backward compatibility
 var Context.rawHistoricalLocations: Set<String>
     get() {
         return sharedPrefs.getStringSet("locations", emptySet()) ?: emptySet()
@@ -131,20 +170,6 @@ var Context.hookSensor: Boolean
         putBoolean("hookSensor", value)
     }
 
-//var Context.updateInterval: Long
-//    get() = sharedPrefs.getLong("updateInterval", FakeLoc.updateInterval)
-//
-//    set(value) = sharedPrefs.edit {
-//        putLong("updateInterval", value)
-//    }
-//
-//var Context.hideMock: Boolean
-//    get() = sharedPrefs.getBoolean("hideMock", FakeLoc.hideMock)
-//
-//    set(value) = sharedPrefs.edit {
-//        putBoolean("hideMock", value)
-//    }
-
 var Context.debug: Boolean
     get() = sharedPrefs.getBoolean("debug", FakeLoc.enableDebugLog)
     set(value) = sharedPrefs.edit {
@@ -173,9 +198,6 @@ var Context.disableFusedProvider: Boolean
         FakeLoc.disableFusedLocation = value
     }
 
-/**
- * 是否允许地理围栏请求
- */
 var Context.enableRequestGeofence: Boolean
     get() = sharedPrefs.getBoolean("enableRequestGeofence", !FakeLoc.disableRequestGeofence)
     set(value) = sharedPrefs.edit {
@@ -183,9 +205,6 @@ var Context.enableRequestGeofence: Boolean
         FakeLoc.disableRequestGeofence = !value
     }
 
-/**
- * 是否允许位置获取
- */
 var Context.enableGetFromLocation: Boolean
     get() = sharedPrefs.getBoolean("enableGetFromLocation", !FakeLoc.disableGetFromLocation)
     set(value) = sharedPrefs.edit {
@@ -193,9 +212,6 @@ var Context.enableGetFromLocation: Boolean
         FakeLoc.disableGetFromLocation = !value
     }
 
-/**
- * 是否允许AGPS模块
- */
 var Context.enableAGPS: Boolean
     get() = sharedPrefs.getBoolean("enableAGPS", FakeLoc.enableAGPS)
     set(value) = sharedPrefs.edit {
@@ -203,9 +219,6 @@ var Context.enableAGPS: Boolean
         FakeLoc.enableAGPS = value
     }
 
-/**
- * 是否允许NMEA模块
- */
 var Context.enableNMEA: Boolean
     get() = sharedPrefs.getBoolean("enableNMEA", FakeLoc.enableNMEA)
     set(value) = sharedPrefs.edit {

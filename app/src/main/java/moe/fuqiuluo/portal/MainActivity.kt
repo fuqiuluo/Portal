@@ -77,6 +77,7 @@ import moe.fuqiuluo.portal.bdmap.toPoi
 import moe.fuqiuluo.portal.databinding.ActivityMainBinding
 import moe.fuqiuluo.portal.ext.gcj02
 import moe.fuqiuluo.portal.ext.wgs84
+import moe.fuqiuluo.portal.ext.sharedPrefs
 import moe.fuqiuluo.portal.ui.notification.NotificationUtils
 import moe.fuqiuluo.portal.ui.viewmodel.BaiduMapViewModel
 import moe.fuqiuluo.portal.ui.viewmodel.MockServiceViewModel
@@ -165,6 +166,9 @@ class MainActivity : AppCompatActivity() {
         if (!ShellUtils.hasRoot()) {
             Toast.makeText(this, "无Root可能导致传感器Hook失效", Toast.LENGTH_LONG).show()
         }
+
+        // One-time migration of historical locations from StringSet to JSON format
+        migrateHistoricalLocationsToJson()
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.CREATED) {
@@ -464,6 +468,39 @@ class MainActivity : AppCompatActivity() {
         super.onDestroy()
 
         mSuggestionSearch?.destroy()
+    }
+
+    /**
+     * Migrates historical location data from legacy StringSet format to new JSON format.
+     * This is a one-time migration to ensure data consistency across app versions.
+     */
+    private fun migrateHistoricalLocationsToJson() {
+        // Skip if migration has already been performed
+        if (sharedPrefs.contains("jsonLocations")) {
+            return
+        }
+        
+        // Get legacy data and migrate
+        val oldLocations = sharedPrefs.getStringSet("locations", emptySet()) ?: emptySet()
+        if (oldLocations.isNotEmpty()) {
+            val locations = oldLocations.mapNotNull {
+                try {
+                    moe.fuqiuluo.portal.ui.mock.HistoricalLocation.fromString(it)
+                } catch (e: Exception) {
+                    null
+                }
+            }
+            
+            // Save as JSON format if locations were successfully parsed
+            if (locations.isNotEmpty()) {
+                sharedPrefs.edit()
+                    .putString("jsonLocations", com.alibaba.fastjson2.JSON.toJSONString(locations))
+                    .apply()
+                
+                // Optional: Remove old data after migration
+                // sharedPrefs.edit().remove("locations").apply()
+            }
+        }
     }
 
     companion object {
