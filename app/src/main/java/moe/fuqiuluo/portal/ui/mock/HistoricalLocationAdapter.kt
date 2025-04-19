@@ -107,4 +107,28 @@ class HistoricalLocationAdapter(
             true
         }
     }
+
+    // Get all location items in the adapter
+    fun getAllItems(): List<HistoricalLocation> {
+        return dataSet.toList()
+    }
+
+    // Reset adapter data with new locations
+    fun resetData(newData: List<HistoricalLocation>) {
+        dataSet.clear()
+        dataSet.addAll(newData)
+        notifyDataSetChanged()
+    }
+    
+    // Update existing location or add new one
+    fun updateOrAddItem(location: HistoricalLocation) {
+        val index = dataSet.indexOfFirst { it.name == location.name }
+        if (index >= 0) {
+            dataSet[index] = location
+            notifyItemChanged(index)
+        } else {
+            dataSet.add(location)
+            notifyItemInserted(dataSet.size - 1)
+        }
+    }
 }

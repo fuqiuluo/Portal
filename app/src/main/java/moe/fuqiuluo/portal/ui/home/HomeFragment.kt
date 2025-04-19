@@ -43,10 +43,13 @@ import moe.fuqiuluo.portal.bdmap.locateMe
 import moe.fuqiuluo.portal.bdmap.setMapConfig
 import moe.fuqiuluo.portal.databinding.FragmentHomeBinding
 import moe.fuqiuluo.portal.ext.gcj02
+import moe.fuqiuluo.portal.ext.historicalLocations
+import moe.fuqiuluo.portal.ext.jsonHistoricalLocations
 import moe.fuqiuluo.portal.ext.mapType
 import moe.fuqiuluo.portal.ext.rawHistoricalLocations
 import moe.fuqiuluo.portal.ext.selectRoute
 import moe.fuqiuluo.portal.ext.wgs84
+import moe.fuqiuluo.portal.ui.mock.HistoricalLocation
 import moe.fuqiuluo.portal.ui.viewmodel.BaiduMapViewModel
 import moe.fuqiuluo.portal.ui.viewmodel.HomeViewModel
 import java.math.BigDecimal
@@ -411,30 +414,27 @@ class HomeFragment : Fragment() {
                         return@setPositiveButton
                     }
 
-                    fun MutableSet<String>.addLocation(
-                        name: String,
-                        address: String,
-                        lat: Double,
-                        lon: Double
-                    ): Boolean {
-                        if (any { it.split(",")[0] == name }) {
-                            return false
-                        }
-                        add(
-                            "$name,$address,${
-                                BigDecimal.valueOf(lat).toPlainString()
-                            },${BigDecimal.valueOf(lon).toPlainString()}"
-                        )
-                        return true
-                    }
-
                     with(requireContext()) {
-                        val locations = rawHistoricalLocations.toMutableSet()
+                        val currentLocations = historicalLocations.toMutableList()
+                        val newLocation = HistoricalLocation(name!!, address, newLat!!, newLon!!)
+                        
+                        // Check for duplicate location names
                         var count = 0
-                        while (!locations.addLocation(name!!, address, newLat!!, newLon!!)) {
-                            name = "$name(${++count})"
+                        var finalName = name!!
+                        while (currentLocations.any { it.name == finalName }) {
+                            finalName = "$name(${++count})"
                         }
-                        rawHistoricalLocations = locations
+                        
+                        // Create a new location with updated name if needed
+                        val finalLocation = if (finalName != name) {
+                            newLocation.copy(name = finalName)
+                        } else {
+                            newLocation
+                        }
+                        
+                        // Add to list and save using JSON format
+                        currentLocations.add(finalLocation)
+                        jsonHistoricalLocations = currentLocations
                     }
 
                     Toast.makeText(requireContext(), "位置已保存", Toast.LENGTH_SHORT).show()

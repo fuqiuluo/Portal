@@ -30,6 +30,7 @@ import moe.fuqiuluo.portal.ext.altitude
 import moe.fuqiuluo.portal.ext.drawOverOtherAppsEnabled
 import moe.fuqiuluo.portal.ext.historicalLocations
 import moe.fuqiuluo.portal.ext.hookSensor
+import moe.fuqiuluo.portal.ext.jsonHistoricalLocations
 import moe.fuqiuluo.portal.ext.needOpenSELinux
 import moe.fuqiuluo.portal.ext.rawHistoricalLocations
 import moe.fuqiuluo.portal.ext.selectLocation
@@ -196,9 +197,10 @@ class MockFragment : Fragment() {
                         .setMessage("确定要删除位置(${location.name})吗？")
                         .setPositiveButton("删除") { _, _ ->
                             historicalLocationAdapter.removeItem(position)
-                            rawHistoricalLocations = rawHistoricalLocations.toMutableSet().apply {
-                                removeIf { it.split(",")[0] == location.name }
-                            }
+                            // Use JSON storage to handle location deletion
+                            val currentLocations = historicalLocations.toMutableList()
+                            currentLocations.removeIf { it.name == location.name && it.lat == location.lat && it.lon == location.lon }
+                            jsonHistoricalLocations = currentLocations
                             showToast("已删除位置")
                         }
                         .setNegativeButton("取消", { _, _ ->
