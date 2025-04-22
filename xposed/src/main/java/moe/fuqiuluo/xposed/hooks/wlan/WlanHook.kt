@@ -85,6 +85,10 @@ object WlanHook {
                 Logger.debug("In getScanResults with caller: $packageName, state: ${FakeLoc.enableMockWifi}")
 
             if(FakeLoc.enableMockWifi) {
+                if(result == null) {
+                    return@afterHook 
+                }
+                
                 if (result is List<*>) {
                     result = arrayListOf<Any>()
                     return@afterHook
