@@ -11,6 +11,7 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.WindowManager
 import android.widget.Toast
+import androidx.appcompat.widget.AppCompatImageView
 import androidx.cardview.widget.CardView
 import moe.fuqiuluo.portal.R
 import moe.fuqiuluo.portal.android.widget.RockerView
@@ -33,6 +34,7 @@ class Rocker(private val activity: Activity) : View.OnTouchListener {
     private var startY = 0
 
     var isStart = false
+    var isHide = false
     private var autoCardVisible = false
     var autoStatus = false
         get() = field
@@ -63,7 +65,8 @@ class Rocker(private val activity: Activity) : View.OnTouchListener {
         layoutParams.y = rockerCoords.second
 
         root.setOnTouchListener(this)
-
+        
+        
         root.findViewById<View>(R.id.expand_menu).setOnClickListener {
             Toast.makeText(activity, "暂不支持", Toast.LENGTH_SHORT).show()
         }
@@ -78,7 +81,14 @@ class Rocker(private val activity: Activity) : View.OnTouchListener {
             }
         }
         val rockerView = root.findViewById<RockerView>(R.id.rocker)
-
+        val autoView = root.findViewById<AppCompatImageView>(R.id.auto)
+        val expandMenuView = root.findViewById<AppCompatImageView>(R.id.expand_menu)
+        
+        root.findViewById<View>(R.id.move).setOnClickListener {
+            isHide = !isHide
+            switchHide(rockerView, autoView, expandMenuView)
+        }
+        
         root.findViewById<View>(R.id.auto_play).setOnClickListener {
             autoStatus = !autoStatus
             playAuto(rockerView)
@@ -109,7 +119,19 @@ class Rocker(private val activity: Activity) : View.OnTouchListener {
         autoListener?.onAutoPlay(autoStatus)
         rockerView.auto(autoStatus)
     }
-
+    
+    private fun switchHide(rockerView: RockerView, autoView: AppCompatImageView, expandMenuView: AppCompatImageView) {
+        if (isHide) {
+            autoView.setVisibility(View.GONE)
+            rockerView.setVisibility(View.GONE)
+            expandMenuView.setVisibility(View.GONE)
+        } else {
+            autoView.setVisibility(View.VISIBLE)
+            rockerView.setVisibility(View.VISIBLE)
+            expandMenuView.setVisibility(View.VISIBLE)
+        }
+    }
+    
     fun show() {
         windowManager.addView(root, layoutParams)
         isStart = true
