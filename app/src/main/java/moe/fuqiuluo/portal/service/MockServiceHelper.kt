@@ -6,6 +6,7 @@ import android.location.LocationManager
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import moe.fuqiuluo.portal.Portal
 import moe.fuqiuluo.portal.android.root.ShellUtils
 import moe.fuqiuluo.portal.ext.altitude
 import moe.fuqiuluo.portal.ext.debug
@@ -19,12 +20,17 @@ import moe.fuqiuluo.portal.ext.enableRequestGeofence
 import moe.fuqiuluo.portal.ext.minSatelliteCount
 import moe.fuqiuluo.portal.ext.needDowngradeToCdma
 import moe.fuqiuluo.portal.ext.speed
+import moe.fuqiuluo.portal.ext.reportDuration
+import moe.fuqiuluo.portal.ext.loopBroadcastlocation
 import moe.fuqiuluo.xposed.utils.FakeLoc
 import java.io.File
 
 object MockServiceHelper {
     const val PROVIDER_NAME = "portal"
     private lateinit var randomKey: String
+
+    private var loopThread :Thread ?= null
+    @Volatile private var isRunning = false
 
     fun tryInitService(locationManager: LocationManager) {
         val rely = Bundle()
@@ -125,6 +131,7 @@ object MockServiceHelper {
         rely.putDouble("speed", speed)
         rely.putDouble("altitude", altitude)
         rely.putFloat("accuracy", accuracy)
+        startLoopBroadcastLocation(locationManager)
         return if(locationManager.sendExtraCommand(PROVIDER_NAME, randomKey, rely)) {
             isMockStart(locationManager)
         } else {
@@ -138,6 +145,7 @@ object MockServiceHelper {
         }
         val rely = Bundle()
         rely.putString("command_id", "stop")
+        stopLoopBroadcastLocation()
         if (locationManager.sendExtraCommand(PROVIDER_NAME, randomKey, rely)) {
             return !isMockStart(locationManager)
         }
@@ -338,6 +346,39 @@ object MockServiceHelper {
     fun isServiceInit(): Boolean {
         return ::randomKey.isInitialized
     }
+
+
+    private fun startLoopBroadcastLocation(locationManager: LocationManager){
+        val appContext = Portal.appContext
+        val delayTime=appContext.reportDuration.toLong()
+
+        if(isRunning) return
+        if(!appContext.loopBroadcastlocation) return
+
+        isRunning=true
+        loopThread=Thread{
+            Log.d("MockServiceHelper","loopBoardcast: Start")
+            while(isRunning){
+                try {
+                    broadcastLocation(locationManager)
+                    Thread.sleep(delayTime)
+                }catch (e:InterruptedException){
+                    if (FakeLoc.enableDebugLog) {
+                        Log.d("MockServiceHelper","loopBoardcast: Stop")
+                    }
+                    break
+                }
+            }
+        }
+        loopThread!!.start()
+    }
+
+    private fun stopLoopBroadcastLocation(){
+        isRunning =false
+        loopThread?.interrupt()
+        loopThread = null
+    }
+
 
     @SuppressLint("DiscouragedPrivateApi")
     fun loadPortalLibrary(context: Context): Boolean {

@@ -1,6 +1,7 @@
 package moe.fuqiuluo.portal
 
 import android.app.Application
+import android.content.Context
 import com.baidu.location.LocationClient
 import com.baidu.mapapi.CoordType
 import com.baidu.mapapi.SDKInitializer
@@ -25,6 +26,8 @@ class Portal: Application() {
         CrashReport.setDeviceModel(applicationContext, Bugly.getDeviceModel())
         CrashReport.setCollectPrivacyInfo(applicationContext, true)
 
+        appContext = applicationContext
+
         //CrashReport.setAllThreadStackEnable(applicationContext, true, true)
     }
 
@@ -32,6 +35,7 @@ class Portal: Application() {
         val DEFAULT_COORD_TYPE = CoordType.GCJ02
         const val DEFAULT_COORD_STR = "GCJ02"
 
+        lateinit var appContext: Context
         //val DEFAULT_COORD_TYPE = CoordType.BD09LL
         //const val DEFAULT_COORD_STR = "bd09ll"
     }
