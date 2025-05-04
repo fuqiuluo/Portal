@@ -122,6 +122,7 @@ class Rocker(private val activity: Activity) : View.OnTouchListener {
     
     private fun switchHide(rockerView: RockerView, autoView: AppCompatImageView, expandMenuView: AppCompatImageView) {
         if (isHide) {
+            if(!autoCardVisible)root.findViewById<View>(R.id.auto).callOnClick()
             autoView.setVisibility(View.GONE)
             rockerView.setVisibility(View.GONE)
             expandMenuView.setVisibility(View.GONE)
