@@ -220,4 +220,11 @@ var Context.disableWifiScan: Boolean
         FakeLoc.enableMockWifi = value
     }
 
+var Context.loopBroadcastlocation: Boolean
+    get() = sharedPrefs.getBoolean("loopBroadcastLocation", FakeLoc.loopBroadcastLocation)
+    set(value) = sharedPrefs.edit {
+        putBoolean("loopBroadcastLocation", value)
+        FakeLoc.loopBroadcastLocation = value
+    }
+
 

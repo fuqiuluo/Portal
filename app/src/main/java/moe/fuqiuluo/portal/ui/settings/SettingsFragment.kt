@@ -26,6 +26,7 @@ import moe.fuqiuluo.portal.ext.disableGetCurrentLocation
 import moe.fuqiuluo.portal.ext.disableRegisterLocationListener
 import moe.fuqiuluo.portal.ext.disableWifiScan
 import moe.fuqiuluo.portal.ext.hookSensor
+import moe.fuqiuluo.portal.ext.loopBroadcastlocation
 import moe.fuqiuluo.portal.ext.minSatelliteCount
 import moe.fuqiuluo.portal.ext.needDowngradeToCdma
 import moe.fuqiuluo.portal.ext.needOpenSELinux
@@ -242,6 +243,11 @@ class SettingsFragment : Fragment() {
             }
         }
 
+        binding.loopBroadcastLocationSwitch.isChecked = requireContext().loopBroadcastlocation
+        binding.loopBroadcastLocationSwitch.setOnCheckedChangeListener { _, isChecked ->
+            requireContext().loopBroadcastlocation = isChecked
+            showToast("重启模拟生效")
+        }
         return root
     }
 
